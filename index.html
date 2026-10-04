@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es-VE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Fuerza en Seco</title>
+  <meta name="description" content="Preparación física en seco para nadar más rápido: salidas, virajes, patada y brazada de pecho.">
+  <meta name="theme-color" content="#06142B">
+  <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="modulepreload" href="js/data.js">
+</head>
+<body>
+  <main id="vista" class="vista"></main>
+
+  <!-- Descanso: círculo que se llena como una ola -->
+  <div id="descanso" class="descanso" hidden>
+    <div class="descanso-fondo" data-t="min"></div>
+    <section class="descanso-panel" role="dialog" aria-label="Descanso">
+      <button class="descanso-min" data-t="min" aria-label="Minimizar">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <p class="eyebrow">Descanso</p>
+      <p class="descanso-titulo"></p>
+      <div class="reloj">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <clipPath id="clip-reloj"><circle cx="100" cy="100" r="88"/></clipPath>
+            <linearGradient id="g-agua" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00D1FF"/><stop offset="1" stop-color="#0B5C9E"/></linearGradient>
+          </defs>
+          <circle cx="100" cy="100" r="88" fill="#0B2447"/>
+          <g clip-path="url(#clip-reloj)">
+            <g id="ola-agua" class="ola-agua">
+              <path class="ola-a" fill="url(#g-agua)" opacity=".55" d="M-200 4 Q-175 -6 -150 4 T-100 4 T-50 4 T0 4 T50 4 T100 4 T150 4 T200 4 T250 4 T300 4 V240 H-200 Z"/>
+              <path class="ola-b" fill="url(#g-agua)" d="M-200 8 Q-175 0 -150 8 T-100 8 T-50 8 T0 8 T50 8 T100 8 T150 8 T200 8 T250 8 T300 8 V240 H-200 Z"/>
+            </g>
+          </g>
+          <circle cx="100" cy="100" r="94" fill="none" stroke="#00D1FF" stroke-opacity=".35" stroke-width="3"/>
+        </svg>
+        <div class="reloj-num" aria-live="off">0:00</div>
+      </div>
+      <p class="descanso-sub"></p>
+      <div class="descanso-btns">
+        <button data-t="-15">−15 s</button>
+        <button data-t="saltar" class="primario">Saltar</button>
+        <button data-t="15">+15 s</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Descanso: mini barra -->
+  <button id="mini" class="mini" hidden aria-label="Abrir descanso">
+    <span class="mini-barra"></span>
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+    <span class="mini-txt"></span>
+    <span class="mini-num">0:00</span>
+  </button>
+
+  <!-- Trabajo: cuenta regresiva para planchas e isométricos -->
+  <div id="trabajo" class="trabajo" hidden role="dialog" aria-label="Temporizador de trabajo">
+    <div class="tr-top">
+      <button class="tr-x" data-w="cerrar" aria-label="Cerrar">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <span id="tr-nombre"></span>
+    </div>
+    <div class="tr-centro">
+      <h2 id="tr-fase"></h2>
+      <p id="tr-lado"></p>
+      <div id="tr-reloj">0</div>
+      <div class="tr-barra"><span id="tr-barra"></span></div>
+      <p id="tr-sig"></p>
+    </div>
+    <div class="tr-btns">
+      <button id="tr-pausa" class="tr-b" data-w="pausa">Pausa</button>
+      <button class="tr-b tr-listo" data-w="listo">Ya terminé</button>
+    </div>
+  </div>
+
+  <div id="hoja" class="hoja-raiz" hidden></div>
+  <div id="aviso" class="aviso" role="status" aria-live="polite"></div>
+  <canvas id="confeti" class="confeti" aria-hidden="true"></canvas>
+
+  <nav id="tabs" class="tabs" aria-label="Secciones"></nav>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
