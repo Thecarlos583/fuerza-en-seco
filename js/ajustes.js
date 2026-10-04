@@ -18,6 +18,7 @@ function formulario(c, completo) {
         <div class="campo-fila"><input name="peso" type="number" inputmode="decimal" min="25" max="150" step="0.5" value="${p.v}" placeholder="Ej. 58">${seg('pu', [['kg', 'kg'], ['lb', 'lb']], p.u)}</div>
       </label>
       <p class="peq txt2">Sirve para ajustar los topes de peso: si pesas menos de 55 kg, todos bajan un 15%.</p>
+      <label class="sw"><span><b>Tengo pie plano</b><small>Marca los ejercicios que pueden costar y muestra con qué cambiarlos</small></span><input type="checkbox" name="pieplano" ${c.pieplano !== false ? 'checked' : ''}><i></i></label>
     </section>
 
     <section class="card">
@@ -60,6 +61,7 @@ function leer(raiz, base) {
     ...base,
     nombre: val('nombre') || 'Juan',
     pesoCorp: peso > 0 ? { v: peso, u: segV('pu') } : null,
+    pieplano: !!$('[name="pieplano"]', raiz)?.checked,
     uManc: segV('uManc'), uDisco: segV('uDisco'),
     barraZ: bz > 0 ? [bz, Math.round(bz * 2.20462 / 5) * 5 || 20] : (base.barraZ || [10, 20]),
     gym: dias('gym'), agua: dias('agua'),

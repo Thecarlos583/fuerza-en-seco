@@ -184,7 +184,6 @@ export const ANIM = {
       { n: 'Jala con los codos', torso: -4, cadera: 82, rodilla: 25, punta: -10, hombro: -25, codo: 105, pausa: 500, ms: 1000, punto: { zona: 'espalda', txt: 'Pecho alto, aprieta los omóplatos' } },
     ] },
   remoMaq: { como: 'remoPolea' },
-  remoMano: { como: 'remoPolea' },
   remoCasa: { como: 'remoPolea' },
   pulloverPolea: { vistas: ['lado'], x0: 104, equipo: [{ tipo: 'torre', x: 208, y0: 12 }, { tipo: 'cable', x: 208, y: 22, agarre: 'cuerda' }],
     poses: [
@@ -354,5 +353,41 @@ export const ANIM = {
     poses: [
       { n: 'Aprieta el balón', torso: -95, cadera: 55, rodilla: 145, hombro: 0, codo: 0, pausa: 2000, ms: 400, punto: { zona: 'rodilla', txt: 'Aprieta fuerte, respirando normal' } },
       { n: 'Suelta', torso: -95, cadera: 55, rodilla: 145, hombro: 0, codo: 0, pausa: 800, ms: 400 },
+    ] },
+  // ── Fuerza (máquinas y mancuernas) ─────────────────────────
+  curlFem: { vistas: ['lado'], ancla: 'cadera', x0: 96, y0: 128,
+    equipo: [{ tipo: 'rect', x: 70, y: 132, w: 52, h: 6 }, { tipo: 'linea', x1: 94, y1: 138, x2: 94, y2: 182 }, { tipo: 'respaldo' }, { tipo: 'rodillo', en: 'rodilla', dx: -10, dy: -8 }, { tipo: 'rodillo', en: 'tobillo', dx: 0, dy: 7 }],
+    poses: [
+      { n: 'Piernas estiradas', torso: -12, cadera: 92, rodilla: 8, punta: 0, hombro: 25, codo: 40, pausa: 300, ms: 450 },
+      { n: 'Talones al glúteo, explosivo', torso: -12, cadera: 92, rodilla: 105, punta: 0, hombro: 25, codo: 40, pausa: 200, ms: 1500, punto: { zona: 'cadera', txt: 'Sube rápido, baja lento; la cadera no se despega' } },
+    ] },
+  talones: { vistas: ['lado'], x0: 132, dy: 0, puntas: true, equipo: [{ tipo: 'rect', x: 112, y: 168, w: 26, h: 14, r: 2 }, { tipo: 'rodillo', en: 'hombro', dy: -6 }],
+    poses: [
+      { n: 'Talones abajo', punta: -18, hombro: 150, codo: 160, dy: 14, pausa: 300, ms: 450 },
+      { n: 'Sube explosivo en puntas', punta: 40, hombro: 150, codo: 160, dy: 14, pausa: 400, ms: 1200, punto: { zona: 'pies', txt: 'Sube rápido y baja lento hasta estirar' } },
+    ] },
+  prensaUna: { como: 'prensa' },
+  pressPecho: { vistas: ['lado'], ancla: 'cadera', x0: 92, y0: 130, mano: 'barra',
+    equipo: [{ tipo: 'rect', x: 66, y: 134, w: 46, h: 6 }, { tipo: 'linea', x1: 88, y1: 140, x2: 88, y2: 182 }, { tipo: 'respaldo' }],
+    poses: [
+      { n: 'Agarres al pecho', torso: -6, cadera: 92, rodilla: 92, hombro: -12, codo: 110, pausa: 300, ms: 450 },
+      { n: 'Empuja explosivo', torso: -6, cadera: 92, rodilla: 92, hombro: 86, codo: 6, pausa: 200, ms: 1500, punto: { zona: 'hombro', txt: 'Hombros pegados al respaldo, sin bloquear los codos' } },
+    ] },
+  pressHombroMaq: { vistas: ['lado'], ancla: 'cadera', x0: 100, y0: 130, mano: 'barra',
+    equipo: [{ tipo: 'rect', x: 74, y: 134, w: 46, h: 6 }, { tipo: 'linea', x1: 96, y1: 140, x2: 96, y2: 182 }, { tipo: 'respaldo' }],
+    poses: [
+      { n: 'Agarres a los hombros', torso: -6, cadera: 92, rodilla: 92, hombro: 22, codo: 150, pausa: 300, ms: 450 },
+      { n: 'Empuja arriba explosivo', torso: -6, cadera: 92, rodilla: 92, hombro: 170, codo: 6, pausa: 200, ms: 1500, punto: { zona: 'espalda', txt: 'Espalda pegada al respaldo, sin arquear' } },
+    ] },
+  remoMano: { vistas: ['lado'], x0: 112, mano: 'mancuernas', equipo: [{ tipo: 'banco', x: 62, ancho: 82, alto: 34 }],
+    poses: [
+      { n: 'Brazo estirado', torso: 80, cadera: 85, rodilla: 10, cadera2: 80, rodilla2: 90, punta2: 180, hombro: 80, codo: 0, hombro2: 80, codo2: 0, pausa: 300, ms: 450 },
+      { n: 'Jala el codo atrás, explosivo', torso: 80, cadera: 85, rodilla: 10, cadera2: 80, rodilla2: 90, punta2: 180, hombro: 15, codo: 100, hombro2: 80, codo2: 0, pausa: 200, ms: 1300, punto: { zona: 'espalda', txt: 'Espalda recta, sin girar el torso' } },
+    ] },
+
+  balanceo: { vistas: ['lado'], x0: 128, apoyo: 2, equipo: [{ tipo: 'muro', x: 64 }],
+    poses: [
+      { n: 'Pierna atrás', torso: 4, cadera: -28, rodilla: 10, punta: 10, cadera2: 0, rodilla2: 0, punta2: 0, hombro: -60, codo: 20, hombro2: -95, codo2: 0, ms: 600 },
+      { n: 'Pierna adelante', torso: 0, cadera: 65, rodilla: 5, punta: 0, cadera2: 0, rodilla2: 0, punta2: 0, hombro: 40, codo: 20, hombro2: -95, codo2: 0, ms: 600, punto: { zona: 'espalda', txt: 'Suelta y controlada, sin arquear la espalda' } },
     ] },
 };

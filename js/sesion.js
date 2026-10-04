@@ -84,11 +84,13 @@ function tarjeta(it, bl, n) {
     <div class="ej-tags">
       ${e.tr.map(chipTransfer).join('')}
       ${e.maq ? `<span class="tag neutro">Máquina</span>` : ''}
+      ${e.exp ? `<span class="tag exp">⚡ Baja en 2 s, sube explosivo</span>` : ''}
       ${ctx.ses.casa && e.casa ? `<span class="tag neutro">${ico('casa')}${esc(e.casa)}</span>` : ''}
       ${cambio ? `<span class="tag marca">${ico('cambiar')}${cambio === 'hoy' ? 'Solo hoy' : 'Siempre'}</span><button class="tag volver" data-a="revertir">Original</button>` : ''}
     </div>
     <div class="series" role="group" aria-label="${ronda ? 'Rondas' : 'Series'}">${Array.from({ length: it.s }, (_, k) => `<button class="serie ${hechas[k] ? 'hecha' : ''}" data-a="serie" data-k="${k}" aria-pressed="${!!hechas[k]}" aria-label="${ronda ? 'Ronda' : 'Serie'} ${k + 1}"><span class="serie-n">${k + 1}</span>${ico('check', 'serie-ok')}</button>`).join('')}</div>
     ${bloquePeso(it)}
+    ${e.pp && C().pieplano !== false && it.alts.length ? `<button class="pie-plano" data-a="cambiar">${ico('cambiar')}<span><b>Pie plano:</b> si te cuesta el equilibrio o sientes el arco, cámbialo por otro</span></button>` : ''}
     <div class="mas"><div class="mas-in">
       ${tieneAnimacion(it.e) ? `<button class="btn-sec ver" data-a="ver">${ico('play')}Ver cómo se hace</button>` : ''}
       <h4>Para qué sirve en el agua</h4><p class="txt2">${esc(e.para)}</p>
@@ -328,7 +330,7 @@ function hojaCambiar(slot) {
       ${it.cambiado ? `<button class="alt original" data-e="${orig.e}"><span class="alt-cab"><span class="alt-n">${ico('cambiar')} Volver al original</span><b class="alt-sr">${prescripcion(orig)}</b></span><span class="alt-p">${esc(EJ[orig.e].n)}</span></button>` : ''}
       ${it.alts.map(a => `<button class="alt ${a.e === it.e ? 'actual' : ''}" data-e="${a.e}">
         <span class="alt-cab"><span class="alt-n">${esc(EJ[a.e].n)}</span><b class="alt-sr">${prescripcion(a)}</b></span>
-        <span class="alt-p">${esc(EJ[a.e].como[0])}</span>${a.e === it.e ? '<span class="alt-tag">Ahora</span>' : ''}${EJ[a.e].maq ? '<span class="alt-maq">Máquina</span>' : ''}</button>`).join('')}
+        <span class="alt-p">${esc(EJ[a.e].como[0])}</span>${a.e === it.e ? '<span class="alt-tag">Ahora</span>' : ''}${EJ[a.e].maq ? '<span class="alt-maq">Máquina</span>' : ''}${EJ[a.e].pp && C().pieplano !== false ? '<span class="alt-pp">Puede costar con pie plano</span>' : ''}</button>`).join('')}
     </div>
     <div class="seg" role="radiogroup" aria-label="Duración del cambio">
       <button class="act" data-m="hoy" role="radio" aria-checked="true">Solo por hoy</button>

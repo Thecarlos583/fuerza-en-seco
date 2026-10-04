@@ -27,7 +27,7 @@ export function renderGuia(v, sub) {
     <div class="top"><p class="saludo">Para tenerlo a mano</p><h1>Guía</h1></div>
 
     <section class="card">
-      <div class="card-cab"><h3>${ico('cal')} Tu semana</h3><span class="cont">A y B con máquinas · C sin máquinas</span></div>
+      <div class="card-cab"><h3>${ico('cal')} Tu semana</h3><span class="cont">fuerza explosiva · máquinas y mancuernas</span></div>
       <div class="plan">
         ${['A', 'B', 'C'].map(diaSesion).join('')}
         ${rutina('movilidad')}
@@ -36,6 +36,16 @@ export function renderGuia(v, sub) {
       </div>
       <p class="peq txt2">Las series cambian según la fase: aquí ves las de las semanas de construcción.</p>
     </section>
+
+    ${c.pieplano !== false ? `<section class="card regla" style="--c:#FFD166">
+      <h3>${ico('info')} Pie plano</h3>
+      <ul>
+        <li>Entrena con zapatos que sujeten bien el arco, no descalzo ni con zapatos muy blandos.</li>
+        <li>En los saltos, cuida que la rodilla no se vaya hacia adentro al caer.</li>
+        <li>Los ejercicios de equilibrio en un pie (peso muerto rumano, búlgara, zancada) pueden costarte: cámbialos por la opción de máquina cuando quieras.</li>
+        <li>La elevación de talones fortalece pantorrilla y tobillo, y ayuda a sostener el arco.</li>
+      </ul>
+    </section>` : ''}
 
     <section class="card regla" style="--c:#FF6B6B">
       <h3>${ico('alto')} Cuándo parar</h3>
@@ -59,7 +69,7 @@ export function renderGuia(v, sub) {
         const fa = FASES[t.fase];
         const det = t.fase === 'puesta' ? 'Potencia 2 × 2-3 · sin fuerza'
           : t.fase === 'competencia' ? 'Calentamiento en seco y recuperación'
-          : `Potencia ${4 + fa.p} series · fuerza ${3 + fa.f} series · RPE ${fa.rpe}`;
+          : `Potencia ${4 + fa.p} series · fuerza ${3 + fa.f}-${4 + fa.f} series · RPE ${fa.rpe}`;
         return `<div class="fase-f" style="--c:${fa.c}">
           <div><b>${fa.n}</b><span>${fechaCorta(t.ini)}${t.fin !== t.ini ? ' – ' + fechaCorta(t.fin) : ''}</span></div>
           <p>${det}${fa.tope ? ` · tope ${fa.tope} saltos` : ''}</p>

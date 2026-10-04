@@ -73,7 +73,8 @@ function anclar(f, p, def, apoyo) {
     return { ox: (def.x0 ?? 110) + p.dx, oy: SUELO - p.dy - bajo };
   }
   const pa = apoyo === 2 ? f.p2 : f.p1;
-  return { ox: (def.x0 ?? 110) + p.dx - pa.punta[0], oy: SUELO - p.dy - Math.max(pa.punta[1], pa.talon[1]) };
+  // def.puntas: se apoya solo la punta (talones colgando de un escalón)
+  return { ox: (def.x0 ?? 110) + p.dx - pa.punta[0], oy: SUELO - p.dy - (def.puntas ? pa.punta[1] : Math.max(pa.punta[1], pa.talon[1])) };
 }
 
 function figura(p, def, fijo = null) {
@@ -146,7 +147,7 @@ function equipoMovil(def, f, p, vista) {
       s += `<line class="respaldo" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}"/>`;
     }
     if (q.tipo === 'objeto') { const r = q.en === 'rodilla' ? (vista === 'frente' && f.fr ? medio(f.fr[0], f.fr[1]) : f.p1.rod) : f.cad; s += `<circle class="balon" cx="${f1(r[0])}" cy="${f1(r[1] + (q.dy ?? 0))}" r="${q.r ?? 6}"/>`; }
-    if (q.tipo === 'rodillo') { const r = q.en === 'rodilla' ? f.p1.rod : f.cad; s += `<circle class="rodillo" cx="${f1(r[0] + (q.dx ?? 0))}" cy="${f1(r[1] + (q.dy ?? -8))}" r="6"/>`; }
+    if (q.tipo === 'rodillo') { const r = { rodilla: f.p1.rod, tobillo: f.p1.tob, hombro: f.hom }[q.en] || f.cad; s += `<circle class="rodillo" cx="${f1(r[0] + (q.dx ?? 0))}" cy="${f1(r[1] + (q.dy ?? -8))}" r="6"/>`; }
     if (q.tipo === 'almohadillas' && vista === 'frente' && f.fr) s += f.fr.map(r => `<rect class="rodillo" x="${f1(r[0] + (r[0] < 120 ? -9 : 3))}" y="${f1(r[1] - 6)}" width="6" height="14" rx="3"/>`).join('');
   }
   if (mano === 'goblet') s += vista === 'frente' && f.fm ? `<g class="equipo"><rect x="113" y="${f1(f.fm[0][1] + 2)}" width="14" height="4" rx="1.3"/></g>` : mancuerna([f.b1.mano[0] + 2, f.b1.mano[1] + 7]);

@@ -675,3 +675,8 @@ body.sin-tabs .mini { bottom: calc(var(--sa-b) + 16px); }
 .anim-svg .barra-p, .anim-poses .barra-p { fill: #C9DCF0; }
 .anim-svg .balon, .anim-poses .balon { fill: #FFB070; stroke: #C46A2A; stroke-width: 1.5; }
 .anim-svg .pie, .anim-poses .pie { fill: var(--aqua); }
+.tag.exp { --c: var(--amarillo); }
+.pie-plano { display: flex; align-items: center; gap: 10px; width: 100%; margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(255, 209, 102, .1); border: 1px solid rgba(255, 209, 102, .35); color: #FFE2A0; font-size: 14px; text-align: left; }
+.pie-plano .ico { color: var(--amarillo); flex: none; }
+.pie-plano b { color: var(--amarillo); }
+.alt-pp { justify-self: start; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: rgba(255, 209, 102, .16); color: var(--amarillo); }
