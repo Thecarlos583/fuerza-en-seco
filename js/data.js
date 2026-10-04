@@ -203,6 +203,10 @@ export const EJ = {
     para: 'Core que no se tuerce = cuerpo alineado en el agua.',
     como: ['De lado a la polea o banda, manos al pecho.', 'Empuja al frente sin girar.', 'Vuelve lento al pecho.'],
     error: 'Rotar el torso.' },
+  plancha: { n: 'Plancha frontal', tr: ['streamline'], z: ['abdomen'], s: ['oblicuos', 'deltoides'], casa: 'Piso',
+    para: 'Core firme = cuerpo recto y alto en el agua.',
+    como: ['Antebrazos en el piso, codos debajo de los hombros.', 'Cuerpo recto de la cabeza a los talones.', 'Aprieta el abdomen y respira.'],
+    error: 'Dejar caer la cadera o subirla mucho.' },
   planchaLat: { n: 'Plancha lateral', tr: ['streamline'], z: ['oblicuos'], s: ['abdomen'],
     para: 'Core lateral firme.',
     como: ['De lado sobre el antebrazo.', 'Cadera arriba, cuerpo recto.', 'Aguanta respirando.'],
@@ -541,8 +545,8 @@ export const SESIONES = {
       P('talones', 3, 12, 60, { alts: [P('prensa', 3, 15, 60)] }),
     ],
     core: [
-      T('copenRod', 3, 20, 45, { lado: 'lado', alts: [T('copen', 3, [15, 20], 45, { lado: 'lado' }), T('balonRod', 3, 10, 30)] }),
-      P('pallof', 3, 10, 45, { lado: 'lado', alts: [T('planchaLat', 3, 20, 45, { lado: 'lado' })] }),
+      T('plancha', 3, 30, 45, { alts: [T('hollow', 3, 20, 45)] }),
+      T('planchaLat', 3, 20, 45, { lado: 'lado', alts: [P('deadbug', 3, 8, 45, { lado: 'lado' })] }),
     ],
   },
   B: { n: 'Potencia de tren superior', sub: 'Brazada y sprint · con máquinas', c: '#7C9CFF',
@@ -580,7 +584,7 @@ export const SESIONES = {
     core: [
       T('superman', 3, 20, 45, { alts: [P('birddog', 3, 8, 45, { lado: 'lado' })] }),
       P('deadbug', 3, 8, 45, { lado: 'lado', alts: [T('hollow', 3, 20, 45)] }),
-      T('copenRod', 2, 20, 45, { lado: 'lado', alts: [T('copen', 2, 15, 45, { lado: 'lado' }), T('balonRod', 2, 10, 30)] }),
+      T('balonRod', 3, 10, 30, { alts: [T('plancha', 3, 30, 45)] }),
     ],
   },
 };
@@ -616,7 +620,7 @@ export const RUTINAS = {
       { b: 'circuito', rondas: 3, descansoRonda: 60, items: [
         P('pogo', 3, 15), P('sjCasa', 3, 5, 0, { alts: [P('sentRapida', 3, 12)] }), P('flexCasa', 3, 8),
         P('bulgaraSofa', 3, 8, 0, { lado: 'pierna' }), P('puente1', 3, 10, 0, { lado: 'pierna' }), P('remoCasa', 3, 12),
-        T('copenSofa', 3, 15, 0, { lado: 'lado' }), T('hollow', 3, 25),
+        T('planchaLat', 3, 15, 0, { lado: 'lado' }), T('hollow', 3, 25),
       ] },
       { b: 'final', items: [P('rotExt', 2, 15, 30, { lado: 'brazo' })] },
     ] },
@@ -651,7 +655,7 @@ export const FASES = {
 };
 
 // Ejercicios en los que conviene que alguien te vea la técnica la primera vez (solo sugerencia)
-export const SUGERIR = ['cajon', 'longitud', 'rdl', 'bulgara', 'copen', 'slam', 'rotacional', 'pressMil'];
+export const SUGERIR = ['cajon', 'longitud', 'rdl', 'bulgara', 'slam', 'rotacional', 'pressMil'];
 
 // ── Guía ─────────────────────────────────────────────────────
 export const REGLAS_PARAR = [

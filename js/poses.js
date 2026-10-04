@@ -150,7 +150,6 @@ export const ANIM = {
     ] },
   copenRod: { como: 'copen' },
   copenSofa: { como: 'copen' },
-  planchaLat: { como: 'copen' },
   pallof: { vistas: ['frente'], x0: 120, juntas: true, equipo: [{ tipo: 'torre', x: 26 }, { tipo: 'cable', x: 30, y: 96, lado: 0 }],
     poses: [
       { n: 'Manos al pecho', torso: 0, cadera: 8, rodilla: 12, hombro: 25, codo: 120, ancho: 15, pausa: 300, ms: 700 },
@@ -389,5 +388,16 @@ export const ANIM = {
     poses: [
       { n: 'Pierna atrás', torso: 4, cadera: -28, rodilla: 10, punta: 10, cadera2: 0, rodilla2: 0, punta2: 0, hombro: -60, codo: 20, hombro2: -95, codo2: 0, ms: 600 },
       { n: 'Pierna adelante', torso: 0, cadera: 65, rodilla: 5, punta: 0, cadera2: 0, rodilla2: 0, punta2: 0, hombro: 40, codo: 20, hombro2: -95, codo2: 0, ms: 600, punto: { zona: 'espalda', txt: 'Suelta y controlada, sin arquear la espalda' } },
+    ] },
+
+  plancha: { vistas: ['lado'], x0: 40, equipo: [{ tipo: 'colchoneta', x: 26, ancho: 180 }],
+    poses: [
+      { n: 'Plancha: cuerpo recto', giro: 80, punta: 12, hombro: 80, codo: 92, pausa: 1500, ms: 600, punto: { zona: 'cadera', txt: 'Cadera alineada, ni caída ni muy arriba' } },
+      { n: 'Aguanta respirando', giro: 80, punta: 12, hombro: 80, codo: 92, cabeza: 4, pausa: 1500, ms: 600 },
+    ] },
+  planchaLat: { vistas: ['lado'], x0: 120, apoyo: 'cuerpo', equipo: [{ tipo: 'colchoneta', x: 26, ancho: 180 }],
+    poses: [
+      { n: 'Cadera abajo', giro: -80, cadera: -15, hombro: -80, codo: 90, pausa: 300, ms: 700 },
+      { n: 'Cadera arriba, cuerpo recto', giro: -76, cadera: 0, hombro: -76, codo: 90, pausa: 1500, ms: 700, punto: { zona: 'cadera', txt: 'Cuerpo en línea, la cadera no cae' } },
     ] },
 };
