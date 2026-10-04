@@ -446,6 +446,38 @@ export const EJ = {
     error: 'Despegar la espalda baja.' },
 };
 
+// ── Animaciones (poses clave) ────────────────────────────────
+// Ángulos en grados (ver js/anim.js). ms: tiempo hasta la pose siguiente · pausa: tiempo quieto en la pose
+// punto: zona que se ilumina en coral con su texto (rodilla, rodillas, cadera, espalda, pies, hombro, manos)
+export const ANIM = {
+  cajon: { vistas: ['lado', 'frente'], x0: 62, equipo: [{ tipo: 'cajon', x: 120, ancho: 46, alto: 30 }],
+    poses: [
+      { n: 'De pie', torso: 0, cadera: 0, rodilla: 0, hombro: 0, codo: 10, pausa: 400, ms: 500 },
+      { n: 'Brazos atrás y carga', torso: 38, cadera: 82, rodilla: 85, hombro: -55, codo: 10, pausa: 120, ms: 240 },
+      { n: 'Despegue explosivo', torso: 12, cadera: 8, rodilla: 4, punta: 38, hombro: 150, codo: 15, dx: 5, dy: 2, ms: 220 },
+      { n: 'En el aire', torso: 22, cadera: 100, rodilla: 115, punta: 15, hombro: 105, codo: 25, dx: 52, dy: 50, ms: 220 },
+      { n: 'Cae suave', torso: 36, cadera: 86, rodilla: 90, hombro: 55, codo: 30, dx: 86, dy: 30, pausa: 800, ms: 500, punto: { zona: 'rodilla', txt: 'Cae suave, rodillas hacia afuera' } },
+      { n: 'De pie arriba', torso: 0, cadera: 0, rodilla: 0, hombro: 0, codo: 10, dx: 86, dy: 30, pausa: 300, ms: 700 },
+      { n: 'Baja caminando', torso: 20, cadera: 85, rodilla: 120, cadera2: -10, rodilla2: 0, punta2: 35, hombro: 25, codo: 15, hombro2: -20, dx: 86, dy: 30, pausa: 150, ms: 550, punto: { zona: 'pies', txt: 'Baja del cajón caminando, nunca saltando' } },
+      { n: 'Un pie en el piso', apoyo: 2, torso: 8, cadera: 55, rodilla: 85, cadera2: 0, rodilla2: 5, hombro: -15, hombro2: 15, codo: 15, dx: 48, dy: 0, ms: 450 },
+      { n: 'Vuelve a tu marca', apoyo: 2, torso: 0, cadera: 0, rodilla: 0, hombro: 0, codo: 10, dx: 48, dy: 0, pausa: 300, ms: 800 },
+    ] },
+  goblet: { vistas: ['lado', 'frente'], x0: 128, mano: 'goblet', juntas: true, ancho: 15,
+    poses: [
+      { n: 'De pie, pecho alto', torso: 4, cadera: 4, rodilla: 0, hombro: 6, codo: 152, pausa: 600, ms: 1500, punto: { zona: 'espalda', txt: 'Pecho alto, mancuerna pegada al pecho' } },
+      { n: 'Bajando en 3 segundos', torso: 18, cadera: 56, rodilla: 62, hombro: 20, codo: 150, ms: 1500, punto: { zona: 'rodilla', txt: 'Rodillas siguen la dirección de los pies' } },
+      { n: 'Abajo', torso: 32, cadera: 112, rodilla: 118, hombro: 34, codo: 148, pausa: 450, ms: 550, punto: { zona: 'pies', txt: 'Talones pegados al piso' } },
+      { n: 'Sube rápido', torso: 14, cadera: 45, rodilla: 50, hombro: 16, codo: 150, ms: 300 },
+    ] },
+  rdl: { vistas: ['lado'], x0: 128, mano: 'mancuernas',
+    poses: [
+      { n: 'De pie', torso: 0, cadera: 0, rodilla: 8, hombro: 0, codo: 0, pausa: 600, ms: 900 },
+      { n: 'Cadera atrás', torso: 30, cadera: 48, rodilla: 18, hombro: 26, codo: 0, ms: 900, punto: { zona: 'cadera', txt: 'La cadera va atrás, no hacia abajo' } },
+      { n: 'Abajo, espalda recta', torso: 66, cadera: 96, rodilla: 24, hombro: 58, codo: 0, pausa: 500, ms: 700, punto: { zona: 'espalda', txt: 'Espalda recta todo el tiempo' } },
+      { n: 'Sube apretando el glúteo', torso: 28, cadera: 45, rodilla: 17, hombro: 24, codo: 0, ms: 600, punto: { zona: 'manos', txt: 'Mancuernas pegadas a las piernas' } },
+    ] },
+};
+
 // ── Bloques ──────────────────────────────────────────────────
 export const BLOQUES = {
   activacion: { n: 'Activación', c: '#00D1FF' },

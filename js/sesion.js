@@ -5,6 +5,7 @@ import { S, C, guardar, dia, leerDia } from './store.js';
 import { sesionDe, deFecha, contactos } from './plan.js';
 import * as W from './pesos.js';
 import { cuerpo } from './cuerpo.js';
+import { tieneAnimacion, montar } from './anim.js';
 import { iniciarDescanso, iniciarTrabajo, cerrarDescanso } from './timer.js';
 import { $, $$, ico, esc, num, chipTransfer, abrirHoja, cerrarHoja, aviso, vibrar, sonar, burbujas, confeti, pantallaEncendida } from './util.js';
 import { fechaLarga, hoy } from './fechas.js';
@@ -106,6 +107,7 @@ function tarjeta(it, bl, n) {
     ${bloquePeso(it)}
     <div class="series">${Array.from({ length: it.s }, (_, k) => burbuja(it, k, hechas[k])).join('')}</div>
     <div class="ej-acc">
+      ${tieneAnimacion(it.e) ? `<button class="btn-chip ver" data-a="ver">${ico('play')}Ver cómo se hace</button>` : ''}
       ${it.alts.length ? `<button class="btn-chip" data-a="cambiar">${ico('cambiar')}Cambiar ejercicio</button>` : ''}
       ${e.check ? `<button class="btn-chip" data-a="ayuda">${ico('mano')}Pedir ayuda</button>` : ''}
     </div>
@@ -242,6 +244,7 @@ function clic(ev) {
     }
     case 'cambiar': hojaCambiar(slot); break;
     case 'ayuda': hojaAyuda(item(slot).e); break;
+    case 'ver': hojaAnimacion(item(slot).e); break;
     case 'terminar': terminar(); break;
   }
 }
@@ -398,6 +401,19 @@ function hojaCambiar(slot) {
     renderSesion(ctx.vista, ctx.clave, ctx.f, ctx.para);
     aviso(u.dataset.u === 'siempre' ? 'Cambiado para todas las sesiones' : 'Cambiado solo por hoy', 'cambiar');
   };
+}
+
+// ── Ver cómo se hace ─────────────────────────────────────────
+export function hojaAnimacion(e) {
+  const x = EJ[e];
+  const h = abrirHoja(`
+    <p class="eyebrow">${ico('play')} Cómo se hace</p>
+    <h2 class="hoja-t">${esc(x.n)}</h2>
+    <div class="anim-caja"></div>
+    <div class="error"><span>${ico('cerrar')}</span><p><b>Error común:</b> ${esc(x.error)}</p></div>
+    ${x.check ? `<button class="btn-sec" data-v="ayuda">${ico('mano')}Pedir ayuda con este ejercicio</button>` : ''}`);
+  montar(h.querySelector('.anim-caja'), e);
+  h.querySelector('[data-v=ayuda]')?.addEventListener('click', () => { cerrarHoja(); setTimeout(() => hojaAyuda(e), 320); });
 }
 
 // ── Pedir ayuda al instructor ────────────────────────────────
