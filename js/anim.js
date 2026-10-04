@@ -1,156 +1,235 @@
 // Motor de animación de figura humana en SVG (100% offline).
 // Cada pose son ángulos de articulación; el motor calcula la figura (cinemática directa),
-// apoya el pie en el suelo y la interpola con requestAnimationFrame.
+// la apoya (pie, cuerpo acostado o asiento) y la interpola con requestAnimationFrame.
 //
 // Ángulos (grados), vista lateral mirando a la derecha:
-//   torso: inclinación hacia adelante · cadera: flexión (muslo adelante) · rodilla: flexión (nunca negativa)
-//   punta: pie en puntas (talón arriba) · hombro: flexión (brazo adelante/arriba; negativo = atrás) · codo: flexión
-//   El sufijo 2 (cadera2, rodilla2…) es la pierna o brazo del fondo; si falta, copia al de adelante.
-//   dx / dy: avance y altura del pie de apoyo sobre el suelo · ancho / valgo / juntas: vista de frente
-import { ANIM } from './data.js';
+//   torso: inclinación adelante (negativo = hacia atrás) · cadera: flexión · rodilla: flexión (nunca negativa)
+//   punta: pie en puntas · hombro: flexión (negativo = atrás) · codo: flexión · cabeza: inclinación
+//   giro: rota toda la figura (−90 = boca arriba con la cabeza a la izquierda, 90 = boca abajo)
+//   Sufijo 2 (cadera2, hombro2…) = pierna o brazo del fondo; si falta, copia al de adelante.
+//   dx / dy: avance y altura · bal: balón en las manos (0 = ya lo soltó)
+// Vista de frente: ancho (separación de pies), valgo (rodillas adentro), lat (desplazamiento lateral),
+//   hF / cF: abducción del brazo y flexión del codo · rF: rotación externa del antebrazo
+// Apoyo (def.apoyo o pose.apoyo): 1 / 2 = pie de adelante / del fondo · 'cuerpo' = lo más bajo toca el suelo
+// def.ancla = 'cadera': la cadera queda fija en (x0 + dx, y0 − dy), para máquinas con asiento.
+import { ANIM } from './poses.js';
 
 const L = { torso: 38, cuello: 4, cabeza: 9, muslo: 33, pierna: 32, pie: 12, brazo: 22, ante: 20 };
-const SUELO = 182;
-const PARAMS = ['torso', 'cadera', 'rodilla', 'punta', 'hombro', 'codo', 'cadera2', 'rodilla2', 'punta2', 'hombro2', 'codo2', 'dx', 'dy', 'cabeza', 'ancho', 'valgo'];
+export const SUELO = 182;
+const PARAMS = ['torso', 'cadera', 'rodilla', 'punta', 'hombro', 'codo', 'cadera2', 'rodilla2', 'punta2', 'hombro2', 'codo2',
+  'dx', 'dy', 'cabeza', 'giro', 'ancho', 'valgo', 'lat', 'rodLat', 'hF', 'cF', 'rF', 'hF2', 'cF2', 'rF2', 'bal'];
 const rad = g => g * Math.PI / 180;
 const vec = (a, l) => [Math.sin(rad(a)) * l, Math.cos(rad(a)) * l];
 const sum = (p, v) => [p[0] + v[0], p[1] + v[1]];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const f1 = n => n.toFixed(1);
 
-// Completa la pose: lo que falta en el lado 2 copia al lado 1; rodillas nunca al revés
-function completar(p) {
+// Completa la pose: lo que falta del lado 2 copia al lado 1; rodillas y codos nunca al revés
+function completar(p, def = {}) {
   const q = { ...p, __ok: true };
-  for (const k of ['cadera', 'rodilla', 'punta', 'hombro', 'codo']) { q[k] ??= 0; q[k + '2'] ??= q[k]; }
+  for (const k of ['cadera', 'rodilla', 'punta', 'hombro', 'codo', 'hF', 'cF', 'rF']) { q[k] ??= 0; q[k + '2'] ??= q[k]; }
+  q.bal ??= def.mano === 'balon' ? 1 : 0;
+  q.ancho ??= def.ancho ?? 11;
   for (const k of PARAMS) q[k] ??= 0;
   q.rodilla = Math.max(0, q.rodilla); q.rodilla2 = Math.max(0, q.rodilla2);
   q.codo = Math.max(0, q.codo); q.codo2 = Math.max(0, q.codo2);
   return q;
 }
 
-// Cinemática directa desde la cadera
-function figura(p, def, fijo = null) {
+// Cinemática directa desde la cadera (en coordenadas locales)
+function local(p) {
   const t = p.torso;
   const cad = [0, 0];
-  const hom = sum(cad, vec(180 - t, L.torso));
+  const hom = vec(180 - t, L.torso);
   const cab = sum(hom, vec(180 - t - p.cabeza, L.cuello + L.cabeza));
   const pierna = (h, k, pu) => {
-    const am = -t + h, rod = sum(cad, vec(am, L.muslo));
-    const ap = am - k, tob = sum(rod, vec(ap, L.pierna));
+    const am = -t + h, rod = vec(am, L.muslo);
+    const tob = sum(rod, vec(am - k, L.pierna));
     const pie = 90 - pu;
     return { rod, tob, punta: sum(tob, vec(pie, L.pie)), talon: sum(tob, vec(pie, -4)) };
   };
   const brazo = (s, e) => {
     const ab = -t + s, cod = sum(hom, vec(ab, L.brazo));
-    return { cod, mano: sum(cod, vec(ab + e, L.ante)), ang: ab + e };
+    return { cod, mano: sum(cod, vec(ab + e, L.ante)) };
   };
-  const f = { cad, hom, cab, p1: pierna(p.cadera, p.rodilla, p.punta), p2: pierna(p.cadera2, p.rodilla2, p.punta2), b1: brazo(p.hombro, p.codo), b2: brazo(p.hombro2, p.codo2) };
-  // Apoyo: el punto más bajo del pie de apoyo toca el suelo (o el cajón con dy); la punta no se desliza
-  let ox, oy;
-  if (fijo?.ox !== undefined) ({ ox, oy } = fijo);
-  else {
-    const pa = (fijo?.apoyo ?? p.apoyo ?? def.apoyo) === 2 ? f.p2 : f.p1;
-    ox = (def.x0 ?? 110) + p.dx - pa.punta[0];
-    oy = SUELO - p.dy - Math.max(pa.punta[1], pa.talon[1]);
+  let f = { cad, hom, cab, p1: pierna(p.cadera, p.rodilla, p.punta), p2: pierna(p.cadera2, p.rodilla2, p.punta2), b1: brazo(p.hombro, p.codo), b2: brazo(p.hombro2, p.codo2) };
+  if (p.giro) {
+    const c = Math.cos(rad(p.giro)), s = Math.sin(rad(p.giro));
+    f = mapear(f, ([x, y]) => [x * c - y * s, x * s + y * c]);
   }
-  const mover = pt => [pt[0] + ox, pt[1] + oy];
-  const m = o => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, Array.isArray(v) ? mover(v) : (typeof v === 'object' ? m(v) : v)]));
-  return m(f);
+  return f;
+}
+const mapear = (o, fn) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, Array.isArray(v) ? fn(v) : mapear(v, fn)]));
+
+function puntos(f) {
+  return [f.cad, f.hom, [f.cab[0], f.cab[1] + L.cabeza - 3], f.p1.rod, f.p1.tob, f.p1.punta, f.p1.talon, f.p2.rod, f.p2.tob, f.p2.punta, f.p2.talon, f.b1.cod, f.b1.mano, f.b2.cod, f.b2.mano];
 }
 
-function traslado(p, def) {
-  const f = figura(p, def, { ox: 0, oy: 0 });
-  const pa = (p.apoyo ?? def.apoyo) === 2 ? f.p2 : f.p1;
+// Dónde va la figura: pie clavado, cuerpo acostado o cadera fija en un asiento
+function anclar(f, p, def, apoyo) {
+  if (def.ancla === 'cadera') return { ox: (def.x0 ?? 110) + p.dx, oy: (def.y0 ?? 120) - p.dy };
+  if (apoyo === 'cuerpo') {
+    const bajo = Math.max(...puntos(f).map(q => q[1])) + 3;
+    return { ox: (def.x0 ?? 110) + p.dx, oy: SUELO - p.dy - bajo };
+  }
+  const pa = apoyo === 2 ? f.p2 : f.p1;
   return { ox: (def.x0 ?? 110) + p.dx - pa.punta[0], oy: SUELO - p.dy - Math.max(pa.punta[1], pa.talon[1]) };
 }
 
-// ── Dibujo ───────────────────────────────────────────────────
-const ln = (a, b, cls) => `<line class="${cls}" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`;
-const pl = (pts, cls) => `<polyline class="${cls}" points="${pts.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ')}"/>`;
+function figura(p, def, fijo = null) {
+  const f = local(p);
+  const o = fijo?.ox !== undefined ? fijo : anclar(f, p, def, fijo?.apoyo ?? p.apoyo ?? def.apoyo ?? 1);
+  return mapear(f, ([x, y]) => [x + o.ox, y + o.oy]);
+}
+const traslado = (p, def) => anclar(local(p), p, def, p.apoyo ?? def.apoyo ?? 1);
 
-function mancuerna(c, ang, vertical) {
-  const [x, y] = c;
-  const r = vertical ? 0 : ang;
-  return `<g class="equipo" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${vertical ? 0 : (-r).toFixed(0)})">
-    <rect x="-1.3" y="-7" width="2.6" height="14" rx="1"/><rect x="-5" y="-9.5" width="10" height="4" rx="1.3"/><rect x="-5" y="5.5" width="10" height="4" rx="1.3"/></g>`;
+// ── Dibujo ───────────────────────────────────────────────────
+const ln = (a, b, cls) => `<line class="${cls}" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}"/>`;
+const pl = (pts, cls) => `<polyline class="${cls}" points="${pts.map(q => q.map(f1).join(',')).join(' ')}"/>`;
+const medio = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+
+function mancuerna([x, y]) {
+  return `<g class="equipo" transform="translate(${f1(x)} ${f1(y)})"><rect x="-1.3" y="-7" width="2.6" height="14" rx="1"/><rect x="-5" y="-9.5" width="10" height="4" rx="1.3"/><rect x="-5" y="5.5" width="10" height="4" rx="1.3"/></g>`;
+}
+const disco = ([x, y], r = 6.5) => `<g class="equipo"><circle cx="${f1(x)}" cy="${f1(y)}" r="${r}"/><circle class="eje" cx="${f1(x)}" cy="${f1(y)}" r="2"/></g>`;
+
+// Equipo fijo (detrás de la figura)
+function equipoFijo(def, vista) {
+  return (def.equipo || []).map(q => {
+    if (q.vista && q.vista !== vista) return '';
+    switch (q.tipo) {
+      case 'cajon': return vista === 'frente'
+        ? `<rect class="cajon fr" x="78" y="${SUELO - q.alto}" width="84" height="${q.alto}" rx="4"/>`
+        : `<rect class="cajon" x="${q.x}" y="${SUELO - q.alto}" width="${q.ancho}" height="${q.alto}" rx="4"/>`;
+      case 'banco': return `<rect class="banco" x="${q.x}" y="${SUELO - q.alto}" width="${q.ancho}" height="6" rx="3"/><line class="pata" x1="${q.x + 6}" y1="${SUELO - q.alto + 6}" x2="${q.x + 6}" y2="${SUELO}"/><line class="pata" x1="${q.x + q.ancho - 6}" y1="${SUELO - q.alto + 6}" x2="${q.x + q.ancho - 6}" y2="${SUELO}"/>`;
+      case 'muro': return `<rect class="muro" x="${q.x}" y="30" width="8" height="${SUELO - 30}"/>`;
+      case 'torre': return `<rect class="torre" x="${q.x - 5}" y="${q.y0 ?? 14}" width="10" height="${SUELO - (q.y0 ?? 14)}" rx="3"/>`;
+      case 'poste': return `<line class="pata" x1="${q.x}" y1="${q.y}" x2="${q.x}" y2="${SUELO}"/>`;
+      case 'barraFija': return `<line class="barra-fija" x1="${q.x1}" y1="${q.y}" x2="${q.x2}" y2="${q.y}"/><line class="pata" x1="${q.x1 + 4}" y1="${q.y}" x2="${q.x1 + 4}" y2="${SUELO}"/>`;
+      case 'linea': return `<line class="maquina" x1="${q.x1}" y1="${q.y1}" x2="${q.x2}" y2="${q.y2}"/>`;
+      case 'rect': return `<rect class="maquina-r" x="${q.x}" y="${q.y}" width="${q.w}" height="${q.h}" rx="${q.r ?? 3}"/>`;
+      case 'colchoneta': return `<rect class="colchoneta" x="${q.x}" y="${SUELO - 3}" width="${q.ancho}" height="3" rx="1.5"/>`;
+      default: return '';
+    }
+  }).join('');
+}
+
+// Equipo que se mueve con la figura (cables, carro de la prensa, balón, barra)
+function equipoMovil(def, f, p, vista) {
+  let s = '';
+  const mano = def.mano;
+  for (const q of def.equipo || []) {
+    if (q.vista && q.vista !== vista) continue;
+    if (q.tipo === 'cable') {
+      const h = q.mano === 2 ? f.b2.mano : vista === 'frente' && f.fm ? f.fm[q.lado ?? 1] : f.b1.mano;
+      s += `<line class="cable" x1="${q.x}" y1="${q.y}" x2="${f1(h[0])}" y2="${f1(h[1])}"/><circle class="polea" cx="${q.x}" cy="${q.y}" r="4"/>`;
+      if (q.agarre === 'cuerda') s += `<circle class="agarre" cx="${f1(h[0])}" cy="${f1(h[1])}" r="3.5"/>`;
+      else s += `<rect class="agarre" x="${f1(h[0] - 2.5)}" y="${f1(h[1] - 5)}" width="5" height="10" rx="2"/>`;
+    }
+    if (q.tipo === 'banda') {
+      const h = f.b1.mano;
+      s += `<line class="banda" x1="${q.x}" y1="${q.y}" x2="${f1(h[0])}" y2="${f1(h[1])}"/><circle class="polea" cx="${q.x}" cy="${q.y}" r="2.5"/>`;
+    }
+    if (q.tipo === 'carro') {
+      // Plataforma de la prensa: perpendicular al riel, apoyada en los pies
+      const c = medio(f.p1.punta, f.p1.talon);
+      const d = vec(q.riel, 1), n = [d[1], -d[0]];
+      const a = [c[0] + n[0] * 16 + d[0] * 4, c[1] + n[1] * 16 + d[1] * 4], b = [c[0] - n[0] * 16 + d[0] * 4, c[1] - n[1] * 16 + d[1] * 4];
+      s += `<line class="riel" x1="${f1(c[0] - d[0] * 60)}" y1="${f1(c[1] - d[1] * 60)}" x2="${f1(c[0] + d[0] * 40)}" y2="${f1(c[1] + d[1] * 40)}"/>`;
+      s += `<line class="carro" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}"/>`;
+    }
+    if (q.tipo === 'respaldo') {
+      // Respaldo pegado a la espalda (asientos reclinados)
+      const d = [f.hom[0] - f.cad[0], f.hom[1] - f.cad[1]], l = Math.hypot(...d) || 1, u = [d[0] / l, d[1] / l];
+      const nrm = [-u[1] * (q.lado ?? -1) * 7, u[0] * (q.lado ?? -1) * 7];
+      const a = [f.cad[0] + nrm[0] - u[0] * 4, f.cad[1] + nrm[1] - u[1] * 4], b = [f.hom[0] + nrm[0] + u[0] * 6, f.hom[1] + nrm[1] + u[1] * 6];
+      s += `<line class="respaldo" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}"/>`;
+    }
+    if (q.tipo === 'objeto') { const r = q.en === 'rodilla' ? (vista === 'frente' && f.fr ? medio(f.fr[0], f.fr[1]) : f.p1.rod) : f.cad; s += `<circle class="balon" cx="${f1(r[0])}" cy="${f1(r[1] + (q.dy ?? 0))}" r="${q.r ?? 6}"/>`; }
+    if (q.tipo === 'rodillo') { const r = q.en === 'rodilla' ? f.p1.rod : f.cad; s += `<circle class="rodillo" cx="${f1(r[0] + (q.dx ?? 0))}" cy="${f1(r[1] + (q.dy ?? -8))}" r="6"/>`; }
+    if (q.tipo === 'almohadillas' && vista === 'frente' && f.fr) s += f.fr.map(r => `<rect class="rodillo" x="${f1(r[0] + (r[0] < 120 ? -9 : 3))}" y="${f1(r[1] - 6)}" width="6" height="14" rx="3"/>`).join('');
+  }
+  if (mano === 'goblet') s += vista === 'frente' && f.fm ? `<g class="equipo"><rect x="113" y="${f1(f.fm[0][1] + 2)}" width="14" height="4" rx="1.3"/></g>` : mancuerna([f.b1.mano[0] + 2, f.b1.mano[1] + 7]);
+  if (mano === 'mancuernas') s += vista === 'frente' && f.fm ? f.fm.map(m => disco([m[0], m[1] + 2], 4.5)).join('') : disco([f.b1.mano[0], f.b1.mano[1] + 3]);
+  if (mano === 'barra') s += vista === 'frente' && f.fm ? `<line class="barra-m" x1="${f1(f.fm[0][0] - 14)}" y1="${f1(f.fm[0][1])}" x2="${f1(f.fm[1][0] + 14)}" y2="${f1(f.fm[1][1])}"/>` : `<circle class="barra-p" cx="${f1(f.b1.mano[0])}" cy="${f1(f.b1.mano[1])}" r="3.5"/>`;
+  if (mano === 'balon' && p.bal > 0.5) {
+    const c = vista === 'frente' && f.fm ? medio(f.fm[0], f.fm[1]) : medio(f.b1.mano, f.b2.mano);
+    s += `<circle class="balon" cx="${f1(c[0])}" cy="${f1(c[1] - 2)}" r="8"/>`;
+  }
+  return s;
 }
 
 function lado(p, def, punto, fijo) {
   const f = figura(p, def, fijo);
   const pierna = (x, cls) => pl([f.cad, x.rod, x.tob, x.punta], cls) + ln(x.tob, x.talon, cls);
   const brazo = (x, cls) => pl([f.hom, x.cod, x.mano], cls);
-  let s = '';
-  s += brazo(f.b2, 'hueso fondo') + pierna(f.p2, 'hueso fondo');
-  s += ln(f.cad, f.hom, 'torso') + `<circle class="cabeza" cx="${f.cab[0].toFixed(1)}" cy="${f.cab[1].toFixed(1)}" r="${L.cabeza}"/>`;
-  s += pierna(f.p1, 'hueso');
-  s += brazo(f.b1, 'hueso');
-  // Goblet: mancuerna parada, pegada al pecho. De lado, una mancuerna en la mano se ve de punta (disco).
-  if (def.mano === 'goblet') s += mancuerna([f.b1.mano[0] + 2, f.b1.mano[1] + 7], 0, true);
-  if (def.mano === 'mancuernas') s += `<g class="equipo"><circle cx="${f.b1.mano[0].toFixed(1)}" cy="${(f.b1.mano[1] + 3).toFixed(1)}" r="6.5"/><circle class="eje" cx="${f.b1.mano[0].toFixed(1)}" cy="${(f.b1.mano[1] + 3).toFixed(1)}" r="2"/></g>`;
+  let s = brazo(f.b2, 'hueso fondo') + pierna(f.p2, 'hueso fondo');
+  s += ln(f.cad, f.hom, 'torso') + `<circle class="cabeza" cx="${f1(f.cab[0])}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`;
+  s += pierna(f.p1, 'hueso') + brazo(f.b1, 'hueso');
+  s += equipoMovil(def, f, p, 'lado');
   if (punto) s += marca(punto, {
-    rodilla: f.p1.rod, cadera: f.cad, pies: f.p1.tob, hombro: f.hom, manos: f.b1.mano,
-    espalda: [(f.cad[0] + f.hom[0]) / 2, (f.cad[1] + f.hom[1]) / 2],
+    rodilla: [f.p1.rod], cadera: [f.cad], pies: [f.p1.tob], hombro: [f.hom], manos: [f.b1.mano], codo: [f.b1.cod],
+    espalda: [medio(f.cad, f.hom)], cabeza: [f.cab],
   }, f);
   return s;
 }
 
-// Vista de frente: alturas de la vista lateral, anchos propios
+// Vista de frente: alturas de la vista lateral y anchos propios
 function frente(p, def, punto, fijo) {
-  const f = figura(p, def, fijo); // de frente solo se usan las alturas
-  const CX = 120, s = [];
-  const piernaF = (sg, x) => {
-    const hx = CX + sg * 7, fx = CX + sg * (p.ancho || def.ancho || 11);
+  const f = figura(p, def, fijo);
+  const CX = 120 + p.lat, s = [];
+  const piernaF = (sg, x, flexion) => {
+    const hx = CX + sg * 7, fx = CX + sg * p.ancho;
     const r = (x.rod[1] - f.cad[1]) / ((x.tob[1] - f.cad[1]) || 1);
     const enLinea = hx + (fx - hx) * r;
-    const flex = clamp(p.rodilla / 90, 0, 1);
-    const kx = enLinea + (fx + sg * 2 - enLinea) * flex - sg * p.valgo * flex;
+    const flex = clamp(flexion / 90, 0, 1);
+    const kx = enLinea + (fx + sg * 2 - enLinea) * flex - sg * p.valgo * flex + p.rodLat;
     const suelo = Math.max(x.punta[1], x.talon[1]);
-    return { rod: [kx, x.rod[1]], tob: [fx, x.tob[1]], pie: [fx + sg * 2, suelo - 2.5], cad: [hx, f.cad[1]] };
+    return { rod: [kx, x.rod[1] + Math.abs(p.rodLat) * 0.5], tob: [fx, x.tob[1]], pie: [fx + sg * 2, suelo - 2.5], cad: [hx, f.cad[1]] };
   };
-  const izq = piernaF(-1, f.p1), der = piernaF(1, f.p2);
-  const brazoF = (sg, x) => {
-    const sx = CX + sg * 11;
+  const izq = piernaF(-1, f.p1, p.rodilla), der = piernaF(1, f.p2, p.rodilla2);
+  const brazoF = (sg, x, hF, cF, rF, lado) => {
+    const sx = CX + sg * 11, hom = [sx, f.hom[1]];
+    if (def.brazosF) {
+      const cod = sum(hom, [sg * Math.sin(rad(hF)) * L.brazo, Math.cos(rad(hF)) * L.brazo]);
+      const a = hF + cF;
+      const rota = def.rotF === true || def.rotF === lado;
+      const mano = rota ? [cod[0] + sg * Math.sin(rad(rF)) * L.ante, cod[1] + 1] : sum(cod, [sg * Math.sin(rad(a)) * L.ante, Math.cos(rad(a)) * L.ante]);
+      return { hom, cod, mano };
+    }
     const mx = def.juntas ? CX + sg * 3 : sx + sg * 3;
     const ex = def.juntas ? CX + sg * 11 : sx + sg * 3;
-    return { hom: [sx, f.hom[1]], cod: [ex, x.cod[1]], mano: [mx, x.mano[1]] };
+    return { hom, cod: [ex, x.cod[1]], mano: [mx, x.mano[1]] };
   };
-  const bi = brazoF(-1, f.b1), bd = brazoF(1, f.b2);
-  for (const x of [izq, der]) s.push(pl([x.cad, x.rod, x.tob], 'hueso'), `<ellipse class="pie" cx="${x.pie[0].toFixed(1)}" cy="${x.pie[1].toFixed(1)}" rx="4.5" ry="2.5"/>`);
+  const bi = brazoF(-1, f.b1, p.hF, p.cF, p.rF, 1), bd = brazoF(1, f.b2, p.hF2, p.cF2, p.rF2, 2);
+  f.fm = [bi.mano, bd.mano];
+  f.fr = [izq.rod, der.rod];
+  for (const x of [izq, der]) s.push(pl([x.cad, x.rod, x.tob], 'hueso'), `<ellipse class="pie" cx="${f1(x.pie[0])}" cy="${f1(x.pie[1])}" rx="4.5" ry="2.5"/>`);
   s.push(ln(izq.cad, der.cad, 'hueso'), ln([CX, f.cad[1]], [CX, f.hom[1]], 'torso'), ln(bi.hom, bd.hom, 'hueso'));
-  s.push(`<circle class="cabeza" cx="${CX}" cy="${f.cab[1].toFixed(1)}" r="${L.cabeza}"/>`);
+  s.push(`<circle class="cabeza" cx="${f1(CX)}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`);
   for (const x of [bi, bd]) s.push(pl([x.hom, x.cod, x.mano], 'hueso'));
-  if (def.mano === 'goblet') s.push(`<g class="equipo"><rect x="${CX - 7}" y="${(bi.mano[1] + 2).toFixed(1)}" width="14" height="4" rx="1.3"/></g>`);
-  if (punto) s.push(marca(punto, { rodilla: izq.rod, rodillas: [izq.rod, der.rod], pies: izq.pie, cadera: [CX, f.cad[1]], espalda: [CX, (f.cad[1] + f.hom[1]) / 2], hombro: bi.hom, manos: bi.mano }, f));
+  s.push(equipoMovil(def, f, p, 'frente'));
+  if (punto) s.push(marca(punto, { rodilla: [izq.rod, der.rod], pies: [izq.pie, der.pie], cadera: [[CX, f.cad[1]]], espalda: [[CX, (f.cad[1] + f.hom[1]) / 2]], hombro: [bi.hom, bd.hom], manos: [bi.mano, bd.mano], codo: [bi.cod, bd.cod], cabeza: [[CX, f.cab[1]]] }, null));
   return s.join('');
 }
 
 function marca(punto, pts, f) {
-  const z = punto.zona === 'rodilla' && pts.rodillas ? pts.rodillas : [pts[punto.zona] || pts.cadera];
   let s = '';
-  if (punto.zona === 'espalda' && f && !pts.rodillas) s += `<line class="marca-linea" x1="${f.cad[0].toFixed(1)}" y1="${f.cad[1].toFixed(1)}" x2="${f.hom[0].toFixed(1)}" y2="${f.hom[1].toFixed(1)}"/>`;
-  for (const p of z) s += `<circle class="marca" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="9"/>`;
+  if (punto.zona === 'espalda' && f) s += `<line class="marca-linea" x1="${f1(f.cad[0])}" y1="${f1(f.cad[1])}" x2="${f1(f.hom[0])}" y2="${f1(f.hom[1])}"/>`;
+  for (const q of pts[punto.zona] || pts.cadera) s += `<circle class="marca" cx="${f1(q[0])}" cy="${f1(q[1])}" r="9"/>`;
   return s;
 }
 
-function escena(def, vista) {
-  const e = (def.equipo || []).map(q => {
-    if (q.tipo === 'cajon') return vista === 'frente'
-      ? `<rect class="cajon fr" x="78" y="${SUELO - q.alto}" width="84" height="${q.alto}" rx="4"/>`
-      : `<rect class="cajon" x="${q.x}" y="${SUELO - q.alto}" width="${q.ancho}" height="${q.alto}" rx="4"/>`;
-    return '';
-  }).join('');
-  return `<line class="suelo" x1="6" y1="${SUELO}" x2="234" y2="${SUELO}"/>${e}`;
-}
-
 export function dibujarPose(def, p, vista = 'lado', punto = null, fijo = null) {
-  const q = p.__ok ? p : completar(p);
-  return escena(def, vista) + (vista === 'frente' ? frente(q, def, punto, fijo) : lado(q, def, punto, fijo));
+  const q = p.__ok ? p : completar(p, def);
+  return `<line class="suelo" x1="6" y1="${SUELO}" x2="234" y2="${SUELO}"/>` + equipoFijo(def, vista) + (vista === 'frente' ? frente(q, def, punto, fijo) : lado(q, def, punto, fijo));
 }
 
 // ── Línea de tiempo ──────────────────────────────────────────
 const suave = x => 0.5 - Math.cos(Math.PI * x) / 2;
 
 function preparar(def) {
-  const poses = def.poses.map(completar);
+  const poses = def.poses.map(p => completar(p, def));
   const tramos = [];
   let t = 0;
   poses.forEach((p, i) => {
@@ -170,22 +249,25 @@ function poseEn(prep, t) {
   const f = suave(clamp((local - tr.pausa) / tr.ms, 0, 1));
   const p = { __ok: true };
   for (const k of PARAMS) p[k] = a[k] + (b[k] - a[k]) * f;
-  // Mismo pie de apoyo: ese pie queda clavado. Si cambia, se interpola el traslado de la figura.
+  // Mismo apoyo: queda clavado. Si cambia, se interpola el traslado de la figura.
   const ap = x => x.apoyo ?? prep.def.apoyo ?? 1;
   let fijo = { apoyo: ap(a) };
-  if (ap(a) !== ap(b)) { const ta = prep.tras[tr.i], tb = prep.tras[(tr.i + 1) % prep.poses.length]; fijo = { ox: ta.ox + (tb.ox - ta.ox) * f, oy: ta.oy + (tb.oy - ta.oy) * f }; }
+  if (prep.def.ancla !== 'cadera' && ap(a) !== ap(b)) { const ta = prep.tras[tr.i], tb = prep.tras[(tr.i + 1) % prep.poses.length]; fijo = { ox: ta.ox + (tb.ox - ta.ox) * f, oy: ta.oy + (tb.oy - ta.oy) * f }; }
   return { p, activa: f < 0.5 ? tr.i : (tr.i + 1) % prep.poses.length, fijo };
 }
 
-export const tieneAnimacion = e => !!ANIM[e];
+// Un ejercicio puede usar la animación de otro parecido (como: 'id')
+const defDe = e => { const d = ANIM[e]; return d?.como ? ANIM[d.como] : d; };
+export const tieneAnimacion = e => !!defDe(e);
 
 // Monta el reproductor dentro de un contenedor
 export function montar(cont, e) {
-  const def = ANIM[e];
+  const def = defDe(e);
   if (!def) return;
   const prep = preparar(def);
   const vistas = def.vistas || ['lado'];
   const st = { t: 0, play: true, vel: 1, vista: vistas[0], ult: performance.now(), raf: 0, paso: null };
+  const nombreVista = v => v === 'frente' ? 'Ver de frente' : 'Ver de lado';
   cont.innerHTML = `
     <div class="anim">
       <svg class="anim-svg" viewBox="0 0 240 196" role="img" aria-label="Animación del ejercicio"><g class="anim-g"></g></svg>
@@ -196,9 +278,9 @@ export function montar(cont, e) {
       <button data-an="vel">Lento 0,5×</button>
       <button data-an="prev" aria-label="Pose anterior">‹ Pose</button>
       <button data-an="next" aria-label="Pose siguiente">Pose ›</button>
-      ${vistas.length > 1 ? '<button data-an="vista" class="vista">Ver de frente</button>' : ''}
+      ${vistas.length > 1 ? `<button data-an="vista" class="vista">${nombreVista(vistas[1])}</button>` : ''}
     </div>
-    <div class="anim-poses">${def.poses.map((p, i) => `<button data-an="ir" data-i="${i}"><svg viewBox="0 0 240 196">${dibujarPose(def, p)}</svg><b>${i + 1}</b><span>${p.n || ''}</span></button>`).join('')}</div>`;
+    <div class="anim-poses">${def.poses.map((p, i) => `<button data-an="ir" data-i="${i}"><svg viewBox="0 0 240 196">${dibujarPose(def, p, vistas[0])}</svg><b>${i + 1}</b><span>${p.n || ''}</span></button>`).join('')}</div>`;
   const g = cont.querySelector('.anim-g'), txt = cont.querySelector('.anim-punto');
   const bPlay = cont.querySelector('[data-an=play]');
   const icoPlay = () => { bPlay.innerHTML = st.play ? '❚❚ Pausa' : '▶ Seguir'; };
@@ -231,7 +313,11 @@ export function montar(cont, e) {
     const a = b.dataset.an;
     if (a === 'play') { st.play = !st.play; if (st.play) st.paso = null; icoPlay(); }
     if (a === 'vel') { st.vel = st.vel === 1 ? 0.5 : 1; b.textContent = st.vel === 1 ? 'Lento 0,5×' : 'Lento ✓'; b.classList.toggle('act', st.vel !== 1); }
-    if (a === 'vista') { const i = (vistas.indexOf(st.vista) + 1) % vistas.length; st.vista = vistas[i]; b.textContent = st.vista === 'frente' ? 'Ver de lado' : 'Ver de frente'; ultActiva = -1; }
+    if (a === 'vista') {
+      const i = (vistas.indexOf(st.vista) + 1) % vistas.length; st.vista = vistas[i];
+      b.textContent = nombreVista(vistas[(i + 1) % vistas.length]); ultActiva = -1;
+      cont.querySelectorAll('.anim-poses button svg').forEach((svg, k) => { svg.innerHTML = dibujarPose(def, def.poses[k], st.vista); });
+    }
     if (a === 'prev' || a === 'next' || a === 'ir') {
       st.play = false; icoPlay();
       const n = def.poses.length;

@@ -75,6 +75,10 @@ export const PESOS = {
   facepull:    { eq: 'maquina', ini: [5, 10], tope: [15, 30], nota: 'Si lo haces con banda: banda ligera → mediana.' },
   pallof:      { eq: 'maquina', ini: [5, 10], tope: [12.5, 25], nota: 'Si lo haces con banda: banda ligera → mediana.' },
   aductorMaq:  { eq: 'maquina', ini: [15, 30], tope: [30, 65] },
+  prensa:      { eq: 'maquina', ini: [30, 65], tope: [80, 180], nota: 'Sin contar el carro de la máquina.' },
+  hipMaq:      { eq: 'maquina', ini: [20, 45], tope: [50, 110] },
+  remoMaq:     { eq: 'maquina', ini: [20, 45], tope: [40, 90] },
+  rotExtPolea: { eq: 'maquina', ini: [2.5, 5], tope: [7.5, 15] },
   ytw:         { eq: 'banda' }, rotExt: { eq: 'banda' }, pasosBanda: { eq: 'banda' }, rotBanda: { eq: 'banda' }, slamCuerda: { eq: 'banda' },
   cajon:       { eq: 'cajon' }, cajonSentado: { eq: 'cajon' },
 };
@@ -168,9 +172,9 @@ export const EJ = {
     para: 'Aductores y glúteo: los músculos del cierre de la patada.',
     como: ['Pies bien abiertos, puntas hacia afuera.', 'Mancuerna colgando entre las piernas.', 'Baja con las rodillas siguiendo a los pies.'],
     error: 'Rodillas hacia adentro.' },
-  aductorMaq: { n: 'Aductor en máquina (ligero)', tr: ['patada'], z: ['aductor'], s: [], carga: ['rodilla'],
-    para: 'Fuerza del cierre de la patada.',
-    como: ['Siéntate con la espalda apoyada.', 'Cierra las piernas controlado.', 'Abre lento.'],
+  aductorMaq: { n: 'Aductor en máquina', tr: ['patada', 'rodilla'], maq: 1, z: ['aductor'], s: [], carga: ['rodilla'],
+    para: 'Aductores fuertes: el cierre de la patada de pecho y rodillas protegidas.',
+    como: ['Siéntate con la espalda apoyada.', 'Cierra las piernas controlado.', 'Abre lento, sin dejar que el peso golpee.'],
     error: 'Usar mucho peso y rebotar.' },
   copen: { n: 'Plancha Copenhague', tr: ['rodilla', 'patada'], z: ['aductor', 'oblicuos'], s: ['abdomen'], carga: ['rodilla'], tec: 1,
     para: 'Aductores fuertes protegen la rodilla del nadador de pecho.',
@@ -193,6 +197,24 @@ export const EJ = {
     para: 'Core lateral firme.',
     como: ['De lado sobre el antebrazo.', 'Cadera arriba, cuerpo recto.', 'Aguanta respirando.'],
     error: 'Dejar caer la cadera.' },
+
+  prensa: { n: 'Prensa de piernas', tr: ['salida', 'viraje'], z: ['cuadriceps', 'gluteo'], s: ['aductor', 'femoral'], carga: ['rodilla'], maq: 1,
+    para: 'Fuerza de piernas segura entrenando solo: el mismo empuje que haces contra la pared en cada viraje.',
+    como: ['Espalda y cadera pegadas al respaldo, pies al ancho de los hombros.', 'Baja hasta que las rodillas queden a 90° sin despegar la cadera.', 'Empuja con todo el pie, sin bloquear las rodillas arriba.'],
+    error: 'Bloquear las rodillas arriba o despegar la cadera del asiento.',
+    check: ['Cadera pegada al asiento', 'Rodillas alineadas con los pies', 'Sin bloquear las rodillas al subir'] },
+  hipMaq: { n: 'Hip thrust en máquina', tr: ['patada', 'salida'], z: ['gluteo'], s: ['femoral'], maq: 1,
+    para: 'Glúteo fuerte = patada de pecho más potente y mejor salida.',
+    como: ['Espalda alta apoyada y el rodillo sobre la cadera.', 'Sube la cadera hasta quedar recto de hombros a rodillas.', 'Aprieta 1 s arriba y baja controlado.'],
+    error: 'Arquear la espalda baja en vez de subir con el glúteo.' },
+  remoMaq: { n: 'Remo en máquina', tr: ['brazada'], z: ['dorsal', 'trapecio'], s: ['biceps'], maq: 1,
+    para: 'Espalda media fuerte para sostener la postura en el agua.',
+    como: ['Pecho contra el apoyo.', 'Jala con los codos hacia atrás.', 'Aprieta los omóplatos y vuelve lento.'],
+    error: 'Despegar el pecho del apoyo.' },
+  rotExtPolea: { n: 'Rotación externa en polea', tr: ['hombro'], z: ['deltoidesPost'], s: [], maq: 1,
+    para: 'Prevención del hombro de nadador con carga constante.',
+    como: ['De lado a la polea, a la altura del codo.', 'Codo pegado al cuerpo a 90°, gira la mano hacia afuera.', 'Vuelve lento, sin separar el codo.'],
+    error: 'Separar el codo del cuerpo.' },
 
   // ── Sesión B ───────────────────────────────────────────────
   slam: { n: 'Slam con balón medicinal', tr: ['brazada', 'sprint'], z: ['dorsal', 'abdomen'], s: ['triceps', 'deltoides'], carga: ['hombro'], pot: 1, tec: 1,
@@ -230,11 +252,11 @@ export const EJ = {
     como: ['Cuélgate con los brazos estirados.', 'Sube llevando el pecho a la barra.', 'Baja en 3 segundos.'],
     error: 'Balancearse.',
     check: ['Empieza con los brazos estirados', 'Sin balanceo ni patadas', 'Baja lento, en 3 segundos'] },
-  domAsist: { n: 'Dominadas asistidas', tr: ['brazada', 'sprint'], z: ['dorsal', 'biceps'], s: [], carga: ['hombro'],
+  domAsist: { n: 'Dominadas asistidas en máquina', tr: ['brazada', 'sprint'], z: ['dorsal', 'biceps'], s: [], carga: ['hombro'],
     para: 'El mismo tirón con ayuda.',
     como: ['Rodillas o pies en la asistencia (máquina o banda).', 'Pecho a la barra.', 'Baja lento.'],
     error: 'Balancearse.' },
-  jalon: { n: 'Jalón al pecho', tr: ['brazada'], z: ['dorsal'], s: ['biceps'], carga: ['hombro'],
+  jalon: { n: 'Jalón al pecho', tr: ['brazada', 'sprint'], maq: 1, z: ['dorsal'], s: ['biceps'], carga: ['hombro'],
     para: 'Fuerza del tirón en máquina.',
     como: ['Pecho alto, agarre un poco más ancho que los hombros.', 'Baja la barra al pecho alto.', 'Sube controlado.'],
     error: 'Echar el torso muy atrás.' },
@@ -246,7 +268,7 @@ export const EJ = {
     para: 'Espalda fuerte, un lado a la vez.',
     como: ['Rodilla y mano en el banco.', 'Jala la mancuerna hacia la cadera.', 'Baja lento.'],
     error: 'Girar el torso.' },
-  remoPolea: { n: 'Remo en polea', tr: ['brazada'], z: ['dorsal', 'trapecio'], s: ['biceps'],
+  remoPolea: { n: 'Remo en polea sentado', tr: ['brazada'], maq: 1, z: ['dorsal', 'trapecio'], s: ['biceps'],
     para: 'Espalda media.',
     como: ['Sentado con el pecho alto.', 'Jala al abdomen con los codos pegados.', 'Aprieta los omóplatos.'],
     error: 'Balancear el torso.' },
@@ -254,7 +276,7 @@ export const EJ = {
     para: 'Imita el barrido hacia adentro de la brazada.',
     como: ['Acostado en el banco, mancuerna arriba con las dos manos.', 'Bájala detrás de la cabeza con los brazos casi rectos.', 'Tráela de vuelta hasta el pecho.'],
     error: 'Doblar mucho los codos.' },
-  pulloverPolea: { n: 'Pullover en polea con cuerda', tr: ['brazada'], z: ['dorsal'], s: ['triceps'], carga: ['hombro'],
+  pulloverPolea: { n: 'Pullover en polea con cuerda', tr: ['brazada'], maq: 1, z: ['dorsal'], s: ['triceps'], carga: ['hombro'],
     para: 'El barrido de la brazada en polea.',
     como: ['De pie frente a la polea alta.', 'Brazos casi rectos, baja la cuerda hasta los muslos.', 'Sube lento.'],
     error: 'Doblar los codos.' },
@@ -446,37 +468,7 @@ export const EJ = {
     error: 'Despegar la espalda baja.' },
 };
 
-// ── Animaciones (poses clave) ────────────────────────────────
-// Ángulos en grados (ver js/anim.js). ms: tiempo hasta la pose siguiente · pausa: tiempo quieto en la pose
-// punto: zona que se ilumina en coral con su texto (rodilla, rodillas, cadera, espalda, pies, hombro, manos)
-export const ANIM = {
-  cajon: { vistas: ['lado', 'frente'], x0: 62, equipo: [{ tipo: 'cajon', x: 120, ancho: 46, alto: 30 }],
-    poses: [
-      { n: 'De pie', torso: 0, cadera: 0, rodilla: 0, hombro: 0, codo: 10, pausa: 400, ms: 500 },
-      { n: 'Brazos atrás y carga', torso: 38, cadera: 82, rodilla: 85, hombro: -55, codo: 10, pausa: 120, ms: 240 },
-      { n: 'Despegue explosivo', torso: 12, cadera: 8, rodilla: 4, punta: 38, hombro: 150, codo: 15, dx: 5, dy: 2, ms: 220 },
-      { n: 'En el aire', torso: 22, cadera: 100, rodilla: 115, punta: 15, hombro: 105, codo: 25, dx: 52, dy: 50, ms: 220 },
-      { n: 'Cae suave', torso: 36, cadera: 86, rodilla: 90, hombro: 55, codo: 30, dx: 86, dy: 30, pausa: 800, ms: 500, punto: { zona: 'rodilla', txt: 'Cae suave, rodillas hacia afuera' } },
-      { n: 'De pie arriba', torso: 0, cadera: 0, rodilla: 0, hombro: 0, codo: 10, dx: 86, dy: 30, pausa: 300, ms: 700 },
-      { n: 'Baja caminando', torso: 20, cadera: 85, rodilla: 120, cadera2: -10, rodilla2: 0, punta2: 35, hombro: 25, codo: 15, hombro2: -20, dx: 86, dy: 30, pausa: 150, ms: 550, punto: { zona: 'pies', txt: 'Baja del cajón caminando, nunca saltando' } },
-      { n: 'Un pie en el piso', apoyo: 2, torso: 8, cadera: 55, rodilla: 85, cadera2: 0, rodilla2: 5, hombro: -15, hombro2: 15, codo: 15, dx: 48, dy: 0, ms: 450 },
-      { n: 'Vuelve a tu marca', apoyo: 2, torso: 0, cadera: 0, rodilla: 0, hombro: 0, codo: 10, dx: 48, dy: 0, pausa: 300, ms: 800 },
-    ] },
-  goblet: { vistas: ['lado', 'frente'], x0: 128, mano: 'goblet', juntas: true, ancho: 15,
-    poses: [
-      { n: 'De pie, pecho alto', torso: 4, cadera: 4, rodilla: 0, hombro: 6, codo: 152, pausa: 600, ms: 1500, punto: { zona: 'espalda', txt: 'Pecho alto, mancuerna pegada al pecho' } },
-      { n: 'Bajando en 3 segundos', torso: 18, cadera: 56, rodilla: 62, hombro: 20, codo: 150, ms: 1500, punto: { zona: 'rodilla', txt: 'Rodillas siguen la dirección de los pies' } },
-      { n: 'Abajo', torso: 32, cadera: 112, rodilla: 118, hombro: 34, codo: 148, pausa: 450, ms: 550, punto: { zona: 'pies', txt: 'Talones pegados al piso' } },
-      { n: 'Sube rápido', torso: 14, cadera: 45, rodilla: 50, hombro: 16, codo: 150, ms: 300 },
-    ] },
-  rdl: { vistas: ['lado'], x0: 128, mano: 'mancuernas',
-    poses: [
-      { n: 'De pie', torso: 0, cadera: 0, rodilla: 8, hombro: 0, codo: 0, pausa: 600, ms: 900 },
-      { n: 'Cadera atrás', torso: 30, cadera: 48, rodilla: 18, hombro: 26, codo: 0, ms: 900, punto: { zona: 'cadera', txt: 'La cadera va atrás, no hacia abajo' } },
-      { n: 'Abajo, espalda recta', torso: 66, cadera: 96, rodilla: 24, hombro: 58, codo: 0, pausa: 500, ms: 700, punto: { zona: 'espalda', txt: 'Espalda recta todo el tiempo' } },
-      { n: 'Sube apretando el glúteo', torso: 28, cadera: 45, rodilla: 17, hombro: 24, codo: 0, ms: 600, punto: { zona: 'manos', txt: 'Mancuernas pegadas a las piernas' } },
-    ] },
-};
+// Las animaciones (poses clave de cada ejercicio) viven en js/poses.js
 
 // ── Bloques ──────────────────────────────────────────────────
 export const BLOQUES = {
@@ -504,40 +496,40 @@ export const ACTIVACION = [
 ];
 
 export const SESIONES = {
-  A: { n: 'Potencia de piernas', sub: 'Salidas, virajes y patada', c: '#00D1FF',
+  A: { n: 'Potencia de piernas', sub: 'Salidas, virajes y patada · con máquinas', c: '#00D1FF',
     potencia: [
       P('cajon', 4, 3, 90, { alts: [P('svertical', 4, 3, 90), P('scmpared', 4, 3, 90)] }),
       P('longitud', 4, 3, 90, { alts: [P('longUna', 3, 2, 90, { lado: 'pierna' }), P('cuclillas', 4, 3, 90)] }),
       P('sstream', 3, 4, 60, { alts: [P('sjSinBrazos', 3, 4, 60)] }),
     ],
     fuerza: [
-      P('goblet', 3, 8, 90, { alts: [P('sentBarra', 3, 6, 90), P('smith', 3, 8, 90)] }),
-      P('puente1', 3, 8, 60, { lado: 'pierna', alts: [P('hipthrust', 3, 10, 60)] }),
-      P('sumo', 3, 10, 60, { alts: [P('aductorMaq', 3, 12, 60)] }),
+      P('prensa', 3, 8, 90, { alts: [P('smith', 3, 8, 90), P('goblet', 3, 8, 90)] }),
+      P('hipMaq', 3, 10, 60, { alts: [P('puente1', 3, 8, 60, { lado: 'pierna' }), P('hipthrust', 3, 10, 60)] }),
+      P('aductorMaq', 3, 12, 60, { alts: [P('sumo', 3, 10, 60)] }),
     ],
     core: [
       T('copen', 3, [15, 20], 45, { lado: 'lado', alts: [T('copenRod', 3, 20, 45, { lado: 'lado' }), T('balonRod', 3, 10, 30)] }),
       P('pallof', 3, 10, 45, { lado: 'lado', alts: [T('planchaLat', 3, 20, 45, { lado: 'lado' })] }),
     ],
   },
-  B: { n: 'Potencia de tren superior', sub: 'Brazada y sprint', c: '#7C9CFF',
+  B: { n: 'Potencia de tren superior', sub: 'Brazada y sprint · con máquinas', c: '#7C9CFF',
     potencia: [
       P('slam', 4, 5, 60, { alts: [P('slamCuerda', 4, 8, 60)] }),
       P('pechoPared', 4, 5, 60, { alts: [P('flexExpl', 3, 5, 90)] }),
       P('flexExpl', 3, 5, 90, { alts: [P('flexPalmada', 3, 5, 90), P('flexRapidas', 3, 8, 90)] }),
     ],
     fuerza: [
-      P('dominadas', 4, 5, 120, { alts: [P('domAsist', 4, 6, 120), P('jalon', 4, 8, 120)] }),
-      P('remoInv', 3, 8, 90, { alts: [P('remoMano', 3, 10, 90, { lado: 'brazo' }), P('remoPolea', 3, 10, 90)] }),
-      P('pullover', 3, 10, 60, { alts: [P('pulloverPolea', 3, 12, 60)] }),
+      P('jalon', 4, 8, 120, { alts: [P('domAsist', 4, 6, 120), P('dominadas', 4, 5, 120)] }),
+      P('remoPolea', 3, 10, 90, { alts: [P('remoMaq', 3, 10, 90), P('remoInv', 3, 8, 90)] }),
+      P('pulloverPolea', 3, 12, 60, { alts: [P('pullover', 3, 10, 60)] }),
     ],
     core: [
-      P('rotExt', 2, 15, 30, { lado: 'brazo', alts: [P('rotExtManc', 2, 12, 30, { lado: 'brazo' })] }),
+      P('rotExtPolea', 2, 15, 30, { lado: 'brazo', alts: [P('rotExt', 2, 15, 30, { lado: 'brazo' }), P('rotExtManc', 2, 12, 30, { lado: 'brazo' })] }),
       P('facepull', 3, 12, 45, { alts: [P('ytwInclinado', 2, 8, 45)] }),
       T('hollow', 3, [20, 30], 45, { alts: [T('hollowRod', 3, 30, 45)] }),
     ],
   },
-  C: { n: 'Potencia total', sub: 'Virajes y sprint', c: '#1DE9B6',
+  C: { n: 'Potencia total', sub: 'Virajes y sprint · día sin máquinas', c: '#1DE9B6',
     potencia: [
       P('squatJump', 4, 4, 90, { alts: [P('cajonSentado', 4, 3, 90)] }),
       P('patinador', 3, 4, 60, { lado: 'lado', alts: [P('pasosBanda', 3, 12, 60, { lado: 'lado' })] }),
@@ -621,8 +613,8 @@ export const FASES = {
   antes:      { n: 'Antes del plan', c: '#8FB3D9', txt: 'El plan todavía no arranca. Mientras, puedes hacer la movilidad corta.' },
 };
 
-// Ejercicios técnicos que se revisan sí o sí la primera semana
-export const REVISAR = ['cajon', 'longitud', 'goblet', 'rdl', 'bulgara', 'dominadas', 'copen', 'slam', 'pechoPared', 'rotacional', 'pressMil'];
+// Ejercicios en los que conviene que alguien te vea la técnica la primera vez (solo sugerencia)
+export const SUGERIR = ['cajon', 'longitud', 'rdl', 'bulgara', 'copen', 'slam', 'rotacional', 'pressMil'];
 
 // ── Guía ─────────────────────────────────────────────────────
 export const REGLAS_PARAR = [

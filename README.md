@@ -11,10 +11,12 @@ sw.js               caché para usarla sin internet
 css/styles.css      todo el diseño (tema acuático)
 icons/              ícono propio (SVG + PNG 192/512 + maskable)
 js/data.js          ← EL PLAN: ejercicios, sesiones A/B/C, rutinas, Plan B, fases, pesos
+js/poses.js         ← LAS ANIMACIONES: poses clave de cada ejercicio ("Ver cómo se hace")
+js/anim.js          motor de animación de la figura en SVG
 js/plan.js          periodización hacia atrás desde la competencia, qué toca cada día, mover sesión
 js/pesos.js         peso inicial, topes, escalones, kg/lb, calculadora de discos
-js/hoy.js           pantalla Hoy (cuenta regresiva, fases, semana, Plan B)
-js/sesion.js        sesión por bloques, chequeo previo, pedir ayuda, RPE, llegada a la pared
+js/hoy.js           pantalla Hoy con los ejercicios del día (estilo Mi Rutina), Ver otro día, Plan B
+js/sesion.js        tarjetas de ejercicio, series, descansos, cambiar ejercicio, chequeo, RPE
 js/guia.js · js/ajustes.js
 js/timer.js         temporizadores de descanso (ola) y de trabajo
 js/cuerpo.js        mapa del cuerpo en SVG
@@ -24,7 +26,7 @@ js/util.js          sonido, vibración, confeti, burbujas, hojas, íconos
 
 ## Cambiar el plan
 
-Todo está en `js/data.js`. Después de editar cualquier archivo, sube `VERSION` en `sw.js` (por ejemplo, `fuerza-en-seco-v2`) para que el teléfono descargue lo nuevo. El teléfono toma la versión nueva la segunda vez que abre la app.
+Sesiones A y B con máquinas; C es el día sin máquinas (mancuernas, balón y peso corporal). Todo está en `js/data.js`; las animaciones, en `js/poses.js`. Después de editar cualquier archivo, sube `VERSION` en `sw.js` (por ejemplo, `fuerza-en-seco-v2`) para que el teléfono descargue lo nuevo. El teléfono toma la versión nueva la segunda vez que abre la app.
 
 ## Probar en la PC
 

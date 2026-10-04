@@ -1,6 +1,6 @@
 // Lógica del plan: fases contadas hacia atrás desde la competencia, qué toca cada día,
 // mover sesiones y cómo se ajustan las series según la fase, el cansancio y el dolor.
-import { EJ, SESIONES, RUTINAS, ACTIVACION, FASES, BLOQUES, REVISAR } from './data.js';
+import { EJ, SESIONES, RUTINAS, ACTIVACION, FASES, BLOQUES } from './data.js';
 import { S, C, leerDia } from './store.js';
 import { SEMANA, sumar, lunesDe, diasEntre, diaDe } from './fechas.js';
 
@@ -151,8 +151,10 @@ function resolver(orig, slot, f) {
 
 const menos = (s, n) => Math.max(1, s + n);
 
-export function sesionGym(f, { ligera = false, dolor = [] } = {}) {
-  const d = deFecha(f);
+export function sesionGym(f, { ligera = false, dolor = [], letra = null } = {}) {
+  const cal = deFecha(f);
+  // Si se eligió otra sesión a mano, se arma esa (y no la versión corta de otro día)
+  const d = letra && letra !== cal.letra ? { ...cal, letra, corta: false } : cal;
   const ses = SESIONES[d.letra];
   const fase = FASES[d.fase] || FASES.construir;
   const bloques = [];
@@ -213,7 +215,7 @@ export function sesionRutina(clave, f) {
 }
 
 export function sesionDe(clave, f, opc) {
-  return 'ABC'.includes(clave) && clave.length === 1 ? sesionGym(f, opc) : sesionRutina(clave, f);
+  return 'ABC'.includes(clave) && clave.length === 1 ? sesionGym(f, { ...opc, letra: clave }) : sesionRutina(clave, f);
 }
 
 // Duración estimada en minutos
@@ -230,12 +232,10 @@ export function duracion(bloques) {
 }
 
 // ── Seguimiento ──────────────────────────────────────────────
-export const pendientesRevision = () => REVISAR.filter(e => !S().revisado[e]);
-
 // Días de gimnasio pasados que no se hicieron ni se salvaron
 export function sesionPerdida(f) {
   const d = deFecha(f), l = leerDia(f);
-  return d.tipo === 'gym' && !l.completa && !l.salvado && !l.falto;
+  return d.tipo === 'gym' && !l.completa && !l.salvado && !l.recuperada && !l.falto;
 }
 
 // Racha: sesiones seguidas hechas o salvadas con el Plan B
@@ -245,7 +245,7 @@ export function racha(hoyF) {
   for (let f = desde, i = 0; i < 120 && f >= C().inicio; f = sumar(f, -1), i++) {
     const d = deFecha(f), l = leerDia(f);
     if (d.tipo !== 'gym' || (l.falto && l.motivo === 'enfermo')) continue; // enfermarse no rompe la racha
-    if (l.completa || l.salvado) n++; else break;
+    if (l.completa || l.salvado || l.recuperada) n++; else break;
   }
   return n;
 }
