@@ -17,6 +17,10 @@ js/plan.js          periodización hacia atrás desde la competencia, qué toca 
 js/pesos.js         peso inicial, topes, escalones, kg/lb, calculadora de discos
 js/hoy.js           pantalla Hoy con los ejercicios del día (estilo Mi Rutina), Ver otro día, Plan B
 js/sesion.js        tarjetas de ejercicio, series, descansos, cambiar ejercicio, chequeo, RPE
+js/marcas.js        Mis marcas: tiempos de natación por prueba y piscina, metas, gráfica
+js/progreso.js      pruebas físicas, RPE por sesión, calendario y pesos de trabajo
+js/entrenador.js    resumen para el entrenador de natación (plan, por qué de cada ejercicio, progreso)
+js/graficas.js      gráficas en SVG
 js/guia.js · js/ajustes.js
 js/timer.js         temporizadores de descanso (ola) y de trabajo
 js/cuerpo.js        mapa del cuerpo en SVG

@@ -5,10 +5,13 @@ import { hoy } from './fechas.js';
 import { renderHoy } from './hoy.js';
 import { renderGuia } from './guia.js';
 import { renderAjustes, renderBienvenida } from './ajustes.js';
+import { renderMarcas } from './marcas.js';
+import { renderProgreso } from './progreso.js';
+import { renderEntrenador } from './entrenador.js';
 import { initTimer } from './timer.js';
 import './app-instalar.js';
 
-const TABS = [['hoy', 'Hoy'], ['guia', 'Guía'], ['ajustes', 'Ajustes']];
+const TABS = [['hoy', 'Hoy'], ['marcas', 'Marcas'], ['progreso', 'Progreso'], ['entrenador', 'Entrenador'], ['guia', 'Guía']];
 const vista = $('#vista');
 let ruta = '', fechaPintada = null;
 
@@ -27,6 +30,9 @@ function ir({ arriba = true } = {}) {
   $$tabs(v);
   vista.classList.remove('entra'); void vista.offsetWidth; vista.classList.add('entra');
   if (v === 'guia') renderGuia(vista, rest[0]);
+  else if (v === 'marcas') renderMarcas(vista, rest[0]);
+  else if (v === 'progreso') renderProgreso(vista);
+  else if (v === 'entrenador') renderEntrenador(vista);
   else if (v === 'ajustes') renderAjustes(vista);
   else if (v === 'bienvenida') renderBienvenida(vista);
   else { ruta = 'hoy'; renderHoy(vista); }

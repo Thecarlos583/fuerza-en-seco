@@ -1,4 +1,5 @@
 // Estado de la app guardado en localStorage. Nada sale del teléfono.
+import { MARCAS_INICIO } from './data.js';
 const KEY = 'fuerza-en-seco:v1';
 
 const base = () => ({
@@ -10,6 +11,9 @@ const base = () => ({
   pesos: {},     // ejercicio → { v, u, sube } peso de trabajo
   revisado: {},  // ejercicio → fecha en que le revisaron la técnica
   timer: null,   // descanso en curso
+  marcas: { ...MARCAS_INICIO, tiempos: [], metas: {} }, // tiempos de natación: { id, p, cs, f, tipo, nota, parcial }
+  pruebas: { inicial: {}, final: {} },                    // pruebas físicas
+  vistos: {},
 });
 
 const fusionar = d => ({ ...base(), ...d });

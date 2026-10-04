@@ -680,3 +680,22 @@ export const RPE = [
   [1, 'Nada'], [2, 'Muy suave'], [3, 'Suave'], [4, 'Cómodo'], [5, 'Algo de esfuerzo'],
   [6, 'Me sobraban 4'], [7, 'Me sobraban 3'], [8, 'Me sobraban 2'], [9, 'Me sobraba 1'], [10, 'Al máximo'],
 ];
+
+// ── Natación: pruebas individuales ───────────────────────────
+// [id del estilo, nombre, distancias]. El 100 combinado solo existe en piscina corta (25 m).
+export const ESTILOS = [
+  ['libre', 'Libre', [50, 100, 200, 400, 800, 1500]],
+  ['espalda', 'Espalda', [50, 100, 200]],
+  ['pecho', 'Pecho', [50, 100, 200]],
+  ['mariposa', 'Mariposa', [50, 100, 200]],
+  ['combinado', 'Combinado', [100, 200, 400]],
+];
+export const MARCAS_INICIO = { seguidas: ['50-pecho', '100-pecho', '50-libre'], principal: '100-pecho', comp: ['50-pecho', '100-pecho', '50-libre'] };
+
+// ── Pruebas físicas (semana 1 y semana de descarga) ──────────
+export const PRUEBAS_FIS = [
+  { k: 'salto', n: 'Salto de longitud', u: 'cm', paso: 1, ini: 200, para: 'Potencia de piernas: salidas y virajes.' },
+  { k: 'balon', n: 'Lanzamiento de balón por encima de la cabeza', u: 'm', paso: 0.1, ini: 6, para: 'Potencia del tirón: brazada y streamline.' },
+  { k: 'dominadas', n: 'Dominadas máximas (o asistidas)', u: 'reps', paso: 1, ini: 3, para: 'Fuerza del tirón principal del nado.' },
+  { k: 'plancha', n: 'Plancha frontal', u: 's', paso: 5, ini: 60, para: 'Core para mantener el cuerpo alineado.' },
+];

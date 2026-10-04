@@ -7,6 +7,9 @@ import { deFecha, faseDe, semanaDe, tramos, opcionMover, sesionPerdida, racha, d
 import { progreso, leerRegistro, htmlSesion, activar, sesionDelDia, chequeo, hojaParar } from './sesion.js';
 import { $, ico, esc, abrirHoja, cerrarHoja, aviso, vibrar, semilla, pantallaEncendida } from './util.js';
 import { instalable, instalar } from './app-instalar.js';
+import { tarjetaPrincipal } from './marcas.js';
+import { momentoPrueba } from './progreso.js';
+import { compFin } from './plan.js';
 
 const FRASES = [
   'Cada salto de hoy es un metro menos de pared a pared.',
@@ -47,15 +50,19 @@ export function renderHoy(v) {
       <button class="btn-chip" data-h="otro-dia">${ico('cal')}Ver otro día</button>
       ${t.manual ? `<button class="btn-chip acento" data-h="volver">${ico('cambiar')}Volver a lo de hoy</button>` : ''}
       <button class="btn-chip" data-h="parar">${ico('alto')}Cuándo parar</button>
+      <a class="btn-chip solo-ico" href="#ajustes" aria-label="Ajustes">${ico('ajustes')}</a>
     </div>
     ${instalable() ? `<button class="instalar" data-h="instalar">${ico('descargar')}<span><b>Instalar app</b><small>Para tenerla en la pantalla y usarla sin internet</small></span></button>` : ''}
     ${sugerencia(f)}
     ${avisoAyer(f, t)}
     ${faltasSemana(f) >= 2 ? `<div class="nota">${ico('corazon')}<span>Semana pesada. Prioriza dormir bien${dc > 0 ? `: faltan ${dc} días para ${esc(c.comp.corto || c.comp.nombre)}` : ''}.</span></div>` : ''}
     ${tarjetaFaseEspecial(f, t.d)}
+    ${semanaPruebas(f)}
+    ${despuesComp(f)}
     ${hero(f, t, l)}
     ${t.clave ? `<div id="ses">${htmlSesion(t.clave, f, t.para)}</div>` : manana(f)}
     ${t.d.tipo === 'competencia' && t.clave === 'competencia' ? noche(f) : ''}
+    ${tarjetaPrincipal()}
     ${semana(f)}
     ${lineaTiempo(f)}
     ${stats(f)}
@@ -118,6 +125,21 @@ function tarjetaFaseEspecial(f, d) {
     <p class="peq">Esta semana suma más movilidad: la movilidad corta todos los días.</p>
     <button class="btn-sec" data-h="fase-ok" data-k="${k}">Entendido</button>
   </section>`;
+}
+
+// Semana 1 y semana de descarga: toca hacer las pruebas físicas
+function semanaPruebas(f) {
+  const fa = faseDe(f), mom = momentoPrueba(f);
+  const toca = (fa === 'tecnica' && semanaDe(f).n === 1) || fa === 'descarga';
+  if (!toca || S().pruebas[mom]?.f) return '';
+  return `<a class="card aviso-card" href="#progreso">${ico('salto')}<span><b>Semana de pruebas físicas ${mom === 'inicial' ? 'iniciales' : 'finales'}</b><small>Salto de longitud, lanzamiento de balón, dominadas y plancha. Anótalas en Progreso.</small></span>${ico('abajo', 'rev-chev')}</a>`;
+}
+
+// Durante y justo después de la competencia: anotar tiempos
+function despuesComp(f) {
+  const fa = faseDe(f);
+  if (fa !== 'competencia' && !(fa === 'despues' && diasEntre(compFin(), f) <= 5)) return '';
+  return `<a class="card aviso-card" href="#marcas">${ico('trofeo')}<span><b>Anota tus tiempos de ${esc(C().comp.corto || C().comp.nombre)}</b><small>Se guardan directo en Mis marcas.</small></span>${ico('abajo', 'rev-chev')}</a>`;
 }
 
 // ── Hero del día ─────────────────────────────────────────────

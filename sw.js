@@ -1,10 +1,10 @@
 // Service worker: guarda la app completa la primera vez para que funcione en modo avión.
 // Al cambiar cualquier archivo, sube VERSION para que el teléfono descargue lo nuevo.
-const VERSION = 'fuerza-en-seco-v6';
+const VERSION = 'fuerza-en-seco-v7';
 const ARCHIVOS = [
   './', './index.html', './manifest.json', './css/styles.css',
   './js/app.js', './js/app-instalar.js', './js/data.js', './js/store.js', './js/fechas.js', './js/plan.js', './js/pesos.js',
-  './js/util.js', './js/anim.js', './js/poses.js', './js/timer.js', './js/cuerpo.js', './js/sesion.js', './js/hoy.js', './js/guia.js', './js/ajustes.js',
+  './js/util.js', './js/anim.js', './js/poses.js', './js/timer.js', './js/cuerpo.js', './js/sesion.js', './js/hoy.js', './js/guia.js', './js/ajustes.js', './js/marcas.js', './js/progreso.js', './js/entrenador.js', './js/graficas.js',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
 ];
 
