@@ -205,11 +205,18 @@ function noche(f) {
 }
 
 // ── Semana ───────────────────────────────────────────────────
+// Los domingos (y antes de que arranque el plan) se muestra la semana que viene
+function lunesVisible(f) {
+  if (f < C().inicio) return lunesDe(C().inicio);
+  return diaDe(f) === 'dom' ? lunesDe(sumar(f, 1)) : lunesDe(f);
+}
+
 function semana(f) {
-  const lun = lunesDe(f);
+  const lun = lunesVisible(f);
+  const proxima = lun > f;
   const dias = Array.from({ length: 7 }, (_, i) => sumar(lun, i));
   return `<section class="card">
-    <div class="card-cab"><h3>Esta semana</h3><span class="cont">${fechaCorta(lun)} – ${fechaCorta(sumar(lun, 6))}</span></div>
+    <div class="card-cab"><h3>${proxima ? 'Semana que viene' : 'Esta semana'}</h3><span class="cont">${fechaCorta(lun)} – ${fechaCorta(sumar(lun, 6))}</span></div>
     <div class="semana">${dias.map(x => {
       const d = deFecha(x), l = leerDia(x);
       const hecho = l.completa || l.salvado || l.recuperada || leerRegistro(x, 'movilidad')?.completa || leerRegistro(x, 'precomp')?.completa;
@@ -274,7 +281,7 @@ function clic(ev, f, t) {
 
 // ── Ver otro día (como en Mi Rutina) ─────────────────────────
 function hojaDia(f, t) {
-  const lun = lunesDe(f);
+  const lun = lunesVisible(f);
   const dias = Array.from({ length: 7 }, (_, i) => sumar(lun, i));
   const actual = t.clave;
   const op = (clave, n, sub, extra = '') => `<button class="dia-op ${clave === actual ? 'act' : ''}" data-c="${clave}"><span class="dia-n">${n}</span><span class="dia-t">${sub}</span>${extra}</button>`;
