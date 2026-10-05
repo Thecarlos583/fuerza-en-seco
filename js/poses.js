@@ -39,12 +39,12 @@ export const ANIM = {
       { n: 'Estírate completo en el aire', torso: 4, cadera: 6, rodilla: 6, punta: 30, hombro: 175, codo: 5, dy: 24, ms: 260 },
       { n: 'Cae suave', torso: 30, cadera: 70, rodilla: 75, hombro: 40, codo: 20, pausa: 450, ms: 600, punto: { zona: 'rodilla', txt: 'Cae suave, rodillas alineadas con los pies' } },
     ] },
-  scmpared: { vistas: ['frente'], x0: 120, brazosF: true, sigue: 'cadera', equipo: [{ tipo: 'muro', x: 148 }],
+  scmpared: { vistas: ['frente', 'lado'], x0: 120, brazosF: true, sigue: 'cadera', equipo: [{ tipo: 'muro', x: 148, vista: 'frente' }],
     poses: [
-      { n: 'De lado a la pared', hF: 10, hF2: 10, pausa: 400, ms: 300 },
-      { n: 'Baja rápido con los brazos abajo', torso: 30, cadera: 75, rodilla: 80, hF: 20, hF2: 20, ms: 200 },
-      { n: 'Salta y toca lo más alto que puedas', torso: 4, cadera: 4, rodilla: 2, punta: 40, hF: 30, hF2: 170, dy: 16, ms: 260, punto: { zona: 'manos', txt: 'Marca la altura y trata de llegar igual cada vez' } },
-      { n: 'Cae suave', torso: 28, cadera: 65, rodilla: 70, hF: 20, hF2: 30, pausa: 500, ms: 600, punto: { zona: 'rodilla', txt: 'Cae suave, rodillas alineadas' } },
+      { n: 'De lado a la pared', hombro: 0, codo: 10, hF: 10, hF2: 10, pausa: 400, ms: 300 },
+      { n: 'Baja rápido con los brazos abajo', torso: 30, cadera: 75, rodilla: 80, hombro: -50, codo: 10, hF: 20, hF2: 20, ms: 200 },
+      { n: 'Salta y toca lo más alto que puedas', torso: 4, cadera: 4, rodilla: 2, punta: 40, hombro: 175, codo: 0, hombro2: 20, hF: 30, hF2: 170, dy: 16, ms: 260, punto: { zona: 'manos', txt: 'Marca la altura y trata de llegar igual cada vez' } },
+      { n: 'Cae suave', torso: 28, cadera: 65, rodilla: 70, hombro: 40, codo: 20, hF: 20, hF2: 30, pausa: 500, ms: 600, punto: { zona: 'rodilla', txt: 'Cae suave, rodillas alineadas' } },
     ] },
   longitud: { vistas: ['lado', 'frente'], x0: 30, sigue: 'cadera',
     poses: [
@@ -90,7 +90,7 @@ export const ANIM = {
       { n: 'Salta explosivo con los brazos arriba', torso: 4, cadera: 4, rodilla: 2, punta: 40, hombro: 160, codo: 10, dy: 32, ms: 300 },
       { n: 'Cae suave', torso: 28, cadera: 65, rodilla: 70, hombro: 40, codo: 20, pausa: 400, ms: 600, punto: { zona: 'rodilla', txt: 'Cae suave, rodillas alineadas' } },
     ] },
-  cajonSentado: { vistas: ['lado'], x0: 96, sigue: 'cadera', equipo: [{ tipo: 'banco', x: 28, ancho: 44, alto: 36 }, { tipo: 'cajon', x: 150, ancho: 44, alto: 30 }],
+  cajonSentado: { vistas: ['lado', 'frente'], x0: 96, sigue: 'cadera', equipo: [{ tipo: 'banco', x: 28, ancho: 44, alto: 36, vista: 'lado' }, { tipo: 'rect', x: 92, y: 146, w: 56, h: 5, vista: 'frente' }, { tipo: 'cajon', x: 150, ancho: 44, alto: 30 }],
     poses: [
       { n: 'Sentado en el banco, frente al cajón', torso: 10, cadera: 90, rodilla: 90, hombro: 0, codo: 20, pausa: 600, ms: 300 },
       { n: 'Inclínate un poco con los brazos atrás', torso: 32, cadera: 100, rodilla: 86, hombro: -50, codo: 10, pausa: 100, ms: 220 },
@@ -281,14 +281,14 @@ export const ANIM = {
       { n: 'Lleva el pecho a la barra', giro: -58, punta: -50, hombro: 40, codo: 105, pausa: 300, ms: 900, punto: { zona: 'cadera', txt: 'Cuerpo recto, la cadera no cae' } },
     ] },
   // ── Sesión C ───────────────────────────────────────────────
-  patinador: { vistas: ['frente'], x0: 120, sigue: 'cadera',
+  patinador: { vistas: ['frente', 'lado'], x0: 120, sigue: 'cadera',
     poses: [
       { n: 'Párate en una pierna', apoyo: 1, lat: -30, torso: 20, cadera: 40, rodilla: 45, cadera2: -10, rodilla2: 95, ancho: 6, hombro: 30, codo: 30, hombro2: -30, pausa: 500, ms: 260 },
       { n: 'Salta de lado', apoyo: 1, lat: 0, torso: 12, cadera: 15, rodilla: 20, cadera2: 15, rodilla2: 25, ancho: 12, hombro: 0, codo: 30, dy: 18, ms: 260 },
       { n: 'Cae en la otra pierna y quédate quieto 1 s', apoyo: 2, lat: 30, torso: 20, cadera: -10, rodilla: 95, cadera2: 40, rodilla2: 45, ancho: 6, hombro: -30, codo: 30, hombro2: 30, pausa: 800, ms: 260, punto: { zona: 'rodilla', txt: 'Rodilla alineada al caer, estable 1 s' } },
       { n: 'Salta de vuelta', apoyo: 2, lat: 0, torso: 12, cadera: 15, rodilla: 25, cadera2: 15, rodilla2: 20, ancho: 12, hombro: 0, codo: 30, dy: 18, ms: 260 },
     ] },
-  pasosBanda: { vistas: ['frente'], x0: 120, sigue: 'cadera', equipo: [{ tipo: 'bandaRod' }],
+  pasosBanda: { vistas: ['frente', 'lado'], x0: 120, sigue: 'cadera', equipo: [{ tipo: 'bandaRod' }],
     poses: [
       { n: 'Banda arriba de las rodillas, media sentadilla', torso: 20, cadera: 50, rodilla: 55, hombro: 30, codo: 90, lat: 0, ancho: 16, pausa: 500, ms: 450 },
       { n: 'Paso largo hacia un lado', torso: 20, cadera: 50, rodilla: 55, hombro: 30, codo: 90, lat: 6, ancho: 22, pausa: 150, ms: 450 },
@@ -400,12 +400,12 @@ export const ANIM = {
     ] },
 
   // ── Plan B en casa ─────────────────────────────────────────
-  cardio: { vistas: ['lado'], x0: 120,
+  cardio: { vistas: ['lado', 'frente'], x0: 120,
     poses: [
       { n: 'Trota con una pierna adelante', apoyo: 1, torso: 10, cadera: 35, rodilla: 25, cadera2: -20, rodilla2: 75, punta2: 30, hombro: -30, codo: 90, hombro2: 35, codo2: 90, ms: 260 },
       { n: 'Cambia de pierna', apoyo: 2, torso: 10, cadera: -20, rodilla: 75, punta: 30, cadera2: 35, rodilla2: 25, hombro: 35, codo: 90, hombro2: -30, codo2: 90, ms: 260 },
     ] },
-  cuerda: { vistas: ['frente'], x0: 120, ancho: 8, brazosF: true, equipo: [{ tipo: 'cuerda' }],
+  cuerda: { vistas: ['frente', 'lado'], x0: 120, ancho: 8, brazosF: true, equipo: [{ tipo: 'cuerda' }],
     poses: [
       { n: 'La cuerda pasa bajo los pies: salto suave', rodilla: 4, punta: 40, hF: 25, cF: 15, cu: 0, dy: 8, ms: 260, punto: { zona: 'pies', txt: 'Saltos bajitos, en la punta de los pies' } },
       { n: 'Cae en puntas mientras la cuerda pasa por arriba', rodilla: 10, punta: 18, hF: 25, cF: 15, cu: 180, ms: 260 },
@@ -451,7 +451,7 @@ export const ANIM = {
       { n: 'Piernas estiradas', torso: -12, cadera: 92, rodilla: 8, punta: 0, hombro: 25, codo: 40, pausa: 300, ms: 450 },
       { n: 'Lleva los talones abajo y atrás, explosivo', torso: -12, cadera: 92, rodilla: 105, punta: 0, hombro: 25, codo: 40, pausa: 200, ms: 1500, punto: { zona: 'cadera', txt: 'Sube rápido, baja lento; la cadera no se despega' } },
     ] },
-  talones: { vistas: ['lado'], x0: 132, puntas: true, sigue: 'pies', equipo: [{ tipo: 'rect', x: 112, y: 168, w: 26, h: 14, r: 2 }, { tipo: 'rodillo', en: 'hombro', dy: -6 }],
+  talones: { vistas: ['lado', 'frente'], x0: 132, puntas: true, sigue: 'pies', equipo: [{ tipo: 'rect', x: 112, y: 168, w: 26, h: 14, r: 2 }, { tipo: 'rodillo', en: 'hombro', dy: -6 }],
     poses: [
       { n: 'Puntas en el borde, talones abajo', punta: -18, hombro: 160, codo: 140, dy: 14, pausa: 400, ms: 450, punto: { zona: 'pies', txt: 'Baja hasta sentir el estiramiento' } },
       { n: 'Sube explosivo en puntas, lo más alto que puedas', punta: 40, hombro: 160, codo: 140, dy: 14, pausa: 500, ms: 1300 },

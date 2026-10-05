@@ -1,50 +1,43 @@
 // Pesos guiados: peso inicial, tope del ciclo, escalones, unidades y calculadora de discos.
 // Regla de oro: es mejor quedarse corto que pasarse.
+// Unidades fijas por equipo: mancuernas, balón, máquinas y poleas en kg; barras y sus discos en lb.
+// Cada peso se guarda en la unidad de su equipo; el switch kg ⇄ lb solo cambia cómo se muestra.
 import { PESOS, FASES } from './data.js';
 import { S, C, leerDia } from './store.js';
 import { diasEntre } from './fechas.js';
 import { faseDe, semanaDe } from './plan.js';
 
-const MANC = { kg: [1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 22.5, 25, 27.5, 30], lb: [2.5, 5, 8, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30, 35, 40, 45, 50, 55, 60] };
-const DISCOS = { kg: [20, 10, 5, 2.5, 1.25], lb: [45, 25, 10, 5, 2.5] };
+const MANC = [1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 22.5, 25, 27.5, 30];
+const DISCOS = [45, 25, 10, 5, 2.5]; // lb
 const rango = (a, b, p) => { const o = []; for (let v = a; v <= b + 1e-9; v += p) o.push(Math.round(v * 100) / 100); return o; };
 export const KG_LB = 2.20462;
 
 export const info = e => PESOS[e] || null;
 export const conPeso = e => ['manc', 'mano', 'barra', 'maquina', 'balon'].includes(PESOS[e]?.eq);
 
-export function unidad(e) {
-  const eq = PESOS[e]?.eq;
-  if (eq === 'balon') return 'kg';
-  if (eq === 'manc' || eq === 'mano') return C().uManc || 'kg';
-  return C().uDisco || 'kg';
+// Unidad del equipo (fija) y unidad en que Juan quiere ver los pesos (switch kg ⇄ lb)
+export const unidad = e => (PESOS[e]?.eq === 'barra' ? 'lb' : 'kg');
+export const verEn = () => C()?.verEn === 'lb' ? 'lb' : 'kg';
+
+// Barra olímpica 45 lb; barra de la Smith 20 lb; barra Z según el gimnasio (20 lb por defecto, se cambia en Ajustes)
+export function barra(e) {
+  if (PESOS[e]?.barra === 'oli') return 45;
+  if (PESOS[e]?.barra === 'smith') return 20;
+  const z = Number(C()?.barraZ);
+  return z > 0 ? z : 20;
 }
 
-export function barra(e, u = unidad(e)) {
-  const t = PESOS[e]?.barra;
-  if (t === 'oli') return u === 'kg' ? 20 : 45;
-  const z = C().barraZ || [10, 20];
-  return u === 'kg' ? z[0] : z[1];
-}
-
-// Pesos que existen de verdad en un gimnasio para ese equipo
-export function lista(e, u = unidad(e)) {
+// Pesos que existen de verdad en un gimnasio para ese equipo (en su unidad)
+export function lista(e) {
   const eq = PESOS[e].eq;
-  if (eq === 'manc' || eq === 'mano') return MANC[u];
+  if (eq === 'manc' || eq === 'mano') return MANC;
   if (eq === 'balon') return [1, 2, 3, 4, 5, 6, 8];
-  if (eq === 'barra') return rango(barra(e, u), barra(e, u) + (u === 'kg' ? 80 : 180), u === 'kg' ? 2.5 : 5);
-  return u === 'kg' ? rango(2.5, 120, 2.5) : rango(5, 260, 5);
+  if (eq === 'barra') return rango(barra(e), barra(e) + 180, 5);
+  return rango(2.5, 120, 2.5);
 }
 
 const abajo = (l, v) => l.filter(x => x <= v + 1e-9).pop() ?? 0;
 const cerca = (l, v) => l.reduce((a, x) => (Math.abs(x - v) < Math.abs(a - v) ? x : a), l[0]);
-
-// Convierte a la otra unidad y lo lleva al peso real más cercano
-export function otra(e, v, u = unidad(e)) {
-  if (!v) return 0;
-  const u2 = u === 'kg' ? 'lb' : 'kg';
-  return cerca(lista(e, u2), u === 'kg' ? v * KG_LB : v / KG_LB);
-}
 
 const idx = u => (u === 'kg' ? 0 : 1);
 const liviano = () => { const p = C().pesoCorp; return p && (p.u === 'kg' ? p.v : p.v / KG_LB) < 55; };
@@ -53,32 +46,35 @@ export function tope(e, f) {
   const p = PESOS[e], u = unidad(e);
   if (!conPeso(e)) return null;
   if (p.desde && f && semanaDe(f).n < p.desde) return 0;
-  let t = p.topeExtra ? barra(e, u) + p.topeExtra[idx(u)] : p.tope[idx(u)];
-  if (liviano()) t = abajo(lista(e, u), t * 0.85);
+  let t = p.topeExtra ? barra(e) + p.topeExtra[idx(u)] : p.tope[idx(u)];
+  if (liviano()) t = abajo(lista(e), t * 0.85);
   return t;
 }
 
 export function inicial(e) {
   const p = PESOS[e], u = unidad(e);
   if (!conPeso(e)) return null;
-  if (p.ini === 'barra') return barra(e, u);
+  if (p.ini === 'barra') return barra(e);
   if (!p.ini) return 0;
   return Math.min(p.ini[idx(u)], tope(e));
 }
 
-// Peso de trabajo guardado (convertido si cambió la unidad)
+// Lleva un peso guardado en otra unidad (versiones viejas de la app) a la de su equipo
+export function aSuUnidad(e, v, u) {
+  if (!v || !u || u === unidad(e)) return v;
+  return cerca(lista(e), unidad(e) === 'kg' ? v / KG_LB : v * KG_LB);
+}
+
+// Peso de trabajo guardado
 export function trabajo(e) {
   const g = S().pesos[e];
-  if (!g) return null;
-  const u = unidad(e);
-  if (g.u === u) return g.v;
-  return cerca(lista(e, u), u === 'kg' ? g.v / KG_LB : g.v * KG_LB);
+  return g ? aSuUnidad(e, g.v, g.u) : null;
 }
 
 export function paso(e, v, dir) {
   const l = lista(e);
   if (dir > 0) {
-    const sube = unidad(e) === 'kg' ? (PESOS[e].eq === 'balon' ? 1 : 2) : 5;
+    const sube = unidad(e) === 'kg' ? (PESOS[e].eq === 'balon' ? 1 : 2) : 5; // barras: 5 lb (un disco de 2,5 por lado)
     const n = abajo(l, v + sube);
     return n > v ? n : (l.find(x => x > v) ?? v);
   }
@@ -122,14 +118,33 @@ export function subida(e, f) {
 
 // ── Texto ────────────────────────────────────────────────────
 const num = v => String(v).replace('.', ',');
+
+// Un peso (guardado en la unidad u) tal como se muestra con el switch: { n, u, aprox }
+// Si hay que convertir, se redondea a medio kilo o media libra y se marca con "≈".
+export function mostrar(v, u) {
+  const ver = verEn();
+  if (!v || u === ver) return { n: num(v || 0), u, aprox: false };
+  const x = u === 'kg' ? v * KG_LB : v / KG_LB;
+  return { n: num(Math.round(x * 2) / 2), u: ver, aprox: true };
+}
+export function cifra(e, v) {
+  const m = mostrar(v, unidad(e));
+  return `${m.aprox ? '≈ ' : ''}${m.n} ${m.u}`;
+}
+
 export function texto(e, v, { mano = true } = {}) {
   const p = PESOS[e];
   if (!v) return 'Peso corporal';
-  const u = unidad(e);
-  if (p.eq === 'balon') return `Balón de ${num(v)} kg`;
-  const o = otra(e, v, u);
-  const ot = u === 'kg' ? 'lb' : 'kg';
-  return `${num(v)} ${u}${o ? ` (${num(o)} ${ot})` : ''}${mano && p.eq === 'mano' ? ' en cada mano' : ''}`;
+  const m = mostrar(v, unidad(e));
+  const base = m.aprox ? `≈ ${m.n} ${m.u} (${num(v)} ${unidad(e)})` : `${m.n} ${m.u}`;
+  if (p.eq === 'balon') return `Balón de ${base}`;
+  return `${base}${mano && p.eq === 'mano' ? ' en cada mano' : ''}`;
+}
+
+// Switch kg ⇄ lb (attr: el data-* que usa la pantalla para sus toques, p. ej. 'data-a')
+export function switchUnidades(attr) {
+  const v = verEn();
+  return `<div class="unid" role="group" aria-label="Ver los pesos en"><span>Ver pesos en</span>${['kg', 'lb'].map(u => `<button type="button" ${attr}="unid" data-u="${u}" aria-pressed="${u === v}">${u}</button>`).join('')}</div>`;
 }
 
 // Etiquetas "Empieza con" y "Tope" para ejercicios sin peso (cajón, banda, corporal)
@@ -142,11 +157,12 @@ export function textoFijo(e) {
   return null;
 }
 
-// ── Calculadora de discos ────────────────────────────────────
+// ── Calculadora de discos (siempre en libras: así son los discos del gimnasio) ──
 export function discos(e, total) {
-  const u = unidad(e), b = barra(e, u);
+  const b = barra(e);
   let lado = Math.max(0, (total - b) / 2);
   const out = [];
-  for (const d of DISCOS[u]) while (lado >= d - 1e-9) { out.push(d); lado = Math.round((lado - d) * 100) / 100; }
-  return { barra: b, u, lado: out, tipo: PESOS[e].barra === 'oli' ? 'Barra olímpica' : 'Barra Z' };
+  for (const d of DISCOS) while (lado >= d - 1e-9) { out.push(d); lado = Math.round((lado - d) * 100) / 100; }
+  const tipo = PESOS[e].barra === 'oli' ? 'Barra olímpica' : PESOS[e].barra === 'smith' ? 'Barra de la Smith' : 'Barra Z';
+  return { barra: b, u: 'lb', lado: out, tipo };
 }

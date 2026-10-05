@@ -158,8 +158,17 @@ function equipoMovil(def, f, p, vista) {
       // La cuerda va de mano a mano; su punto medio pasa bajo los pies (cu = 0) o sobre la cabeza (cu = 180)
       const [a, b] = vista === 'frente' && f.fm ? f.fm : [f.b1.mano, f.b2.mano];
       const m = medio(a, b), c = Math.cos(rad(p.cu));
-      const ctrl = [m[0] + (vista === 'frente' ? 0 : Math.sin(rad(p.cu)) * 70), m[1] + (c > 0 ? c * 2 * (SUELO + 1 - m[1]) : c * 2 * (m[1] - f.cab[1] + 16))];
-      s += `<path class="cuerda" d="M${f1(a[0])} ${f1(a[1])} Q${f1(ctrl[0])} ${f1(ctrl[1])} ${f1(b[0])} ${f1(b[1])}"/>`;
+      if (vista === 'frente') {
+        const ctrl = [m[0], m[1] + (c > 0 ? c * 2 * (SUELO + 1 - m[1]) : c * 2 * (m[1] - f.cab[1] + 16))];
+        s += `<path class="cuerda" d="M${f1(a[0])} ${f1(a[1])} Q${f1(ctrl[0])} ${f1(ctrl[1])} ${f1(b[0])} ${f1(b[1])}"/>`;
+      } else {
+        // De lado la cuerda es un lazo que gira alrededor del cuerpo: punto lejano y vuelta a la mano
+        const r = c > 0 ? SUELO + 1 - f.cad[1] : f.cad[1] - f.cab[1] + 14;
+        const lejos = [f.cad[0] + Math.sin(rad(p.cu)) * 34, f.cad[1] + c * r];
+        const d = [lejos[0] - m[0], lejos[1] - m[1]], l = Math.hypot(...d) || 1, n = [-d[1] / l * 14, d[0] / l * 14];
+        const c1 = [m[0] + d[0] / 2 + n[0], m[1] + d[1] / 2 + n[1]], c2 = [m[0] + d[0] / 2 - n[0], m[1] + d[1] / 2 - n[1]];
+        s += `<path class="cuerda" d="M${f1(m[0])} ${f1(m[1])} Q${f1(c1[0])} ${f1(c1[1])} ${f1(lejos[0])} ${f1(lejos[1])} Q${f1(c2[0])} ${f1(c2[1])} ${f1(m[0])} ${f1(m[1])}"/>`;
+      }
     }
     if (q.tipo === 'pesoCadera') s += disco([f.cad[0] + 2, f.cad[1] - 8], 7);
     if (q.tipo === 'balonPiso' && def.mano === 'balon' && p.bal <= 0.5) s += `<circle class="balon" cx="${q.x}" cy="${SUELO - 8}" r="8"/>`;

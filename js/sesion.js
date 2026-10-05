@@ -105,6 +105,7 @@ const minus = s => s ? s.charAt(0).toLowerCase() + s.slice(1).replace(/\.$/, '')
 function detalles(it) {
   const e = EJ[it.e];
   return `
+      ${W.conPeso(it.e) && W.tope(it.e, ctx.f) !== 0 ? W.switchUnidades('data-a') : ''}
       ${tieneAnimacion(it.e) ? `<button class="btn-sec ver" data-a="ver">${ico('play')}Ver cómo se hace</button>` : ''}
       <h4>Para qué sirve en el agua</h4><p class="txt2">${esc(e.para)}</p>
       <h4>Cómo hacerlo</h4>
@@ -132,16 +133,17 @@ function bloquePeso(it) {
   const sube = !primera && W.subida(e, f);
   const ult = W.trabajo(e);
   const calentar = W.paso(e, v / 2 + 0.01, -1) || W.lista(e)[0];
+  const m = W.mostrar(v, W.unidad(e));
   return `
     <div class="peso">
       <button class="peso-btn" data-a="peso" data-d="-1" aria-label="Menos peso">${ico('menos')}</button>
-      <div class="peso-val ${v >= tope ? 'en-tope' : ''}"><b>${v ? num(v) : '0'}</b><span>${v ? W.unidad(e) : 'corporal'}${p.eq === 'mano' && v ? ' c/mano' : ''}</span>${v >= tope ? ico('candado') : ''}</div>
+      <div class="peso-val ${v >= tope ? 'en-tope' : ''}"><b>${v ? `${m.aprox ? '≈' : ''}${m.n}` : '0'}</b><span>${v ? m.u : 'corporal'}${p.eq === 'mano' && v ? ' c/mano' : ''}</span>${v >= tope ? ico('candado') : ''}</div>
       <button class="peso-btn" data-a="peso" data-d="1" aria-label="Más peso">${ico('mas')}</button>
     </div>
     <p class="ultima">${primera
       ? `Primera vez: empieza con <b>${W.texto(e, v)}</b>. Calienta antes con ${W.texto(e, calentar, { mano: false })} × 8.`
       : `${ult ? `Tu peso de trabajo: <b>${W.texto(e, ult)}</b>` : W.texto(e, v)}`}
-      <span class="tope-mini">${ico('candado')}tope ${num(tope)} ${W.unidad(e)}</span></p>
+      <span class="tope-mini">${ico('candado')}tope ${W.cifra(e, tope)}</span></p>
     ${p.nota && primera ? `<p class="ultima">${esc(p.nota)}</p>` : ''}
     ${sube ? `<button class="sube" data-a="subir" data-v="${sube}">${ico('trofeo')}<span>La sesión pasada salió limpia: hoy puedes probar <b>${W.texto(e, sube)}</b></span></button>` : ''}
     ${p.eq === 'barra' && v ? discosSVG(e, v) : ''}`;
@@ -149,8 +151,8 @@ function bloquePeso(it) {
 
 function discosSVG(e, total) {
   const d = W.discos(e, total);
-  const col = { 20: 'var(--coral)', 45: 'var(--coral)', 10: 'var(--azul)', 25: 'var(--azul)', 5: 'var(--turq)', 2.5: 'var(--amarillo)', 1.25: 'var(--txt2)' };
-  const alto = x => ({ 20: 72, 45: 72, 25: 62, 10: 56, 5: 44, 2.5: 34, 1.25: 28 }[x] || 30);
+  const col = { 45: 'var(--coral)', 25: 'var(--azul)', 10: 'var(--lila)', 5: 'var(--turq)', 2.5: 'var(--amarillo)' };
+  const alto = x => ({ 45: 72, 25: 62, 10: 52, 5: 42, 2.5: 32 }[x] || 30);
   const placa = (x, p) => { const h = alto(p); return `<rect x="${x}" y="${50 - h / 2}" width="12" height="${h}" rx="3" style="fill:${col[p]}"/>`; };
   const der = d.lado.map((p, i) => placa(196 + i * 14, p)).join('');
   const izq = d.lado.map((p, i) => placa(92 - i * 14, p)).join('');
@@ -161,7 +163,7 @@ function discosSVG(e, total) {
       <rect x="104" y="40" width="6" height="20" rx="2" style="fill:var(--txt)"/><rect x="190" y="40" width="6" height="20" rx="2" style="fill:var(--txt)"/>
       ${izq}${der}
     </svg>
-    <p><b>${d.tipo} (${num(d.barra)} ${d.u})</b> + ${txt} = <b>${num(total)} ${d.u}</b></p>
+    <p><b>${d.tipo} (${num(d.barra)} lb)</b> + ${txt} = <b>${num(total)} lb</b>${W.verEn() === 'kg' ? ` <span class="nowrap">(${W.cifra(e, total)})</span>` : ''}</p>
   </div>`;
 }
 
@@ -186,6 +188,14 @@ function cambiarPeso(slot, dir) {
   ctx.rec.pesos[slot] = n; guardar();
   vibrar();
   repintarTarjeta(slot);
+}
+
+// El switch kg ⇄ lb cambia cómo se ven todos los pesos de la app (se guardan igual)
+function cambiarUnidades(u) {
+  if (W.verEn() === u) return;
+  C().verEn = u; guardar(); vibrar(8);
+  $$('.ej', ctx.raiz).forEach(c => { if (c.querySelector('.peso, .unid')) repintarTarjeta(c.dataset.slot); });
+  aviso(u === 'kg' ? 'Pesos en kilos' : 'Pesos en libras', 'check');
 }
 
 // ── Toques ───────────────────────────────────────────────────
@@ -213,6 +223,7 @@ function clic(ev) {
     case 'cambiar': hojaCambiar(slot); break;
     case 'revertir': revertir(slot); break;
     case 'ver': hojaAnimacion(item(slot).e); break;
+    case 'unid': cambiarUnidades(b.dataset.u); break;
     case 'terminar': terminar(); break;
     default: return;
   }

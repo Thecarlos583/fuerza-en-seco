@@ -9,25 +9,24 @@ const seg = (nombre, ops, val) => `<div class="seg" data-seg="${nombre}">${ops.m
 const diasSel = (nombre, sel, sinDom = false) => `<div class="dias-sel" data-dias="${nombre}">${SEMANA.map(d => `<button type="button" data-v="${d}" class="${sel.includes(d) ? 'act' : ''}" ${sinDom && d === 'dom' ? 'disabled' : ''}>${NOMBRE_DIA[d].slice(0, 3)}</button>`).join('')}</div>`;
 
 function formulario(c, completo) {
-  const p = c.pesoCorp || { v: '', u: 'kg' };
+  const p = c.pesoCorp || { v: '' };
   return `
     <section class="card">
       <h3 class="sub-t">Tú</h3>
       <label class="campo"><span>Nombre</span><input name="nombre" value="${esc(c.nombre)}" autocomplete="given-name"></label>
-      <label class="campo"><span>Peso corporal</span>
-        <div class="campo-fila"><input name="peso" type="number" inputmode="decimal" min="25" max="150" step="0.5" value="${p.v}" placeholder="Ej. 58">${seg('pu', [['kg', 'kg'], ['lb', 'lb']], p.u)}</div>
+      <label class="campo"><span>Peso corporal (kg)</span>
+        <input name="peso" type="number" inputmode="decimal" min="25" max="150" step="0.5" value="${p.v}" placeholder="Ej. 58">
       </label>
       <p class="peq txt2">Sirve para ajustar los topes de peso: si pesas menos de 55 kg, todos bajan un 15%.</p>
       <label class="sw"><span><b>Tengo pie plano</b><small>Marca los ejercicios que pueden costar y muestra con qué cambiarlos</small></span><input type="checkbox" name="pieplano" ${c.pieplano !== false ? 'checked' : ''}><i></i></label>
     </section>
 
-    <section class="card">
+    ${completo ? `<section class="card">
       <h3 class="sub-t">Tu gimnasio</h3>
-      <div class="campo"><span>Mancuernas en</span>${seg('uManc', [['kg', 'Kilos (kg)'], ['lb', 'Libras (lb)']], c.uManc || 'kg')}</div>
-      <div class="campo"><span>Discos y máquinas en</span>${seg('uDisco', [['kg', 'Kilos (kg)'], ['lb', 'Libras (lb)']], c.uDisco || 'kg')}</div>
-      ${completo ? `<label class="campo"><span>Peso de la barra Z de tu gimnasio (kg)</span><input name="barraZ" type="number" inputmode="decimal" step="0.5" value="${(c.barraZ || [10])[0]}"></label>
-      <p class="peq txt2">Pregunta en tu gimnasio cuánto pesa la suya. Suele estar entre 7 y 12 kg.</p>` : ''}
-    </section>
+      <p class="peq txt2">Mancuernas, balones, máquinas y poleas van en kilos. Las barras y sus discos van en libras, como en el gimnasio.</p>
+      <label class="campo"><span>Peso de la barra Z de tu gimnasio (lb)</span><input name="barraZ" type="number" inputmode="decimal" min="5" max="45" step="1" value="${Number(c.barraZ) || 20}"></label>
+      <p class="peq txt2">Pregunta en tu gimnasio cuánto pesa la suya. Suele estar entre 15 y 25 lb.</p>
+    </section>` : ''}
 
     <section class="card">
       <h3 class="sub-t">Tu semana</h3>
@@ -60,10 +59,9 @@ function leer(raiz, base) {
   return {
     ...base,
     nombre: val('nombre') || 'Juan',
-    pesoCorp: peso > 0 ? { v: peso, u: segV('pu') } : null,
+    pesoCorp: peso > 0 ? { v: peso, u: 'kg' } : null,
     pieplano: !!$('[name="pieplano"]', raiz)?.checked,
-    uManc: segV('uManc'), uDisco: segV('uDisco'),
-    barraZ: bz > 0 ? [bz, Math.round(bz * 2.20462 / 5) * 5 || 20] : (base.barraZ || [10, 20]),
+    barraZ: bz > 0 ? bz : (Number(base.barraZ) || 20),
     gym: dias('gym'), agua: dias('agua'),
     inicio: val('inicio'),
     comp: { ...base.comp, nombre: cnombre, corto: /nacional/i.test(cnombre) ? 'los Juegos Nacionales' : cnombre, ini: val('cini'), fin: val('cfin') || '', lugar: val('clugar') || '', piscina: Number(segV('piscina')) },
@@ -103,7 +101,7 @@ function revisarGym(raiz) {
 
 // ── Bienvenida ───────────────────────────────────────────────
 export function renderBienvenida(v) {
-  const c = { ...DEFAULTS, uManc: 'kg', uDisco: 'kg' };
+  const c = { ...DEFAULTS };
   v.innerHTML = `
     <div class="bienvenida">
       <div class="logo-grande"><img src="icons/icon.svg" alt=""></div>
@@ -116,7 +114,7 @@ export function renderBienvenida(v) {
   interacciones($("#form", v));
   $('#form').onsubmit = e => {
     e.preventDefault();
-    const n = leer(v, { ...c, sonido: true, vibracion: true, barraZ: [10, 20], otras: [] });
+    const n = leer(v, { ...c, sonido: true, vibracion: true, barraZ: 20, verEn: 'kg', otras: [] });
     const err = validar(n);
     if (err) return aviso(err, 'info', 3500);
     if (!revisarGym(v)) return aviso('Deja un día libre entre sesiones de gimnasio', 'info', 3500);

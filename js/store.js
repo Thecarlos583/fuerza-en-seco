@@ -24,6 +24,15 @@ function fusionar(d) {
   e.vistos = { ...(d.vistos || {}) };
   if (e.config && e.config.ligero === undefined) e.config.ligero = true;
   if (e.config && !e.config.tema) e.config.tema = 'auto';
+  // Unidades fijas por equipo (versión 13): peso corporal en kg, barra Z en lb, switch kg ⇄ lb solo para mostrar
+  if (e.config) {
+    const c = e.config;
+    if (c.pesoCorp?.u === 'lb') c.pesoCorp = { v: Math.round(c.pesoCorp.v / 2.20462 * 2) / 2, u: 'kg' };
+    if (Array.isArray(c.barraZ)) c.barraZ = c.barraZ[1] || 20;
+    c.barraZ ||= 20;
+    c.verEn ||= 'kg';
+    delete c.uManc; delete c.uDisco;
+  }
   return e;
 }
 

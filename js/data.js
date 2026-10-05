@@ -48,11 +48,12 @@ export const ZONAS = {
 
 // ── Pesos guiados (nadador de 16 años, 55-65 kg, sin experiencia) ──
 // eq: manc (una mancuerna) · mano (una en cada mano) · barra · maquina · balon · banda · cajon · corporal
-// ini / tope: [kg, lb]. ini 0 = peso corporal. barra: 'z' (barra Z) u 'oli' (olímpica); topeExtra = discos sobre la barra.
+// ini / tope: [kg, lb]; se usa el de la unidad del equipo (barras en lb, el resto en kg). ini 0 = peso corporal.
+// barra: 'z' (barra Z), 'oli' (olímpica) o 'smith'; topeExtra = discos sobre la barra.
 export const PESOS = {
   goblet:      { eq: 'manc', ini: [8, 17.5], tope: [20, 45] },
   sentBarra:   { eq: 'barra', barra: 'z', ini: 'barra', tope: [35, 75], nota: 'Empieza con la barra Z o la barra sola.' },
-  smith:       { eq: 'barra', barra: 'z', ini: 'barra', tope: [35, 75], nota: 'Empieza con la barra sola de la máquina.' },
+  smith:       { eq: 'barra', barra: 'smith', ini: 'barra', tope: [35, 75], nota: 'Empieza con la barra sola de la máquina.' },
   sumo:        { eq: 'manc', ini: [8, 17.5], tope: [20, 45] },
   puente1:     { eq: 'manc', ini: 0, tope: [8, 17.5], desde: 3, nota: 'Mancuerna sobre la cadera, solo desde la semana 3.' },
   hipthrust:   { eq: 'manc', ini: [10, 20], tope: [25, 55] },

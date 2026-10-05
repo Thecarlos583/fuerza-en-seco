@@ -844,3 +844,11 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 /* Animaciones: espalda con curva, cuerda */
 .anim-svg .torso, .anim-poses .torso { fill: none; stroke-linejoin: round; }
 .anim-svg .cuerda, .anim-poses .cuerda { fill: none; stroke: var(--salmon); stroke-width: 2; stroke-linecap: round; }
+
+/* Switch kg ⇄ lb */
+.unid { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; }
+.unid > span { margin-right: auto; font-size: 0.8125rem; font-weight: 750; color: var(--txt2); }
+.unid button { min-height: 48px; min-width: 56px; padding: 0 12px; border-radius: 14px; background: var(--card2); font-weight: 800; }
+.unid button[aria-pressed="true"] { background: color-mix(in srgb, var(--aqua) 18%, transparent); color: var(--txt-aqua); box-shadow: inset 0 0 0 1.5px var(--aqua); }
+.nowrap { white-space: nowrap; }
+.plan-dia li small.pesos-g { display: block; margin-top: 2px; font-size: 0.75rem; }

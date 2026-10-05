@@ -1,9 +1,10 @@
 // Guía: el plan día por día (como en Mi Rutina), reglas, cuándo parar y fases hasta la competencia.
 import { FASES, REGLAS_PARAR, REGLAS_ENTRENADOR, SUGERIR, EJ, SESIONES, RUTINAS, ACTIVACION } from './data.js';
-import { C } from './store.js';
+import { C, guardar } from './store.js';
+import * as W from './pesos.js';
 import { tramos, gymOrden } from './plan.js';
 import { fechaCorta, fechaLarga, NOMBRE_DIA, SEMANA } from './fechas.js';
-import { ico, esc } from './util.js';
+import { ico, esc, vibrar, aviso } from './util.js';
 import { prescripcion, hojaAnimacion } from './sesion.js';
 import { tieneAnimacion } from './anim.js';
 
@@ -11,7 +12,13 @@ export function renderGuia(v, sub) {
   const c = C();
   const ts = tramos().filter(t => !['antes', 'despues'].includes(t.fase));
   const orden = gymOrden();
-  const lista = items => `<ul>${items.map(it => `<li style="--c:${EJ[it.e].maq ? 'var(--azul)' : 'var(--aqua)'}"><i class="punto"></i><span>${esc(EJ[it.e].n)}${EJ[it.e].maq ? ' <small>(máquina)</small>' : ''}</span>${tieneAnimacion(it.e) ? `<button class="ver-mini" data-g="ver" data-e="${it.e}" aria-label="Ver cómo se hace">${ico('play')}</button>` : ''}<b>${prescripcion(it)}</b></li>`).join('')}</ul>`;
+  const lista = items => `<ul>${items.map(it => `<li style="--c:${EJ[it.e].maq ? 'var(--azul)' : 'var(--aqua)'}"><i class="punto"></i><span>${esc(EJ[it.e].n)}${EJ[it.e].maq ? ' <small>(máquina)</small>' : ''}${pesos(it.e)}</span>${tieneAnimacion(it.e) ? `<button class="ver-mini" data-g="ver" data-e="${it.e}" aria-label="Ver cómo se hace">${ico('play')}</button>` : ''}<b>${prescripcion(it)}</b></li>`).join('')}</ul>`;
+  // "Empieza con" y "Tope" en la unidad elegida con el switch
+  const pesos = e => {
+    if (!W.conPeso(e) || W.tope(e) === 0) return '';
+    const ini = W.inicial(e);
+    return `<small class="pesos-g">Empieza con ${ini ? W.texto(e, ini, { mano: false }) : 'peso corporal'} · tope ${W.cifra(e, W.tope(e))}</small>`;
+  };
   const diaSesion = letra => {
     const s = SESIONES[letra];
     return `<details class="plan-dia"><summary><span class="dia-n">${NOMBRE_DIA[orden['ABC'.indexOf(letra)]] || ''}</span><span class="dia-t">Sesión ${letra} · ${s.n}<small>${s.sub}</small></span>${ico('abajo')}</summary>
@@ -28,6 +35,7 @@ export function renderGuia(v, sub) {
 
     <section class="card">
       <div class="card-cab"><h3>${ico('cal')} Tu semana</h3><span class="cont">fuerza explosiva · máquinas y mancuernas</span></div>
+      ${W.switchUnidades('data-g')}
       <div class="plan">
         ${['A', 'B', 'C'].map(diaSesion).join('')}
         ${rutina('movilidad')}
@@ -82,7 +90,17 @@ export function renderGuia(v, sub) {
 
   v.onclick = ev => {
     const b = ev.target.closest('[data-g=ver]');
-    if (b) { ev.preventDefault(); hojaAnimacion(b.dataset.e); }
+    if (b) { ev.preventDefault(); hojaAnimacion(b.dataset.e); return; }
+    const u = ev.target.closest('[data-g=unid]');
+    if (u && W.verEn() !== u.dataset.u) {
+      // Cambia kg ⇄ lb y vuelve a pintar sin cerrar los días que estaban abiertos
+      C().verEn = u.dataset.u; guardar(); vibrar(8);
+      const abiertos = [...v.querySelectorAll('details')].map(d => d.open), y = scrollY;
+      renderGuia(v);
+      v.querySelectorAll('details').forEach((d, i) => { d.open = !!abiertos[i]; });
+      scrollTo(0, y);
+      aviso(u.dataset.u === 'kg' ? 'Pesos en kilos' : 'Pesos en libras', 'check');
+    }
   };
   if (sub) setTimeout(() => document.getElementById(sub)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
