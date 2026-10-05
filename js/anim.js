@@ -31,8 +31,10 @@ function completar(p, def = {}) {
   q.bal ??= def.mano === 'balon' ? 1 : 0;
   q.ancho ??= def.ancho ?? 11;
   for (const k of PARAMS) q[k] ??= 0;
-  q.rodilla = Math.max(0, q.rodilla); q.rodilla2 = Math.max(0, q.rodilla2);
-  q.codo = Math.max(0, q.codo); q.codo2 = Math.max(0, q.codo2);
+  // Rangos humanos: la rodilla y el codo nunca se doblan al revés ni más allá de lo posible
+  for (const k of ['rodilla', 'rodilla2']) q[k] = clamp(q[k], 0, 140);
+  for (const k of ['codo', 'codo2']) q[k] = clamp(q[k], 0, 145);
+  for (const k of ['cadera', 'cadera2']) q[k] = clamp(q[k], -40, 140);
   return q;
 }
 
@@ -146,6 +148,7 @@ function equipoMovil(def, f, p, vista) {
       const a = [f.cad[0] + nrm[0] - u[0] * 4, f.cad[1] + nrm[1] - u[1] * 4], b = [f.hom[0] + nrm[0] + u[0] * 6, f.hom[1] + nrm[1] + u[1] * 6];
       s += `<line class="respaldo" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}"/>`;
     }
+    if (q.tipo === 'balonPiso' && def.mano === 'balon' && p.bal <= 0.5) s += `<circle class="balon" cx="${q.x}" cy="${SUELO - 8}" r="8"/>`;
     if (q.tipo === 'objeto') { const r = q.en === 'rodilla' ? (vista === 'frente' && f.fr ? medio(f.fr[0], f.fr[1]) : f.p1.rod) : f.cad; s += `<circle class="balon" cx="${f1(r[0])}" cy="${f1(r[1] + (q.dy ?? 0))}" r="${q.r ?? 6}"/>`; }
     if (q.tipo === 'rodillo') { const r = { rodilla: f.p1.rod, tobillo: f.p1.tob, hombro: f.hom }[q.en] || f.cad; s += `<circle class="rodillo" cx="${f1(r[0] + (q.dx ?? 0))}" cy="${f1(r[1] + (q.dy ?? -8))}" r="6"/>`; }
     if (q.tipo === 'almohadillas' && vista === 'frente' && f.fr) s += f.fr.map(r => `<rect class="rodillo" x="${f1(r[0] + (r[0] < 120 ? -9 : 3))}" y="${f1(r[1] - 6)}" width="6" height="14" rx="3"/>`).join('');
@@ -162,8 +165,8 @@ function equipoMovil(def, f, p, vista) {
 
 function lado(p, def, punto, fijo) {
   const f = figura(p, def, fijo);
-  const pierna = (x, cls) => pl([f.cad, x.rod, x.tob, x.punta], cls) + ln(x.tob, x.talon, cls);
-  const brazo = (x, cls) => pl([f.hom, x.cod, x.mano], cls);
+  const pierna = (x, cls) => ln(f.cad, x.rod, cls + ' muslo') + ln(x.rod, x.tob, cls + ' canilla') + pl([x.talon, x.tob, x.punta], cls + ' pie-l');
+  const brazo = (x, cls) => ln(f.hom, x.cod, cls + ' brazo') + ln(x.cod, x.mano, cls + ' ante');
   let s = brazo(f.b2, 'hueso fondo') + pierna(f.p2, 'hueso fondo');
   s += ln(f.cad, f.hom, 'torso') + `<circle class="cabeza" cx="${f1(f.cab[0])}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`;
   s += pierna(f.p1, 'hueso') + brazo(f.b1, 'hueso');
@@ -205,10 +208,10 @@ function frente(p, def, punto, fijo) {
   const bi = brazoF(-1, f.b1, p.hF, p.cF, p.rF, 1), bd = brazoF(1, f.b2, p.hF2, p.cF2, p.rF2, 2);
   f.fm = [bi.mano, bd.mano];
   f.fr = [izq.rod, der.rod];
-  for (const x of [izq, der]) s.push(pl([x.cad, x.rod, x.tob], 'hueso'), `<ellipse class="pie" cx="${f1(x.pie[0])}" cy="${f1(x.pie[1])}" rx="4.5" ry="2.5"/>`);
+  for (const x of [izq, der]) s.push(ln(x.cad, x.rod, 'hueso muslo'), ln(x.rod, x.tob, 'hueso canilla'), `<ellipse class="pie" cx="${f1(x.pie[0])}" cy="${f1(x.pie[1])}" rx="4.5" ry="2.5"/>`);
   s.push(ln(izq.cad, der.cad, 'hueso'), ln([CX, f.cad[1]], [CX, f.hom[1]], 'torso'), ln(bi.hom, bd.hom, 'hueso'));
   s.push(`<circle class="cabeza" cx="${f1(CX)}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`);
-  for (const x of [bi, bd]) s.push(pl([x.hom, x.cod, x.mano], 'hueso'));
+  for (const x of [bi, bd]) s.push(ln(x.hom, x.cod, 'hueso brazo'), ln(x.cod, x.mano, 'hueso ante'));
   s.push(equipoMovil(def, f, p, 'frente'));
   s.push(marca(punto, { rodilla: [izq.rod, der.rod], pies: [izq.pie, der.pie], cadera: [[CX, f.cad[1]]], espalda: [[CX, (f.cad[1] + f.hom[1]) / 2]], hombro: [bi.hom, bd.hom], manos: [bi.mano, bd.mano], codo: [bi.cod, bd.cod], cabeza: [[CX, f.cab[1]]] }, null));
   return s.join('');
@@ -224,12 +227,28 @@ function marca(punto, pts, f) {
   return s;
 }
 
+function puntoClave(def, q, vista) {
+  const f = figura(q, def);
+  const k = def.sigue || 'cadera';
+  if (vista === 'frente') return [120 + q.lat, { cadera: f.cad, manos: f.b1.mano, pies: f.p1.tob, hombro: f.hom, rodilla: f.p1.rod }[k][1]];
+  return { cadera: f.cad, manos: f.b1.mano, pies: f.p1.tob, hombro: f.hom, rodilla: f.p1.rod }[k];
+}
+function flecha(def, a, b, vista) {
+  const p = puntoClave(def, a, vista), q = puntoClave(def, b, vista);
+  const dx = q[0] - p[0], dy = q[1] - p[1], l = Math.hypot(dx, dy);
+  if (l < 8) return '';
+  const u = [dx / l, dy / l], largo = Math.min(l * 0.75, 38), ini = [p[0] + u[0] * 10, p[1] + u[1] * 10], fin = [ini[0] + u[0] * largo, ini[1] + u[1] * largo];
+  const n = [-u[1], u[0]], h1 = [fin[0] - u[0] * 7 + n[0] * 5, fin[1] - u[1] * 7 + n[1] * 5], h2 = [fin[0] - u[0] * 7 - n[0] * 5, fin[1] - u[1] * 7 - n[1] * 5];
+  return `<line class="flecha" x1="${f1(ini[0])}" y1="${f1(ini[1])}" x2="${f1(fin[0])}" y2="${f1(fin[1])}"/><polygon class="flecha-p" points="${[fin, h1, h2].map(x => x.map(f1).join(',')).join(' ')}"/>`;
+}
+
 const fondo = (def, vista) => `<line class="suelo" x1="6" y1="${SUELO}" x2="234" y2="${SUELO}"/>` + equipoFijo(def, vista);
 const figuraSVG = (def, q, vista, punto, fijo) => (vista === 'frente' ? frente(q, def, punto, fijo) : lado(q, def, punto, fijo));
 
-export function dibujarPose(def, p, vista = 'lado', punto = null, fijo = null) {
+export function dibujarPose(def, p, vista = 'lado', punto = null, fijo = null, siguiente = null) {
   const q = p.__ok ? p : completar(p, def);
-  return fondo(def, vista) + figuraSVG(def, q, vista, punto, fijo);
+  const sig = siguiente ? (siguiente.__ok ? siguiente : completar(siguiente, def)) : null;
+  return fondo(def, vista) + figuraSVG(def, q, vista, punto, fijo) + (sig ? flecha(def, q, sig, vista) : '');
 }
 
 // Actualiza un grupo SVG sin reconstruirlo: si la estructura es la misma, solo cambia los atributos
@@ -316,8 +335,9 @@ export function montar(cont, e) {
       <button data-an="next" aria-label="Pose siguiente">Pose ›</button>
       ${vistas.length > 1 ? `<button data-an="vista" class="vista">${nombreVista(vistas[1])}</button>` : ''}
     </div>
-    <p class="anim-lento" hidden>Tu teléfono va algo lento: te muestro las poses fijas. Toca cada una o usa ‹ Pose ›.</p>
-    <div class="anim-poses">${def.poses.map((p, i) => `<button data-an="ir" data-i="${i}"><svg viewBox="0 0 240 196">${dibujarPose(def, p, vistas[0])}</svg><b>${i + 1}</b><span>${p.n || ''}</span></button>`).join('')}</div>`;
+    <p class="anim-lento" hidden>Tu teléfono va algo lento: aquí van las poses fijas, con flechas de hacia dónde te mueves.</p>
+    <div class="anim-fijas" hidden></div>
+    <ol class="anim-pasos">${def.poses.map((p, i) => `<li data-an="ir" data-i="${i}">${p.n || ''}</li>`).join('')}</ol>`;
   const fijoG = cont.querySelector('.anim-fijo'), g = cont.querySelector('.anim-g'), txt = cont.querySelector('.anim-punto');
   const bPlay = cont.querySelector('[data-an=play]');
   const icoPlay = () => { bPlay.innerHTML = st.play ? '❚❚ Pausa' : '▶ Seguir'; };
@@ -335,13 +355,22 @@ export function montar(cont, e) {
       ultActiva = activa;
       txt.textContent = punto ? punto.txt : (def.poses[activa].n || '');
       txt.classList.toggle('alerta', !!punto);
-      cont.querySelectorAll('.anim-poses button').forEach((b, i) => b.classList.toggle('act', i === activa));
+      cont.querySelectorAll('.anim-pasos li').forEach((b, i) => b.classList.toggle('act', i === activa));
     }
     return performance.now() - t0;
   };
   // Pausa cuando no se ve en pantalla
   const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => { st.visible = es[0].isIntersecting; }) : null;
   io?.observe(cont);
+  // Poses fijas grandes con flechas (teléfono lento o ejercicio marcado como "fijas")
+  const mostrarFijas = () => {
+    const n = def.poses.length, caja = cont.querySelector('.anim-fijas');
+    caja.innerHTML = def.poses.map((p, i) => `<figure><svg class="anim-svg" viewBox="0 0 240 196">${dibujarPose(def, p, st.vista, p.punto, null, i < n - 1 ? def.poses[i + 1] : null)}</svg><b>${i + 1}</b><figcaption>${p.n || ''}</figcaption></figure>`).join('');
+    caja.hidden = false;
+    cont.querySelector('.anim').hidden = true;
+    cont.querySelector('.anim-ctrl').hidden = vistas.length < 2;
+    cont.querySelectorAll('.anim-ctrl button:not(.vista)').forEach(b => { b.hidden = true; });
+  };
   const detener = () => { cancelAnimationFrame(st.raf); io?.disconnect(); if (detenerActual === detener) detenerActual = null; };
   detenerActual = detener;
 
@@ -358,15 +387,16 @@ export function montar(cont, e) {
         const prom = x => x.reduce((a, b) => a + b, 0) / x.length;
         if (st.costo.length < 20) st.costo.push(c);
         else if (!st.lento && (prom(st.costo) > 18 || prom(st.gaps.slice(-20)) > 100)) {
-          st.lento = true; st.play = false; st.paso = 0; icoPlay(); pintar();
+          st.lento = true; st.play = false; st.paso = 0; icoPlay();
           cont.querySelector('.anim-lento').hidden = false;
+          mostrarFijas();
         }
       }
     }
     st.raf = requestAnimationFrame(bucle);
   };
-  pintar();
-  st.raf = requestAnimationFrame(bucle);
+  if (def.fijas) { st.play = false; st.lento = true; mostrarFijas(); }
+  else { pintar(); st.raf = requestAnimationFrame(bucle); }
 
   cont.onclick = ev => {
     const b = ev.target.closest('[data-an]');
@@ -378,8 +408,7 @@ export function montar(cont, e) {
       const i = (vistas.indexOf(st.vista) + 1) % vistas.length; st.vista = vistas[i];
       b.textContent = nombreVista(vistas[(i + 1) % vistas.length]); ultActiva = -1;
       fijoG.innerHTML = fondo(def, st.vista);
-      cont.querySelectorAll('.anim-poses button svg').forEach((svg, k) => { svg.innerHTML = dibujarPose(def, def.poses[k], st.vista); });
-      pintar();
+      if (st.lento) mostrarFijas(); else pintar();
     }
     if (a === 'prev' || a === 'next' || a === 'ir') {
       st.play = false; icoPlay();

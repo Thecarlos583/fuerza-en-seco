@@ -419,7 +419,10 @@ export function hojaAnimacion(e) {
     <p class="eyebrow">${ico('play')} Cómo se hace</p>
     <h2 class="hoja-t">${esc(x.n)}</h2>
     <div class="anim-caja"></div>
-    <div class="error"><span>${ico('cerrar')}</span><p><b>Error común:</b> ${esc(x.error)}</p></div>`);
+    <h4 class="sub-t">En el agua te sirve para</h4>
+    <p class="txt2">${esc(x.para)}</p>
+    <div class="error"><span>${ico('cerrar')}</span><p><b>Error común:</b> ${esc(x.error)}</p></div>
+    ${x.z.length ? `<h4 class="sub-t">Músculos que trabaja</h4><div class="mapa encendido">${cuerpo(x.z, x.s)}</div>` : ''}`);
   montar(h.querySelector('.anim-caja'), e);
 }
 

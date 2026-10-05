@@ -819,3 +819,24 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 .plan-dia summary .dia-t, .plan-dia.quieto .dia-t { flex: 1 1 9rem; }
 .plan-dia summary > .ico { margin-left: auto; }
 .vista { hyphens: auto; }
+
+/* ── Figura con volumen ─────────────────────────────────────── */
+.anim-svg .hueso.muslo, .anim-poses .hueso.muslo { stroke-width: 10; }
+.anim-svg .hueso.canilla, .anim-poses .hueso.canilla { stroke-width: 8; }
+.anim-svg .hueso.pie-l, .anim-poses .hueso.pie-l { stroke-width: 5; }
+.anim-svg .hueso.brazo, .anim-poses .hueso.brazo { stroke-width: 8; }
+.anim-svg .hueso.ante, .anim-poses .hueso.ante { stroke-width: 6; }
+.anim-svg .torso, .anim-poses .torso { stroke-width: 15; }
+.anim-svg .flecha, .anim-poses .flecha { fill: none; stroke: var(--amarillo); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.anim-svg .flecha-p, .anim-poses .flecha-p { fill: var(--amarillo); }
+.mapa.encendido .cuerpo .z.on { fill: var(--zc); }
+.mapa.encendido .cuerpo .z.sec { fill: color-mix(in srgb, var(--zc) 45%, var(--neutro)); }
+.anim-pasos { margin: 12px 0 0; padding: 0; list-style: none; counter-reset: ap; display: grid; gap: 4px; }
+.anim-pasos li { counter-increment: ap; display: flex; gap: 8px; align-items: flex-start; padding: 8px 12px; border-radius: 12px; font-size: 0.9375rem; color: var(--txt2); transition: background .2s, color .2s; }
+.anim-pasos li::before { content: counter(ap); flex: none; width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; font-size: 0.75rem; font-weight: 850; background: var(--card2); color: var(--txt-aqua); }
+.anim-pasos li.act { background: color-mix(in srgb, var(--aqua) 14%, transparent); color: var(--txt); font-weight: 700; }
+.anim-pasos li.act::before { background: var(--aqua); color: var(--sobre-acento); }
+.anim-fijas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: 8px; }
+.anim-fijas figure { margin: 0; border-radius: 16px; background: var(--anim-bg); padding: 4px; position: relative; }
+.anim-fijas figure b { position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: var(--aqua); color: var(--sobre-acento); font-size: 0.8125rem; }
+.anim-fijas figcaption { font-size: 0.8125rem; font-weight: 700; padding: 4px 8px 8px; color: var(--txt); }
