@@ -1,9 +1,9 @@
 // Para el entrenador de natación: el plan, cada ejercicio con por qué ayuda en el agua, y el progreso.
-import { EJ, SESIONES, ACTIVACION, FASES, PRUEBAS_FIS, TRANSFER } from './data.js';
+import { EJ, SESIONES, ACTIVACION, FASES } from './data.js';
 import { S, C } from './store.js';
 import { hoy, fechaCorta, fechaLarga } from './fechas.js';
 import { faseDe, semanaDe, tramos, diasParaComp, diasSalvados, gymOrden } from './plan.js';
-import { sesionesHechas, asistencia } from './progreso.js';
+import { sesionesHechas, asistencia, progresoPesos } from './progreso.js';
 import { mejor, meta, fmtT, nombrePrueba } from './marcas.js';
 import { prescripcion } from './sesion.js';
 import { hojaAnimacion } from './sesion.js';
@@ -23,7 +23,8 @@ export function renderEntrenador(v) {
   const rpeProm = ult.length ? Math.round((ult.reduce((s, x) => s + x.rpe, 0) / ult.length) * 10) / 10 : null;
   const pool = Number(c.comp.piscina) || 50;
   const orden = gymOrden();
-  const P = S().pruebas;
+  const { conPeso } = progresoPesos();
+  const pc = S().pesoLog || [];
 
   v.innerHTML = `
     <div class="top"><p class="saludo">Resumen para su entrenador de natación</p><h1>Entrenador</h1></div>
@@ -61,8 +62,9 @@ export function renderEntrenador(v) {
     </section>
 
     <section class="card">
-      <div class="card-cab"><h3>${ico('salto')} Pruebas físicas</h3></div>
-      <ul class="pesos-lista">${PRUEBAS_FIS.map(t => { const i = P.inicial[t.k], fi = P.final[t.k]; return `<li><span>${t.n}</span><b>${i == null ? '–' : num(i)} → ${fi == null ? '–' : num(fi)} ${t.u}</b><small>${t.para}</small></li>`; }).join('')}</ul>
+      <div class="card-cab"><h3>${ico('trofeo')} Progreso de pesos</h3></div>
+      ${conPeso.length ? `<ul class="pesos-lista">${conPeso.map(x => `<li><span>${esc(EJ[x.e].n)}</span><b>${W.cifra(x.e, x.ini)} → ${W.cifra(x.e, x.hoy)}</b></li>`).join('')}</ul>` : '<p class="txt2">Todavía no hay sesiones de gimnasio registradas.</p>'}
+      ${pc.length ? `<p class="txt2 peq">Peso corporal: ${num(pc.at(-1).v)} kg (${fechaCorta(pc.at(-1).f)})${pc.length > 1 ? `; empezó con ${num(pc[0].v)} kg` : ''}.</p>` : ''}
     </section>
 
     <section class="card">
@@ -118,8 +120,10 @@ function resumenTexto() {
   lin.push('Marcas:');
   for (const id of S().marcas.seguidas) lin.push(`- ${nombrePrueba(id)} (${pool} m): ${fmtT(mejor(id, pool))} · meta ${fmtT(meta(id, pool))}`);
   lin.push('');
-  lin.push('Pruebas físicas (inicial → final):');
-  for (const t of PRUEBAS_FIS) lin.push(`- ${t.n}: ${S().pruebas.inicial[t.k] ?? '–'} → ${S().pruebas.final[t.k] ?? '–'} ${t.u}`);
+  lin.push('Progreso de pesos (empezó → hoy):');
+  const { conPeso } = progresoPesos();
+  if (!conPeso.length) lin.push('- Todavía sin sesiones registradas');
+  for (const x of conPeso) lin.push(`- ${EJ[x.e].n}: ${W.cifra(x.e, x.ini)} → ${W.cifra(x.e, x.hoy)}`);
   lin.push('');
   for (const l of ['A', 'B', 'C']) {
     const s = SESIONES[l];

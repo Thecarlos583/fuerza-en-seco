@@ -1,11 +1,11 @@
-// Progreso: pruebas físicas (inicial y final), esfuerzo (RPE) de cada sesión, calendario y pesos.
-import { PRUEBAS_FIS, EJ, SESIONES, FASES } from './data.js';
+// Progreso: constancia, evolución de los pesos de cada ejercicio, peso corporal, esfuerzo (RPE) y calendario.
+import { EJ, SESIONES } from './data.js';
 import { S, C, guardar, leerDia } from './store.js';
-import { hoy, aFecha, iso, sumar, diaDe, fechaCorta, MESES } from './fechas.js';
-import { deFecha, faseDe, racha, diasSalvados, tramos } from './plan.js';
+import { hoy, aFecha, iso, sumar, lunesDe, fechaCorta, MESES } from './fechas.js';
+import { deFecha, racha, diasSalvados } from './plan.js';
 import * as W from './pesos.js';
-import { $, $$, ico, esc, num, abrirHoja, cerrarHoja, aviso, vibrar, sonar, confeti } from './util.js';
-import { barrasRPE, antesDespues, tocarGrafica } from './graficas.js';
+import { ico, esc, num, abrirHoja, cerrarHoja, aviso, vibrar } from './util.js';
+import { barrasRPE, linea, mini, tocarGrafica } from './graficas.js';
 
 let mes = 0;
 
@@ -26,53 +26,100 @@ export function asistencia(hasta = hoy()) {
   return { prog, ok, pct: prog ? Math.round((ok / prog) * 100) : null };
 }
 
-export const momentoPrueba = f => (['descarga', 'puesta', 'competencia', 'despues'].includes(faseDe(f)) ? 'final' : 'inicial');
+// Rutinas terminadas ese día (gimnasio, recuperación, Plan B…)
+const terminadas = f => Object.values(leerDia(f).r || {}).filter(r => r.completa).length;
+export function constancia(f = hoy()) {
+  const lun = lunesDe(f), m = f.slice(0, 7);
+  let semana = 0, gymSemana = 0, mesN = 0;
+  for (const [d, l] of Object.entries(S().log)) {
+    const n = terminadas(d);
+    if (!n) continue;
+    if (d >= lun && d <= f) { semana += n; if (l.completa) gymSemana++; }
+    if (d.startsWith(m) && d <= f) mesN += n;
+  }
+  return { semana, gymSemana, mes: mesN, salvados: diasSalvados(), racha: racha(f) };
+}
+
+// Historial de cada ejercicio: pesos (en la unidad de su equipo) o series de peso corporal
+export function historial(e) {
+  return Object.keys(S().log).sort().map(f => ({ f, r: leerDia(f).res?.[e] })).filter(x => x.r)
+    .map(({ f, r }) => (r.v != null ? { f, v: W.aSuUnidad(e, r.v, r.u) } : { f, s: r.s, r: r.r, seg: r.seg }));
+}
+
+export function progresoPesos() {
+  const ids = new Set([...Object.keys(S().pesos), ...Object.values(S().log).flatMap(l => Object.keys(l.res || {}))]);
+  const conPeso = [], corporal = [];
+  for (const e of ids) {
+    if (!EJ[e]) continue;
+    const h = historial(e);
+    if (W.conPeso(e) && W.tope(e) !== 0) {
+      const pts = h.filter(x => x.v != null);
+      const ini = pts[0]?.v ?? W.inicial(e), hoyV = W.trabajo(e) ?? pts.at(-1)?.v;
+      if (hoyV == null || !pts.length) continue;
+      conPeso.push({ e, ini, hoy: hoyV, dif: hoyV - ini, pct: ini ? (hoyV - ini) / ini : 0, pts });
+    } else if (h.length) corporal.push({ e, h });
+  }
+  conPeso.sort((a, b) => b.pct - a.pct || b.dif - a.dif);
+  return { conPeso, corporal };
+}
 
 // ── Pantalla ─────────────────────────────────────────────────
 export function renderProgreso(v) {
   const f = hoy();
   v.innerHTML = `
     <div class="top"><p class="saludo">Tu evolución</p><h1>Progreso</h1></div>
-    ${stats(f)}
-    ${pruebas(f)}
-    ${rpe()}
-    ${calendario(f)}
-    ${pesos()}`;
+    ${constanciaHTML(f)}
+    ${pesosHTML()}
+    ${pesoCorporalHTML(f)}
+    ${rpeHTML()}
+    ${calendario(f)}`;
   v.onclick = clic;
 }
 
-function stats(f) {
-  const a = asistencia(f);
-  return `<div class="stats tres">
-    <div class="stat racha">${ico('fuego')}<b>${racha(f)}</b><span>sesiones seguidas</span></div>
-    <div class="stat">${ico('check')}<b>${a.pct == null ? '–' : a.pct + '%'}</b><span>asistencia (${a.ok} de ${a.prog})</span></div>
-    <div class="stat salvados">${ico('corazon')}<b>${diasSalvados()}</b><span>días salvados</span></div>
-  </div>`;
-}
-
-function pruebas(f) {
-  const P = S().pruebas, mom = momentoPrueba(f);
-  const fd = tramos().find(t => t.fase === 'descarga');
+function constanciaHTML(f) {
+  const c = constancia(f);
   return `<section class="card">
-    <div class="card-cab"><h3>${ico('salto')} Pruebas físicas</h3></div>
-    <p class="txt2 peq">Inicial: semana 1. Final: semana de descarga${fd ? ` (${fechaCorta(fd.ini)} – ${fechaCorta(fd.fin)})` : ''}. Nunca en la puesta a punto.</p>
-    <div class="leyenda ad-ley"><span><i style="background:var(--serie-ini)"></i>Inicial${P.inicial.f ? ` · ${fechaCorta(P.inicial.f)}` : ''}</span><span><i style="background:var(--serie-fin)"></i>Final${P.final.f ? ` · ${fechaCorta(P.final.f)}` : ''}</span></div>
-    ${PRUEBAS_FIS.map(t => {
-      const a = P.inicial[t.k], b = P.final[t.k];
-      const mejora = a != null && b != null ? Math.round((b - a) * 10) / 10 : null;
-      return `<div class="prueba-f">
-        <div class="pf-cab"><b>${t.n}</b>${mejora != null ? (mejora > 0 ? `<span class="tag exp">${ico('trofeo')}Récord +${num(mejora)} ${t.u}</span>` : `<span class="tag neutro">${mejora === 0 ? 'Igual' : num(mejora) + ' ' + t.u}</span>`) : ''}</div>
-        <p class="txt2 peq">${t.para}</p>
-        ${antesDespues(a, b, { u: t.u, fmt: num })}
-      </div>`;
-    }).join('')}
-    ${faseDe(f) === 'puesta' ? `<div class="nota">${ico('info')}<span>Estás en la puesta a punto: no hagas pruebas físicas ahora.</span></div>` : ''}
-    <button class="btn-pri" data-p="anotar" data-mom="${mom}">${ico('mas')}Anotar pruebas ${mom === 'inicial' ? 'iniciales' : 'finales'}</button>
-    <button class="link" data-p="anotar" data-mom="${mom === 'inicial' ? 'final' : 'inicial'}">Anotar las ${mom === 'inicial' ? 'finales' : 'iniciales'}</button>
+    <div class="card-cab"><h3>${ico('check')} Constancia</h3></div>
+    <div class="stats dos-dos">
+      <div class="stat">${ico('cal')}<b>${c.semana}</b><span>sesiones esta semana (${c.gymSemana} de 3 de gimnasio)</span></div>
+      <div class="stat">${ico('check')}<b>${c.mes}</b><span>sesiones en ${MESES[aFecha(f).getMonth()]}</span></div>
+      <div class="stat racha">${ico('fuego')}<b>${c.racha}</b><span>sesiones de gimnasio seguidas</span></div>
+      <div class="stat salvados">${ico('corazon')}<b>${c.salvados}</b><span>días salvados con el Plan B</span></div>
+    </div>
   </section>`;
 }
 
-function rpe() {
+const signo = (e, d) => { const m = W.mostrar(Math.abs(d), W.unidad(e)); return `${d > 0 ? '+' : d < 0 ? '−' : ''}${m.aprox ? '≈' : ''}${m.n} ${m.u}`; };
+const presc = x => `${x.s} × ${x.seg ? `${x.seg} s` : x.r ?? ''}`;
+
+function pesosHTML() {
+  const { conPeso, corporal } = progresoPesos();
+  const top = conPeso.filter(x => x.dif > 0).slice(0, 3);
+  return `<section class="card">
+    <div class="card-cab"><h3>${ico('trofeo')} Tus pesos</h3></div>
+    ${conPeso.length || corporal.length ? `
+      ${conPeso.length ? W.switchUnidades('data-p') : ''}
+      ${top.length ? `<p class="sub-t">Los que más subieron</p><ol class="podio">${top.map(x => `<li><span>${esc(EJ[x.e].n)}</span><b class="sube-txt">${signo(x.e, x.dif)}</b></li>`).join('')}</ol>` : ''}
+      ${conPeso.length ? `<ul class="prog-ej">${conPeso.map(x => `<li>
+        <div><b>${esc(EJ[x.e].n)}</b><span>Empezó con ${W.cifra(x.e, x.ini)} → hoy ${W.cifra(x.e, x.hoy)}${x.dif ? ` <em class="${x.dif > 0 ? 'sube-txt' : ''}">(${signo(x.e, x.dif)})</em>` : ''}</span></div>
+        ${mini(x.pts.map(p => p.v))}</li>`).join('')}</ul>` : ''}
+      ${corporal.length ? `<p class="sub-t">Con tu peso corporal</p><ul class="prog-ej">${corporal.map(x => `<li><div><b>${esc(EJ[x.e].n)}</b><span>${x.h.length} ${x.h.length === 1 ? 'vez' : 'veces'} · empezó con ${presc(x.h[0])} → última ${presc(x.h.at(-1))}</span></div></li>`).join('')}</ul>` : ''}`
+      : `<p class="vacio">${ico('info')}Cuando termines tu primera sesión de gimnasio, aquí ves cuánto sube cada ejercicio.</p>`}
+  </section>`;
+}
+
+function pesoCorporalHTML(f) {
+  const h = S().pesoLog || [];
+  const estaSemana = h.find(x => x.f >= lunesDe(f));
+  return `<section class="card">
+    <div class="card-cab"><h3>${ico('progreso')} Peso corporal</h3>${h.length ? `<span class="cont">${num(h.at(-1).v)} kg</span>` : ''}</div>
+    ${h.length >= 2 ? linea(h, { fmt: x => `${num(x)} kg`, desc: 'Evolución de tu peso corporal' }) : h.length ? `<p class="txt2 peq">Registrado: ${num(h[0].v)} kg el ${fechaCorta(h[0].f)}. Con dos semanas ya ves la gráfica.</p>` : ''}
+    <p class="txt2 peq">Una vez por semana, en la mañana. Solo para ver cómo cambia mientras creces y entrenas.</p>
+    <button class="btn-sec" data-p="peso">${ico('mas')}${estaSemana ? 'Cambiar el peso de esta semana' : 'Anotar mi peso de esta semana'}</button>
+  </section>`;
+}
+
+function rpeHTML() {
   const h = sesionesHechas().slice(-12);
   return `<section class="card">
     <div class="card-cab"><h3>${ico('fuego')} Esfuerzo por sesión (RPE)</h3><span class="cont">últimas ${h.length}</span></div>
@@ -90,9 +137,11 @@ function calendario(f) {
   for (let k = 0; k < diasMes; k++) {
     const d = sumar(primero, k), l = leerDia(d), dd = deFecha(d);
     const letra = Object.keys(l.r || {}).find(x => x.length === 1 && 'ABC'.includes(x) && l.r[x].completa);
-    const casa = l.planbHecho || l.r?.movilidad?.completa;
+    const casa = !letra && terminadas(d) > 0;
     const col = letra ? SESIONES[letra].c : '';
-    const cls = [letra ? 'gym' : '', casa && !letra ? 'casa' : '', d === f ? 'hoy' : '', d > f ? 'futuro' : '', dd.tipo === 'gym' && d < f && !l.completa && !l.salvado && !l.recuperada ? 'falta' : ''].join(' ');
+    const pendiente = d < f && d >= C().inicio && !l.registro && !terminadas(d) && !l.falto && !l.descanso && !l.salvado && !l.recuperada;
+    const cls = [letra ? 'gym' : '', casa ? 'casa' : '', d === f ? 'hoy' : '', d > f ? 'futuro' : '',
+      dd.tipo === 'gym' && d < f && !l.completa && !l.salvado && !l.recuperada ? 'falta' : '', pendiente && dd.tipo !== 'gym' ? 'pendiente' : ''].join(' ');
     celdas += `<span class="cal-d ${cls}" style="${col ? `--c:${col}` : ''}">${k + 1}${letra ? `<small>${letra}</small>` : ''}</span>`;
   }
   return `<section class="card">
@@ -102,16 +151,7 @@ function calendario(f) {
       <button class="cal-nav" data-p="mes" data-d="1" aria-label="Mes siguiente">${ico('atras', 'girar180')}</button>
     </div>
     <div class="cal">${['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(x => `<span class="cal-h">${x}</span>`).join('')}${celdas}</div>
-    <div class="leyenda"><span><i style="background:var(--aqua)"></i>Sesión hecha</span><span><i class="casa-l"></i>En casa</span><span><i class="falta-l"></i>Sesión perdida</span></div>
-  </section>`;
-}
-
-function pesos() {
-  const ids = Object.keys(S().pesos).filter(e => EJ[e] && W.conPeso(e));
-  if (!ids.length) return '';
-  return `<section class="card">
-    <div class="card-cab"><h3>${ico('trofeo')} Pesos de trabajo</h3></div>
-    <ul class="pesos-lista">${ids.map(e => `<li><span>${esc(EJ[e].n)}</span><b>${W.texto(e, W.trabajo(e))}</b><small>empezó con ${W.texto(e, W.inicial(e), { mano: false })} · tope ${W.texto(e, W.tope(e), { mano: false })}</small></li>`).join('')}</ul>
+    <div class="leyenda"><span><i style="background:var(--aqua)"></i>Gimnasio</span><span><i class="casa-l"></i>Recuperación o Plan B</span><span><i class="falta-l"></i>Sesión perdida</span><span><i class="pend-l"></i>Sin registrar</span></div>
   </section>`;
 }
 
@@ -120,49 +160,45 @@ function clic(ev) {
   const b = ev.target.closest('[data-p]');
   if (!b) return;
   if (b.dataset.p === 'mes') { mes = Math.min(0, mes + Number(b.dataset.d)); vibrar(8); dispatchEvent(new Event('fs:refrescar')); }
-  if (b.dataset.p === 'anotar') hojaPruebas(b.dataset.mom);
+  if (b.dataset.p === 'peso') hojaPeso();
+  if (b.dataset.p === 'unid' && W.verEn() !== b.dataset.u) { C().verEn = b.dataset.u; guardar(); vibrar(8); dispatchEvent(new Event('fs:refrescar')); }
 }
 
-function hojaPruebas(mom) {
-  const P = S().pruebas, actual = P[mom], otro = P[mom === 'inicial' ? 'final' : 'inicial'];
-  const val = t => actual[t.k] ?? otro[t.k] ?? t.ini;
+// Anotar el peso corporal de la semana (uno por semana: si ya hay, se reemplaza)
+function hojaPeso() {
+  const f = hoy(), log = (S().pesoLog ||= []);
+  const previo = log.at(-1)?.v ?? C().pesoCorp?.v ?? 58;
+  let v = Math.round(previo * 10) / 10;
   const h = abrirHoja(`
-    <p class="eyebrow">${ico('salto')} Pruebas físicas</p>
-    <h2 class="hoja-t">${mom === 'inicial' ? 'Iniciales' : 'Finales'}</h2>
-    <p class="hoja-sub">Hazlas frescas, después de calentar. Mejor intento de 2-3.</p>
-    ${PRUEBAS_FIS.map(t => `<div class="pf-in" data-k="${t.k}" data-paso="${t.paso}">
-      <span>${t.n}</span>
-      <div class="peso">
-        <button class="peso-btn" data-d="-1" aria-label="Menos">${ico('menos')}</button>
-        <div class="peso-val"><b>${num(val(t))}</b><span>${t.u}</span></div>
-        <button class="peso-btn" data-d="1" aria-label="Más">${ico('mas')}</button>
-      </div></div>`).join('')}
+    <p class="eyebrow">${ico('progreso')} Peso corporal</p>
+    <h2 class="hoja-t">¿Cuánto pesas esta semana?</h2>
+    <p class="hoja-sub">En la mañana, antes de desayunar. Sin metas: solo para ver cómo cambia.</p>
+    <div class="peso">
+      <button class="peso-btn" data-d="-1" aria-label="Menos">${ico('menos')}</button>
+      <div class="peso-val"><b id="pc-v">${num(v)}</b><span>kg</span></div>
+      <button class="peso-btn" data-d="1" aria-label="Más">${ico('mas')}</button>
+    </div>
     <button class="btn-pri" data-g="ok">${ico('check')}Guardar</button>`);
-  const v = Object.fromEntries(PRUEBAS_FIS.map(t => [t.k, val(t)]));
   let t1, t2;
   const parar = () => { clearTimeout(t1); clearInterval(t2); };
-  const mover = (fila, d) => {
-    const k = fila.dataset.k, paso = Number(fila.dataset.paso);
-    v[k] = Math.max(0, Math.round((v[k] + paso * d) * 10) / 10);
-    fila.querySelector('b').textContent = num(v[k]); vibrar(5);
-  };
+  const mover = d => { v = Math.max(25, Math.min(150, Math.round((v + d * 0.1) * 10) / 10)); h.querySelector('#pc-v').textContent = num(v); vibrar(5); };
   h.addEventListener('pointerdown', e => {
     const bt = e.target.closest('[data-d]');
     if (!bt) return;
     e.preventDefault();
-    const fila = bt.closest('.pf-in'), d = Number(bt.dataset.d);
-    mover(fila, d);
-    t1 = setTimeout(() => { t2 = setInterval(() => mover(fila, d), 60); }, 380);
+    const d = Number(bt.dataset.d);
+    mover(d);
+    t1 = setTimeout(() => { t2 = setInterval(() => mover(d), 60); }, 380);
   });
   ['pointerup', 'pointerleave', 'pointercancel'].forEach(x => h.addEventListener(x, parar));
   h.onclick = e => {
     if (!e.target.closest('[data-g=ok]')) return;
-    const antes = { ...P[mom] };
-    P[mom] = { ...v, f: hoy() };
+    const lun = lunesDe(f), i = log.findIndex(x => x.f >= lun);
+    if (i >= 0) log[i] = { f, v }; else log.push({ f, v });
+    log.sort((a, b) => a.f.localeCompare(b.f));
+    C().pesoCorp = { v, u: 'kg' };
     guardar(); cerrarHoja();
-    const records = mom === 'final' && PRUEBAS_FIS.filter(t => P.inicial[t.k] != null && v[t.k] > P.inicial[t.k]).length;
-    if (records) { aviso(`¡Mejoraste en ${records} de ${PRUEBAS_FIS.length} pruebas!`, 'trofeo', 3500); sonar.logro(); confeti(true); }
-    else aviso('Pruebas guardadas', 'check');
+    aviso('Peso guardado', 'check');
     dispatchEvent(new Event('fs:refrescar'));
   };
 }

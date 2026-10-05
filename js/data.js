@@ -641,7 +641,7 @@ export const RUTINAS = {
 // p / f: series de potencia / fuerza que se suman o restan a la cifra base (construcción)
 export const FASES = {
   tecnica:    { n: 'Técnica', c: 'var(--aqua)', p: -1, f: -1, core: 0, rpe: '6', tope: 30,
-    txt: 'Aprende a moverte bien. Pocas series, técnica perfecta y pruebas iniciales.' },
+    txt: 'Aprende a moverte bien. Pocas series y técnica perfecta.' },
   construir:  { n: 'Construir', c: 'var(--turq)', p: 0, f: 0, core: 0, rpe: '7', tope: 40,
     txt: 'Subimos el trabajo. Saltos frescos y fuerza dejando 2-3 repeticiones de reserva.' },
   construir2: { n: 'Construir +', c: 'var(--turq)', p: 0, f: 0, core: 0, rpe: '7', tope: 40,
@@ -649,7 +649,7 @@ export const FASES = {
   pico:       { n: 'Pico', c: 'var(--coral)', p: 0, f: 0, core: 0, rpe: '7-8', tope: 45,
     txt: 'Máxima intención en cada salto. Un poco más de peso, nunca al fallo.' },
   descarga:   { n: 'Descarga', c: 'var(--amarillo)', p: -1, f: -1, core: -1, rpe: '6', tope: 25, peso: 0.85,
-    txt: 'Menos volumen, misma velocidad. Tu cuerpo está asimilando el trabajo. Semana de pruebas finales.' },
+    txt: 'Menos volumen, misma velocidad. Tu cuerpo está asimilando el trabajo.' },
   puesta:     { n: 'Puesta a punto', c: 'var(--lila)', p: 0, f: null, core: -1, rpe: '5', tope: 12, peso: 0.5,
     txt: 'Sesiones cortas, rápidas y frescas. Nada nuevo y nada que te deje adolorido.' },
   competencia: { n: 'Competencia', c: 'var(--amarillo)', txt: '¡A nadar! Calentamiento en seco antes de entrar al agua y recuperación en la noche.' },
@@ -694,11 +694,3 @@ export const ESTILOS = [
   ['combinado', 'Combinado', [100, 200, 400]],
 ];
 export const MARCAS_INICIO = { seguidas: ['50-pecho', '100-pecho', '50-libre'], principal: '100-pecho', comp: ['50-pecho', '100-pecho', '50-libre'] };
-
-// ── Pruebas físicas (semana 1 y semana de descarga) ──────────
-export const PRUEBAS_FIS = [
-  { k: 'salto', n: 'Salto de longitud', u: 'cm', paso: 1, ini: 200, para: 'Potencia de piernas: salidas y virajes.' },
-  { k: 'balon', n: 'Lanzamiento de balón por encima de la cabeza', u: 'm', paso: 0.1, ini: 6, para: 'Potencia del tirón: brazada y streamline.' },
-  { k: 'dominadas', n: 'Dominadas máximas (o asistidas)', u: 'reps', paso: 1, ini: 3, para: 'Fuerza del tirón principal del nado.' },
-  { k: 'plancha', n: 'Plancha frontal', u: 's', paso: 5, ini: 60, para: 'Core para mantener el cuerpo alineado.' },
-];

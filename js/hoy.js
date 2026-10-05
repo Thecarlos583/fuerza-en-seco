@@ -8,7 +8,6 @@ import { progreso, leerRegistro, htmlSesion, activar, sesionDelDia, chequeo, hoj
 import { $, ico, esc, abrirHoja, cerrarHoja, aviso, vibrar, semilla, pantallaEncendida } from './util.js';
 import { instalable, instalar } from './app-instalar.js';
 import { tarjetaPrincipal } from './marcas.js';
-import { momentoPrueba } from './progreso.js';
 import { compFin } from './plan.js';
 
 const FRASES = [
@@ -57,7 +56,6 @@ export function renderHoy(v) {
     ${avisoAyer(f, t)}
     ${faltasSemana(f) >= 2 ? `<div class="nota">${ico('corazon')}<span>Semana pesada. Prioriza dormir bien${dc > 0 ? `: faltan ${dc} días para ${esc(c.comp.corto || c.comp.nombre)}` : ''}.</span></div>` : ''}
     ${tarjetaFaseEspecial(f, t.d)}
-    ${semanaPruebas(f)}
     ${despuesComp(f)}
     ${hero(f, t, l)}
     ${t.clave ? '<div id="ses" class="ses-cargando"></div>' : manana(f)}
@@ -133,14 +131,6 @@ function tarjetaFaseEspecial(f, d) {
     <p class="peq">Esta semana suma más movilidad: la movilidad corta todos los días.</p>
     <button class="btn-sec" data-h="fase-ok" data-k="${k}">Entendido</button>
   </section>`;
-}
-
-// Semana 1 y semana de descarga: toca hacer las pruebas físicas
-function semanaPruebas(f) {
-  const fa = faseDe(f), mom = momentoPrueba(f);
-  const toca = (fa === 'tecnica' && semanaDe(f).n === 1) || fa === 'descarga';
-  if (!toca || S().pruebas[mom]?.f) return '';
-  return `<a class="card aviso-card" href="#progreso">${ico('salto')}<span><b>Semana de pruebas físicas ${mom === 'inicial' ? 'iniciales' : 'finales'}</b><small>Salto de longitud, lanzamiento de balón, dominadas y plancha. Anótalas en Progreso.</small></span>${ico('abajo', 'rev-chev')}</a>`;
 }
 
 // Durante y justo después de la competencia: anotar tiempos

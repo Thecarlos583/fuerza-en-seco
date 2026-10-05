@@ -12,7 +12,7 @@ const base = () => ({
   revisado: {},  // ejercicio → fecha en que le revisaron la técnica
   timer: null,   // descanso en curso
   marcas: { ...MARCAS_INICIO, tiempos: [], metas: {} }, // tiempos de natación: { id, p, cs, f, tipo, nota, parcial }
-  pruebas: { inicial: {}, final: {} },                    // pruebas físicas
+  pesoLog: [],   // peso corporal semanal: { f, v } en kg
   vistos: {},
 });
 
@@ -20,7 +20,8 @@ const base = () => ({
 function fusionar(d) {
   const b = base(), e = { ...b, ...d };
   e.marcas = { ...b.marcas, ...(d.marcas || {}) };
-  e.pruebas = { ...b.pruebas, ...(d.pruebas || {}) };
+  delete e.pruebas; // las pruebas físicas ya no existen (versión 15)
+  if (!d.pesoLog) e.pesoLog = e.config?.pesoCorp?.v ? [{ f: e.config.inicio, v: e.config.pesoCorp.u === 'lb' ? Math.round(e.config.pesoCorp.v / 2.20462 * 2) / 2 : e.config.pesoCorp.v }] : [];
   e.vistos = { ...(d.vistos || {}) };
   if (e.config && e.config.ligero === undefined) e.config.ligero = true;
   if (e.config && !e.config.tema) e.config.tema = 'auto';

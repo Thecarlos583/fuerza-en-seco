@@ -10,7 +10,7 @@
   --sobre-acento: #04223A; --grad: linear-gradient(135deg, #00D1FF, #1DE9B6);
   --maquina: #2E5F94; --hueso-fondo: #0B6F94; --anim-bg: #12335E; --anim-bg2: #081A36;
   --velo: rgba(2, 8, 20, .72); --barra: rgba(6, 20, 43, .97); --sombra: rgba(0, 0, 0, .25);
-  --serie-ini: #4C6EF5; --serie-fin: #0E9FA8; --rpe-l: 70%;
+  --rpe-l: 70%;
   --r: 22px;
   --r2: 14px;
   --sa-t: env(safe-area-inset-top, 0px);
@@ -29,7 +29,7 @@
   --sobre-acento: #FFFFFF; --grad: linear-gradient(135deg, #00749C, #087A64);
   --maquina: #9CB1C9; --hueso-fondo: #7CC0DA; --anim-bg: #EAF3FC; --anim-bg2: #DCE9F7;
   --velo: rgba(11, 27, 51, .45); --barra: rgba(255, 255, 255, .97); --sombra: rgba(11, 27, 51, .15);
-  --serie-ini: #4C6EF5; --serie-fin: #0E8A92; --rpe-l: 34%;
+  --rpe-l: 34%;
 }
 /* "only": impide que Chrome o el navegador de Samsung oscurezcan o inviertan la página por su cuenta */
 :root[data-tema="claro"] { color-scheme: only light; }
@@ -703,21 +703,6 @@ body.sin-tabs .mini { bottom: calc(var(--sa-b) + 16px); }
 /* ── Progreso ───────────────────────────────────────────────── */
 .stats.tres { grid-template-columns: repeat(3, 1fr); }
 .stats.tres .stat b { font-size: 1.75rem; }
-.prueba-f { padding: 12px 0; border-top: 1px solid var(--linea); }
-.pf-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.pf-cab b { font-size: 0.9375rem; }
-.ad { display: grid; gap: 8px; margin-top: 8px; }
-.ad-fila { display: grid; grid-template-columns: 52px 1fr 76px; align-items: center; gap: 8px; font-size: 0.8125rem; }
-.ad-n { color: var(--txt2); font-weight: 650; }
-.ad-barra { height: 14px; border-radius: 4px; background: var(--bg); overflow: hidden; }
-.ad-barra i { display: block; height: 100%; border-radius: 0 4px 4px 0; }
-.ad-barra i.ini { background: var(--serie-ini); }
-.ad-barra i.fin { background: var(--serie-fin); }
-.ad-fila b { text-align: right; font-variant-numeric: tabular-nums; }
-.ad-ley { margin: 12px 0 4px; }
-.pf-in { display: grid; gap: 8px; margin-bottom: 12px; }
-.pf-in > span { font-weight: 700; font-size: 0.875rem; }
-.pf-in .peso { touch-action: none; user-select: none; }
 .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .cal-h { text-align: center; font-size: 0.6875rem; font-weight: 700; color: var(--txt2); }
 .cal-d { --c: transparent; aspect-ratio: 1; border-radius: 11px; display: grid; place-content: center; text-align: center; font-size: 0.8125rem; font-weight: 700; background: var(--bg); color: var(--txt2); line-height: 1.05; }
@@ -730,6 +715,8 @@ body.sin-tabs .mini { bottom: calc(var(--sa-b) + 16px); }
 .cal-nav { width: 48px; height: 48px; border-radius: 12px; background: var(--card2); display: grid; place-items: center; }
 .leyenda i.casa-l { background: transparent; box-shadow: inset 0 0 0 2px var(--turq); }
 .leyenda i.falta-l { background: transparent; box-shadow: inset 0 0 0 2px var(--coral); }
+.leyenda i.pend-l { background: transparent; box-shadow: inset 0 0 0 2px var(--txt2); border-radius: 4px; }
+.cal-d.pendiente { box-shadow: inset 0 0 0 1.5px var(--txt2); border-style: dashed; }
 .pesos-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .pesos-lista li { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 12px 12px; border-radius: 12px; background: var(--bg); font-size: 0.875rem; }
 .pesos-lista li b { text-align: right; font-variant-numeric: tabular-nums; }
@@ -790,7 +777,6 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 .cuenta-pill { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; }
 .cuenta-pill b { flex: none; }
 .alt-cab { flex-wrap: wrap; }
-.ad-fila { grid-template-columns: auto 1fr auto; }
 .mc-nums { grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr)); }
 .tabs button span { font-size: min(0.72rem, 3vw); line-height: 1.15; text-align: center; }
 .seg button { padding: 8px 4px; line-height: 1.2; }
@@ -798,7 +784,7 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 .plan-dia summary { grid-template-columns: minmax(4.5rem, auto) 1fr 20px; }
 
 /* Filas que se reacomodan antes de partir palabras */
-.plan-dia li, .ce-cab, .card-cab, .fase-f div, .mc-cab, .pf-cab, .hero-fila { flex-wrap: wrap; }
+.plan-dia li, .ce-cab, .card-cab, .fase-f div, .mc-cab, .hero-fila { flex-wrap: wrap; }
 .plan-dia li span, .ce-cab b { flex: 1 1 9rem; }
 .dias-sel { grid-template-columns: repeat(auto-fit, minmax(2.9rem, 1fr)); }
 .seg { flex-wrap: wrap; }
@@ -852,3 +838,18 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 .unid button[aria-pressed="true"] { background: color-mix(in srgb, var(--aqua) 18%, transparent); color: var(--txt-aqua); box-shadow: inset 0 0 0 1.5px var(--aqua); }
 .nowrap { white-space: nowrap; }
 .plan-dia li small.pesos-g { display: block; margin-top: 2px; font-size: 0.75rem; }
+
+/* Progreso: constancia, pesos por ejercicio */
+.stats.dos-dos { grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); margin: 0; }
+.stats.dos-dos .stat { background: var(--bg); }
+.podio { margin: 0 0 8px; padding: 0; list-style: none; counter-reset: po; display: grid; gap: 8px; }
+.podio li { counter-increment: po; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 8px 12px; border-radius: 14px; background: var(--bg); font-size: 0.875rem; }
+.podio li::before { content: counter(po); width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: color-mix(in srgb, var(--amarillo) 22%, transparent); color: var(--txt-amarillo); font-weight: 850; font-size: 0.75rem; }
+.podio li span { flex: 1 1 8rem; min-width: 0; font-weight: 700; }
+.sube-txt { color: var(--txt-turq); font-weight: 800; font-style: normal; }
+.prog-ej { margin: 0; padding: 0; list-style: none; display: grid; }
+.prog-ej li { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 0; border-top: 1px solid var(--linea); }
+.prog-ej li > div { flex: 1 1 12rem; min-width: 0; display: grid; gap: 2px; }
+.prog-ej li b { font-size: 0.9375rem; }
+.prog-ej li span { font-size: 0.8125rem; color: var(--txt2); }
+.mini-g { width: 84px; height: 30px; flex: none; }

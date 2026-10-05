@@ -27,7 +27,7 @@ export function progreso(ses, rec) {
   let tot = 0, ok = 0;
   for (const bl of ses.bloques) for (const it of bl.items) {
     tot += it.s;
-    ok += (rec?.hechas[it.slot] || []).slice(0, it.s).filter(Boolean).length;
+    ok += (rec?.hechas?.[it.slot] || []).slice(0, it.s).filter(Boolean).length;
   }
   return { tot, ok, frac: tot ? ok / tot : 0 };
 }
@@ -468,8 +468,10 @@ function guardarFin(rpe) {
     d.res ||= {};
     for (const bl of ses.bloques) for (const it of bl.items) {
       const hechas = (rec.hechas[it.slot] || []).filter(Boolean).length;
-      if (!W.conPeso(it.e) || rec.pesos[it.slot] === undefined || !hechas) continue;
+      if (!hechas) continue;
       const ok = (rec.hechas[it.slot] || []).slice(0, it.s).filter(Boolean).length >= it.s;
+      // Peso corporal: se guardan las series hechas y las repeticiones o el tiempo (para Progreso)
+      if (!W.conPeso(it.e) || rec.pesos[it.slot] === undefined) { d.res[it.e] = { s: hechas, r: it.seg ? null : (it.rTxt || it.r), seg: it.seg ? segDe(it) : null, ok }; continue; }
       d.res[it.e] = { v: rec.pesos[it.slot], u: W.unidad(it.e), ok };
       // El peso usado pasa a ser el de trabajo (en descarga/puesta no se toca)
       if (!['descarga', 'puesta'].includes(ses.fase) && !ses.ligera) W.guardarTrabajo(it.e, rec.pesos[it.slot], f, !!rec.subio?.[it.e]);

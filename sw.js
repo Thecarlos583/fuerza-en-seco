@@ -1,6 +1,6 @@
 // Service worker: guarda la app completa la primera vez para que funcione en modo avión.
 // Al cambiar cualquier archivo, sube VERSION para que el teléfono descargue lo nuevo.
-const VERSION = 'fuerza-en-seco-v14';
+const VERSION = 'fuerza-en-seco-v15';
 const ARCHIVOS = [
   './', './index.html', './manifest.json', './css/styles.css',
   './js/app.js', './js/app-instalar.js', './js/data.js', './js/store.js', './js/fechas.js', './js/plan.js', './js/pesos.js',
