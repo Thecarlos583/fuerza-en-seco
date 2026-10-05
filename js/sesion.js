@@ -89,13 +89,13 @@ function tarjeta(it, bl, n) {
     </div>
     <div class="series" role="group" aria-label="${ronda ? 'Rondas' : 'Series'}">${Array.from({ length: it.s }, (_, k) => `<button class="serie ${hechas[k] ? 'hecha' : ''}" data-a="serie" data-k="${k}" aria-pressed="${!!hechas[k]}" aria-label="${ronda ? 'Ronda' : 'Serie'} ${k + 1}"><span class="serie-n">${k + 1}</span>${ico('check', 'serie-ok')}</button>`).join('')}</div>
     ${bloquePeso(it)}
-    ${e.pp && C().pieplano !== false && it.alts.length ? `<button class="pie-plano" data-a="cambiar">${ico('cambiar')}<span><b>Pie plano:</b> si te cuesta el equilibrio o sientes el arco, cámbialo por otro</span></button>` : ''}
     <div class="mas"><div class="mas-in">${abierta ? detalles(it) : ''}    </div></div>
   </article>`;
 }
 // Series, repeticiones y descanso como chips separados (se acomodan solos en pantallas angostas)
 function chipsPres(it, bl) {
-  const reps = it.seg ? `<b>${segTxt(it)}</b>` : `<b>${it.rTxt || it.r}</b> reps`;
+  const reps = it.seg ? `<b>${segTxt(it)}</b>` : `<b>${it.rTxt || it.r}</b>${/^\d/.test(it.rTxt || it.r) && !/pasos|lado/.test(it.rTxt || '') ? ' reps' : ''}`;
+  if (it.guia) return `<span><b>${it.s}</b> ${it.s === 1 ? 'serie' : 'series'}</span><span>${reps}${it.lado ? ' ' + LADO[it.lado] : ''}</span><span>${ico('reloj')}${it.guia} s guía</span>`;
   const d = it.d ? (it.d >= 60 && it.d % 60 === 0 ? `${it.d / 60} min` : `${it.d} s`) : '';
   return `<span><b>${it.s}</b> ${bl.rondas ? 'rondas' : 'series'}</span><span>${reps}${it.lado ? ' ' + LADO[it.lado] : ''}</span>${d && !bl.rondas ? `<span>${ico('reloj')}${d}</span>` : ''}`;
 }
@@ -247,8 +247,8 @@ function tocarSerie(slot, k) {
   }
   if (!ctx.rec.inicio) ctx.rec.inicio = Date.now();
   pantallaEncendida(true);
-  if (it.seg) {
-    const s = segDe(it);
+  if (it.seg || it.guia) {
+    const s = it.guia || segDe(it);
     const tramos = [{ tipo: 'prep', s: 3 }];
     if (it.lado) tramos.push({ tipo: 'trabajo', s, txt: 'Primer lado' }, { tipo: 'cambio', s: 5 }, { tipo: 'trabajo', s, txt: 'Segundo lado' });
     else tramos.push({ tipo: 'trabajo', s });
@@ -356,17 +356,35 @@ function hojaPrueba(slot) {
 }
 
 // ── Cambiar ejercicio (como en Mi Rutina) ────────────────────
+// Etiquetas de una alternativa: 🏠 en casa, 🏋️ máquina, 🦵 bajo impacto, 💪 más fácil, 🔥 más difícil
+export function etiquetas(orig, a) {
+  const e = EJ[a.e], t = [];
+  if (e.casa) t.push(['🏠', 'En casa']);
+  if (e.maq) t.push(['🏋️', 'Máquina']);
+  if (e.bajo || (EJ[orig.e].salto && !e.salto)) t.push(['🦵', 'Bajo impacto']);
+  if (a.tag === '💪') t.push(['💪', 'Más fácil']);
+  if (a.tag === '🔥') t.push(['🔥', 'Más difícil']);
+  return t.map(([i, n]) => `<span class="et"><span aria-hidden="true">${i}</span> ${n}</span>`).join('');
+}
+
 function hojaCambiar(slot) {
   const it = item(slot), orig = it.orig;
   let sel = null, modo = 'hoy';
+  const opcion = (a, extra = '') => `<div class="alt ${a.e === it.e ? 'actual' : ''}" data-e="${a.e}">
+      <button class="alt-elegir" type="button" aria-expanded="false">
+        <span class="alt-cab"><span class="alt-n">${extra}${esc(EJ[a.e].n)}</span><b class="alt-sr">${prescripcion(a)}</b></span>
+        <span class="alt-ets">${etiquetas(orig, a)}</span>
+        ${a.e === it.e ? '<span class="alt-tag">Ahora</span>' : ''}
+      </button>
+      <div class="alt-mas" hidden></div>
+    </div>`;
   const h = abrirHoja(`
     <h3 class="hoja-t">Cambiar ejercicio</h3>
     <p class="hoja-sub">En lugar de <b>${esc(EJ[orig.e].n)}</b> · ${prescripcion(orig)}</p>
+    <p class="leyenda-ets">🏠 en casa · 🏋️ máquina · 🦵 bajo impacto · 💪 más fácil · 🔥 más difícil</p>
     <div class="alts">
-      ${it.cambiado ? `<button class="alt original" data-e="${orig.e}"><span class="alt-cab"><span class="alt-n">${ico('cambiar')} Volver al original</span><b class="alt-sr">${prescripcion(orig)}</b></span><span class="alt-p">${esc(EJ[orig.e].n)}</span></button>` : ''}
-      ${it.alts.map(a => `<button class="alt ${a.e === it.e ? 'actual' : ''}" data-e="${a.e}">
-        <span class="alt-cab"><span class="alt-n">${esc(EJ[a.e].n)}</span><b class="alt-sr">${prescripcion(a)}</b></span>
-        <span class="alt-p">${esc(EJ[a.e].como[0])}</span>${a.e === it.e ? '<span class="alt-tag">Ahora</span>' : ''}${EJ[a.e].maq ? '<span class="alt-maq">Máquina</span>' : ''}${EJ[a.e].pp && C().pieplano !== false ? '<span class="alt-pp">Puede costar con pie plano</span>' : ''}</button>`).join('')}
+      ${it.cambiado ? opcion(orig, `${ico('cambiar')} Volver al original: `) : ''}
+      ${it.alts.map(a => opcion(a)).join('')}
     </div>
     <div class="seg" role="radiogroup" aria-label="Duración del cambio">
       <button class="act" data-m="hoy" role="radio" aria-checked="true">Solo por hoy</button>
@@ -374,10 +392,21 @@ function hojaCambiar(slot) {
     </div>
     <button class="btn-pri" data-listo disabled>Elige una opción</button>`);
   h.onclick = ev => {
-    const alt = ev.target.closest('.alt');
-    if (alt) {
+    const b = ev.target.closest('.alt-elegir');
+    if (b) {
+      const alt = b.closest('.alt');
       sel = alt.dataset.e;
-      $$('.alt', h).forEach(x => x.classList.toggle('sel', x === alt));
+      $$('.alt', h).forEach(x => {
+        const es = x === alt, mas = $('.alt-mas', x);
+        x.classList.toggle('sel', es);
+        $('.alt-elegir', x).setAttribute('aria-expanded', es);
+        mas.hidden = !es;
+        if (!es) mas.innerHTML = '';
+      });
+      // Los 3 pasos y la animación se crean solo al elegirla
+      const e = EJ[sel], mas = $('.alt-mas', alt);
+      mas.innerHTML = `<ol class="pasos">${e.como.map(p => `<li>${esc(p)}</li>`).join('')}</ol>${tieneAnimacion(sel) ? '<div class="alt-anim"></div>' : ''}`;
+      if (tieneAnimacion(sel)) montar($('.alt-anim', mas), sel);
       const btn = $('[data-listo]', h);
       btn.disabled = false;
       btn.textContent = sel === orig.e ? 'Volver al original' : 'Cambiar';

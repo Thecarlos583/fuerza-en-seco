@@ -32,6 +32,10 @@ function fusionar(d) {
     if (Array.isArray(c.barraZ)) c.barraZ = c.barraZ[1] || 20;
     c.barraZ ||= 20;
     c.verEn ||= 'kg';
+    // Versión 16: días de doble sesión de agua (recuperación fija y dos activaciones) y activación con ligas
+    if (!Array.isArray(c.aguaDoble)) { c.aguaDoble = ['mar', 'jue', 'sab']; c.agua = [...new Set([...(c.agua || []), ...c.aguaDoble])]; }
+    if (c.activacion === undefined) c.activacion = true;
+    delete c.pieplano;
     delete c.uManc; delete c.uDisco;
   }
   return e;

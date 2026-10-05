@@ -126,7 +126,7 @@ function equipoMovil(def, f, p, vista) {
   for (const q of def.equipo || []) {
     if (q.vista && q.vista !== vista) continue;
     if (q.tipo === 'cable') {
-      const h = q.mano === 2 ? f.b2.mano : vista === 'frente' && f.fm ? f.fm[q.lado ?? 1] : f.b1.mano;
+      const h = q.mano === 2 ? f.b2.mano : vista === 'frente' && f.fm ? (q.lado === 'medio' ? medio(f.fm[0], f.fm[1]) : f.fm[q.lado ?? 1]) : f.b1.mano;
       s += `<line class="cable" x1="${q.x}" y1="${q.y}" x2="${f1(h[0])}" y2="${f1(h[1])}"/><circle class="polea" cx="${q.x}" cy="${q.y}" r="4"/>`;
       if (q.agarre === 'cuerda') s += `<circle class="agarre" cx="${f1(h[0])}" cy="${f1(h[1])}" r="3.5"/>`;
       else s += `<rect class="agarre" x="${f1(h[0] - 2.5)}" y="${f1(h[1] - 5)}" width="5" height="10" rx="2"/>`;
@@ -170,7 +170,12 @@ function equipoMovil(def, f, p, vista) {
         s += `<path class="cuerda" d="M${f1(m[0])} ${f1(m[1])} Q${f1(c1[0])} ${f1(c1[1])} ${f1(lejos[0])} ${f1(lejos[1])} Q${f1(c2[0])} ${f1(c2[1])} ${f1(m[0])} ${f1(m[1])}"/>`;
       }
     }
-    if (q.tipo === 'pesoCadera') s += disco([f.cad[0] + 2, f.cad[1] - 8], 7);
+    if (q.tipo === 'bandaManos') {
+      // Banda o toalla entre las dos manos (pull-apart)
+      const [m1, m2] = vista === 'frente' && f.fm ? f.fm : [f.b1.mano, f.b2.mano];
+      s += `<line class="${q.toalla ? 'toalla' : 'banda'}" x1="${f1(m1[0])}" y1="${f1(m1[1])}" x2="${f1(m2[0])}" y2="${f1(m2[1])}"/>`;
+    }
+        if (q.tipo === 'pesoCadera') s += disco([f.cad[0] + 2, f.cad[1] - 8], 7);
     if (q.tipo === 'balonPiso' && def.mano === 'balon' && p.bal <= 0.5) s += `<circle class="balon" cx="${q.x}" cy="${SUELO - 8}" r="8"/>`;
     if (q.tipo === 'objeto') { const r = q.en === 'rodilla' ? (vista === 'frente' && f.fr ? medio(f.fr[0], f.fr[1]) : f.p1.rod) : f.cad; s += `<circle class="balon" cx="${f1(r[0])}" cy="${f1(r[1] + (q.dy ?? 0))}" r="${q.r ?? 6}"/>`; }
     if (q.tipo === 'rodillo') { const r = { rodilla: f.p1.rod, tobillo: f.p1.tob, hombro: f.hom }[q.en] || f.cad; s += `<circle class="rodillo" cx="${f1(r[0] + (q.dx ?? 0))}" cy="${f1(r[1] + (q.dy ?? -8))}" r="6"/>`; }
@@ -260,8 +265,8 @@ function marca(punto, pts, f) {
 function puntoClave(def, q, vista) {
   const f = figura(q, def);
   const k = def.sigue || 'cadera';
-  if (vista === 'frente') return [120 + q.lat, { cadera: f.cad, manos: f.b1.mano, pies: f.p1.tob, hombro: f.hom, rodilla: f.p1.rod }[k][1]];
-  return { cadera: f.cad, manos: f.b1.mano, pies: f.p1.tob, hombro: f.hom, rodilla: f.p1.rod }[k];
+  const p = { cadera: f.cad, manos: f.b1.mano, pies: f.p1.tob, hombro: f.hom, rodilla: f.p1.rod, codo: f.b1.cod }[k] || f.cad;
+  return vista === 'frente' ? [120 + q.lat, p[1]] : p;
 }
 function flecha(def, a, b, vista) {
   const p = puntoClave(def, a, vista), q = puntoClave(def, b, vista);

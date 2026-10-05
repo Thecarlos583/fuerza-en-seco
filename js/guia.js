@@ -1,8 +1,8 @@
 // Guía: el plan día por día (como en Mi Rutina), reglas, cuándo parar y fases hasta la competencia.
-import { FASES, REGLAS_PARAR, REGLAS_ENTRENADOR, SUGERIR, EJ, SESIONES, RUTINAS, ACTIVACION } from './data.js';
+import { FASES, REGLAS_PARAR, REGLAS_ORO, SUGERIR, EJ, SESIONES, RUTINAS, ACTIVACION, LIGAS, LIGAS_TXT } from './data.js';
 import { C, guardar } from './store.js';
 import * as W from './pesos.js';
-import { tramos, gymOrden } from './plan.js';
+import { tramos, gymOrden, RECUPERACION } from './plan.js';
 import { fechaCorta, fechaLarga, NOMBRE_DIA, SEMANA } from './fechas.js';
 import { ico, esc, vibrar, aviso } from './util.js';
 import { prescripcion, hojaAnimacion } from './sesion.js';
@@ -27,8 +27,18 @@ export function renderGuia(v, sub) {
       <p class="plan-b">Fuerza</p>${lista(s.fuerza)}
       <p class="plan-b">Core y prevención</p>${lista(s.core)}</details>`;
   };
-  const rutina = k => `<details class="plan-dia"><summary><span class="dia-n">${k === 'movilidad' ? 'Otros días' : 'Plan B'}</span><span class="dia-t">${RUTINAS[k].n}<small>${RUTINAS[k].sub}</small></span>${ico('abajo')}</summary>
+  const rutina = (k, dn) => `<details class="plan-dia"><summary><span class="dia-n">${dn}</span><span class="dia-t">${RUTINAS[k].n}<small>${RUTINAS[k].sub}</small></span>${ico('abajo')}</summary>
       ${RUTINAS[k].bloques.map(b => lista(b.items)).join('')}</details>`;
+  // La semana en orden: gimnasio, recuperación de los días de doble sesión y domingo libre
+  const dias = SEMANA.map(d => {
+    const k = orden.indexOf(d);
+    if (k >= 0 && k < 3) return diaSesion('ABC'[k]);
+    if (d === 'dom') return `<div class="plan-dia quieto"><span class="dia-n">Domingo</span><span class="dia-t">Descanso</span></div>`;
+    if (RECUPERACION[d]) return rutina(RECUPERACION[d], NOMBRE_DIA[d]);
+    return rutina('movilidad', NOMBRE_DIA[d]);
+  }).join('');
+  const ligas = `<details class="plan-dia"><summary><span class="dia-n">Días de agua</span><span class="dia-t">Antes de nadar: activación con ligas<small>4 min · banda ligera o mediana · ${esc(LIGAS_TXT.ligera)}</small></span>${ico('abajo')}</summary>
+      ${lista(LIGAS.base)}<p class="plan-b">En competencia se suman (según tus pruebas)</p>${lista([...LIGAS.pecho, ...LIGAS.libre])}</details>`;
 
   v.innerHTML = `
     <div class="top"><p class="saludo">Para tenerlo a mano</p><h1>Guía</h1></div>
@@ -37,32 +47,32 @@ export function renderGuia(v, sub) {
       <div class="card-cab"><h3>${ico('cal')} Tu semana</h3><span class="cont">fuerza explosiva · máquinas y mancuernas</span></div>
       ${W.switchUnidades('data-g')}
       <div class="plan">
-        ${['A', 'B', 'C'].map(diaSesion).join('')}
-        ${rutina('movilidad')}
-        <div class="plan-dia quieto"><span class="dia-n">Domingo</span><span class="dia-t">Descanso</span></div>
-        ${['recuperacion', 'forma', 'agua'].map(rutina).join('')}
+        ${dias}
+        ${ligas}
       </div>
+      <p class="plan-b">Plan B (solo si no pudiste ir)</p>
+      <div class="plan">${['recuperacion', 'forma', 'agua'].map(k => rutina(k, 'Plan B')).join('')}</div>
       <p class="peq txt2">Las series cambian según la fase: aquí ves las de las semanas de construcción.</p>
     </section>
-
-    ${c.pieplano !== false ? `<section class="card regla" style="--c:var(--amarillo)">
-      <h3>${ico('info')} Pie plano</h3>
-      <ul>
-        <li>Entrena con zapatos que sujeten bien el arco, no descalzo ni con zapatos muy blandos.</li>
-        <li>En los saltos, cuida que la rodilla no se vaya hacia adentro al caer.</li>
-        <li>Los ejercicios de equilibrio en un pie (peso muerto rumano, búlgara, zancada) pueden costarte: cámbialos por la opción de máquina cuando quieras.</li>
-        <li>La elevación de talones fortalece pantorrilla y tobillo, y ayuda a sostener el arco.</li>
-      </ul>
-    </section>` : ''}
 
     <section class="card regla" style="--c:var(--coral)">
       <h3>${ico('alto')} Cuándo parar</h3>
       <div class="reglas-parar">${REGLAS_PARAR.map(r => `<div><b>${esc(r.t)}</b><p>${esc(r.d)}</p></div>`).join('')}</div>
     </section>
 
-    <section class="card regla" style="--c:var(--aqua)">
-      <h3>${ico('guia')} Reglas del entrenador</h3>
-      <ul>${REGLAS_ENTRENADOR.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+    <section class="card oro" id="reglas">
+      <div class="card-cab"><h3>${ico('trofeo')} Tus 8 reglas de oro</h3><span class="cont" id="oro-n">1 de ${REGLAS_ORO.length}</span></div>
+      <p class="oro-lema">Entrenar explosivo, fresco y seguro</p>
+      <div class="oro-carrusel" id="oro" tabindex="0" aria-label="Reglas de oro, desliza para ver la siguiente">
+        ${REGLAS_ORO.map((r, k) => `<article class="oro-t" aria-label="Regla ${k + 1} de ${REGLAS_ORO.length}">
+          <span class="oro-ico">${ico(r.i)}</span>
+          <p class="oro-num">Regla ${k + 1}</p>
+          <h4>${esc(r.t)}</h4>
+          <p>${esc(r.d)}</p>
+          <p class="oro-ej"><b>Ejemplo:</b> ${esc(r.ej)}</p>
+        </article>`).join('')}
+      </div>
+      <div class="oro-puntos" aria-hidden="true">${REGLAS_ORO.map((_, k) => `<i class="${k ? '' : 'act'}"></i>`).join('')}</div>
     </section>
 
     <section class="card" id="primer-dia">
@@ -102,5 +112,11 @@ export function renderGuia(v, sub) {
       aviso(u.dataset.u === 'kg' ? 'Pesos en kilos' : 'Pesos en libras', 'check');
     }
   };
+  const car = v.querySelector('#oro');
+  car.addEventListener('scroll', () => {
+    const k = Math.round(car.scrollLeft / car.clientWidth);
+    v.querySelectorAll('.oro-puntos i').forEach((p, i) => p.classList.toggle('act', i === k));
+    v.querySelector('#oro-n').textContent = `${k + 1} de ${REGLAS_ORO.length}`;
+  }, { passive: true });
   if (sub) setTimeout(() => document.getElementById(sub)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }

@@ -18,7 +18,6 @@ function formulario(c, completo) {
         <input name="peso" type="number" inputmode="decimal" min="25" max="150" step="0.5" value="${p.v}" placeholder="Ej. 58">
       </label>
       <p class="peq txt2">Sirve para ajustar los topes de peso: si pesas menos de 55 kg, todos bajan un 15%.</p>
-      <label class="sw"><span><b>Tengo pie plano</b><small>Marca los ejercicios que pueden costar y muestra con qué cambiarlos</small></span><input type="checkbox" name="pieplano" ${c.pieplano !== false ? 'checked' : ''}><i></i></label>
     </section>
 
     ${completo ? `<section class="card">
@@ -33,6 +32,8 @@ function formulario(c, completo) {
       <div class="campo"><span>Días de gimnasio (elige 3)</span>${diasSel('gym', c.gym, true)}</div>
       <p class="peq txt2" id="gym-msg">En orden: el primero es la sesión A, el segundo la B y el tercero la C.</p>
       <div class="campo"><span>Días de agua</span>${diasSel('agua', c.agua)}</div>
+      <div class="campo"><span>Días que nadas dos veces</span>${diasSel('aguaDoble', c.aguaDoble || [])}</div>
+      <p class="peq txt2">Esos días no hay gimnasio: te toca una recuperación corta en la noche, y la activación antes de cada sesión de agua.</p>
       <label class="campo"><span>Fecha de inicio del plan</span><input name="inicio" type="date" value="${c.inicio}"></label>
     </section>
 
@@ -60,9 +61,8 @@ function leer(raiz, base) {
     ...base,
     nombre: val('nombre') || 'Juan',
     pesoCorp: peso > 0 ? { v: peso, u: 'kg' } : null,
-    pieplano: !!$('[name="pieplano"]', raiz)?.checked,
     barraZ: bz > 0 ? bz : (Number(base.barraZ) || 20),
-    gym: dias('gym'), agua: dias('agua'),
+    gym: dias('gym'), aguaDoble: dias('aguaDoble'), agua: [...new Set([...dias('agua'), ...dias('aguaDoble')])],
     inicio: val('inicio'),
     comp: { ...base.comp, nombre: cnombre, corto: /nacional/i.test(cnombre) ? 'los Juegos Nacionales' : cnombre, ini: val('cini'), fin: val('cfin') || '', lugar: val('clugar') || '', piscina: Number(segV('piscina')) },
   };
@@ -136,11 +136,26 @@ export function renderAjustes(v) {
         <p class="peq txt2">Automático sigue el modo oscuro o claro del teléfono.</p>
         <label class="sw"><span><b>Sonido</b><small>Pitidos al terminar descansos y temporizadores</small></span><input type="checkbox" name="sonido" ${c.sonido !== false ? 'checked' : ''}><i></i></label>
         <label class="sw"><span><b>Vibración</b><small>Vibra al terminar cada descanso</small></span><input type="checkbox" name="vibracion" ${c.vibracion !== false ? 'checked' : ''}><i></i></label>
+        <label class="sw"><span><b>Activación antes de nadar</b><small>Tarjeta de 4 min con banda en cada día de agua</small></span><input type="checkbox" name="activacion" ${c.activacion !== false ? 'checked' : ''}><i></i></label>
         <label class="sw"><span><b>Modo ligero</b><small>Sin olas, burbujas ni confeti, para que vaya fluida en cualquier teléfono</small></span><input type="checkbox" name="ligero" ${c.ligero !== false ? 'checked' : ''}><i></i></label>
         <button type="button" class="btn-sec" data-a="probar">${ico('play')}Probar sonido y vibración</button>
         <p class="peq txt2">Si no oyes nada, sube el volumen multimedia del teléfono (no el del timbre).</p>
+      </section>
+
+      <section class="card">
+        <h3 class="sub-t">${ico('cal')} Recordatorio para registrar tu día</h3>
+        <p class="peq txt2">Lo más seguro es el calendario del teléfono: suena todos los días a la hora que elijas, aunque la app esté cerrada.</p>
+        <label class="campo"><span>Hora del recordatorio</span><input name="horaRec" type="time" value="${c.horaRec || '20:30'}"></label>
+        <button type="button" class="btn-sec" data-a="ics">${ico('descargar')}Crear recordatorio diario</button>
+        <ol class="pasos peq">
+          <li>Toca el botón: se descarga el archivo <b>fuerza-en-seco.ics</b>.</li>
+          <li>Ábrelo desde la notificación de descarga o desde la carpeta Descargas, con <b>Calendario de Samsung</b>.</li>
+          <li>Toca <b>Guardar</b> o <b>Añadir</b>. Listo: todos los días te aparece "Registra tu día en Fuerza en Seco".</li>
+        </ol>
+        <h3 class="sub-t">${ico('info')} Notificaciones</h3>
+        <p class="peq txt2">Te avisan cuando termina un descanso con la app en segundo plano, 5 minutos antes de tu activación en competencia y, si el teléfono lo permite, una vez al día para registrar cómo te fue. Pueden no sonar a la hora exacta: el calendario es lo seguro.</p>
         <button type="button" class="btn-sec" data-a="notif">${ico('info')}${'Notification' in window && Notification.permission === 'granted' ? 'Notificaciones activadas' : 'Activar notificaciones'}</button>
-        <p class="peq txt2">Sirven para avisarte cuando termina un descanso con la app en segundo plano. No siempre llegan a tiempo: en Samsung ve a Ajustes del teléfono → Aplicaciones → Chrome → Batería → "Sin restricciones".</p>
+        <p class="peq txt2">En Samsung, para que lleguen: Ajustes del teléfono → Aplicaciones → Fuerza en Seco → Batería → "Sin restricciones".</p>
       </section>
       <button class="btn-pri" type="submit">${ico('check')}Guardar cambios</button>
     </form>
@@ -164,6 +179,8 @@ export function renderAjustes(v) {
     n.sonido = $('[name="sonido"]', v).checked;
     n.vibracion = $('[name="vibracion"]', v).checked;
     n.ligero = $('[name="ligero"]', v).checked;
+    n.activacion = $('[name="activacion"]', v).checked;
+    n.horaRec = $('[name="horaRec"]', v).value || '20:30';
     n.tema = $('[data-seg="tema"] .act', v)?.dataset.v || 'auto';
     aplicarTema(n.tema);
     document.documentElement.classList.toggle('ligero', n.ligero || matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -183,7 +200,12 @@ export function renderAjustes(v) {
     }
     if (b.dataset.a === 'importar') $('#archivo', v).click();
     if (b.dataset.a === 'probar') { sonar.fin(); try { navigator.vibrate?.([200, 100, 200]); } catch { } aviso('¿Lo oíste? Si no, sube el volumen multimedia', 'play', 3500); }
-    if (b.dataset.a === 'notif' && 'Notification' in window) Notification.requestPermission().then(r => { aviso(r === 'granted' ? 'Notificaciones activadas' : 'No se activaron las notificaciones', 'info'); dispatchEvent(new Event('fs:refrescar')); });
+    if (b.dataset.a === 'notif' && 'Notification' in window) Notification.requestPermission().then(async r => {
+      if (r === 'granted') await registrarAvisoDiario();
+      aviso(r === 'granted' ? 'Notificaciones activadas' : 'No se activaron las notificaciones', 'info');
+      dispatchEvent(new Event('fs:refrescar'));
+    });
+    if (b.dataset.a === 'ics') descargarIcs($('[name="horaRec"]', v).value || '20:30');
     if (b.dataset.a === 'reiniciar' && confirm('¿Seguro? Se borran todas tus sesiones, pesos y ajustes.')) {
       reiniciar(); location.hash = 'bienvenida'; dispatchEvent(new Event('fs:refrescar'));
     }
@@ -194,4 +216,39 @@ export function renderAjustes(v) {
     try { importar(await f.text()); aviso('Datos importados', 'check'); dispatchEvent(new Event('fs:refrescar')); }
     catch (err) { aviso(err.message || 'No se pudo importar', 'info', 3500); }
   };
+}
+
+// ── Recordatorio diario ──────────────────────────────────────
+// Archivo .ics con un evento diario y recurrente, con alarma, que abre el Calendario de Samsung
+export function textoIcs(hora, url, desde = hoy()) {
+  const [h, m] = hora.split(':');
+  const fecha = desde.replace(/-/g, '');
+  const ahora = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  return [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Fuerza en Seco//ES', 'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT', 'UID:registro-diario@fuerza-en-seco', `DTSTAMP:${ahora}`,
+    `DTSTART:${fecha}T${h.padStart(2, '0')}${m.padStart(2, '0')}00`, 'DURATION:PT10M', 'RRULE:FREQ=DAILY',
+    'SUMMARY:Registra tu día en Fuerza en Seco',
+    `DESCRIPTION:¿Cómo te fue hoy? Regístralo en 10 segundos: ${url}`, `URL:${url}`,
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'TRIGGER:PT0M', 'DESCRIPTION:Registra tu día en Fuerza en Seco', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR', '',
+  ].join('\r\n');
+}
+function descargarIcs(hora) {
+  C().horaRec = hora; guardar();
+  const url = location.origin + location.pathname;
+  const blob = new Blob([textoIcs(hora, url)], { type: 'text/calendar' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'fuerza-en-seco.ics' });
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  aviso('Ábrelo con el Calendario del teléfono', 'cal', 3500);
+}
+// Aviso diario con periodicSync (solo si el navegador lo permite; mejor esfuerzo)
+async function registrarAvisoDiario() {
+  try {
+    const reg = await navigator.serviceWorker?.ready;
+    if (!reg?.periodicSync) return;
+    const p = await navigator.permissions.query({ name: 'periodic-background-sync' }).catch(() => null);
+    if (p && p.state === 'denied') return;
+    await reg.periodicSync.register('registro-diario', { minInterval: 12 * 60 * 60 * 1000 });
+  } catch { }
 }

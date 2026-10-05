@@ -1,6 +1,6 @@
 // Service worker: guarda la app completa la primera vez para que funcione en modo avión.
 // Al cambiar cualquier archivo, sube VERSION para que el teléfono descargue lo nuevo.
-const VERSION = 'fuerza-en-seco-v15';
+const VERSION = 'fuerza-en-seco-v16';
 const ARCHIVOS = [
   './', './index.html', './manifest.json', './css/styles.css',
   './js/app.js', './js/app-instalar.js', './js/data.js', './js/store.js', './js/fechas.js', './js/plan.js', './js/pesos.js',
@@ -39,4 +39,10 @@ self.addEventListener('fetch', e => {
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => cs.length ? cs[0].focus() : self.clients.openWindow('./#hoy')));
+});
+
+// Recordatorio diario (periodicSync, solo si el navegador lo permite): "¿Cómo te fue hoy?"
+self.addEventListener('periodicsync', e => {
+  if (e.tag !== 'registro-diario') return;
+  e.waitUntil(self.registration.showNotification('¿Cómo te fue hoy?', { body: 'Regístralo en 10 segundos.', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'registro-diario' }));
 });

@@ -1,6 +1,6 @@
 // Lógica del plan: fases contadas hacia atrás desde la competencia, qué toca cada día,
 // mover sesiones y cómo se ajustan las series según la fase, el cansancio y el dolor.
-import { EJ, SESIONES, RUTINAS, ACTIVACION, FASES, BLOQUES } from './data.js';
+import { EJ, SESIONES, RUTINAS, ACTIVACION, FASES, BLOQUES, LIGAS, LIGAS_OTRAS } from './data.js';
 import { S, C, leerDia } from './store.js';
 import { SEMANA, sumar, lunesDe, diasEntre, diaDe } from './fechas.js';
 
@@ -82,7 +82,8 @@ function asignacion(lunes) {
 export const letraDe = f => asignacion(lunesDe(f))[f] || null;
 
 // ── Qué toca cada día ────────────────────────────────────────
-// tipo: gym · movilidad · descanso · precomp · competencia
+// tipo: gym · recuperacion (martes, jueves y sábado) · movilidad · descanso · precomp · competencia
+export const RECUPERACION = { mar: 'recMar', jue: 'recJue', sab: 'recSab' };
 export function deFecha(f) {
   const fase = faseDe(f);
   const dc = diasParaComp(f);
@@ -94,7 +95,11 @@ export function deFecha(f) {
   if (diaDe(f) === 'dom') return { ...base, tipo: 'descanso' };
   const letra = letraDe(f);
   const movida = S().movs.find(m => m.de === f && letraDe(m.a));
-  if (!letra) return { ...base, tipo: otra ? 'precomp' : 'movilidad', otra, movida: movida?.a };
+  if (!letra) {
+    if (otra) return { ...base, tipo: 'precomp', otra, movida: movida?.a };
+    const rec = RECUPERACION[diaDe(f)];
+    return rec ? { ...base, tipo: 'recuperacion', clave: rec, movida: movida?.a } : { ...base, tipo: 'movilidad', movida: movida?.a };
+  }
   if (fase === 'puesta') {
     // Puesta a punto: solo las 2 primeras sesiones, cortas. Las demás se vuelven movilidad.
     let previas = 0;
@@ -204,17 +209,48 @@ export function sesionGym(f, { ligera = false, dolor = [], letra = null } = {}) 
 export function sesionRutina(clave, f) {
   const r = RUTINAS[clave];
   const fase = faseDe(f);
+  const suave = leerDia(f).planB?.clave === clave && leerDia(f).planB?.suave; // enfermo o con dolor: una sola serie de todo
   const bloques = r.bloques.map((bl, k) => {
     const items = bl.items.map((it, i) => resolver(it, `${clave}${k}-${i}`, f));
     if (fase === 'descarga' && ['recuperacion', 'forma', 'agua'].includes(clave)) items.forEach(it => { it.s = menos(it.s, -1); });
     return { b: bl.b, ...BLOQUES[bl.b], rondas: bl.rondas && (fase === 'descarga' ? bl.rondas - 1 : bl.rondas), descansoRonda: bl.descansoRonda, items };
   });
   for (const bl of bloques) if (bl.rondas) bl.items.forEach(it => { it.s = bl.rondas; });
-  const TITULO = { movilidad: 'Día sin gimnasio', precomp: 'Precompetencia', competencia: 'Día de competencia', noche: 'Recuperación', recuperacion: 'Plan B', forma: 'Plan B', agua: 'Plan B' };
-  return { clave, n: r.n, sub: r.sub, c: r.c, casa: !!r.casa, final: r.final, fase, tope: 0, bloques, min: duracion(bloques), titulo: TITULO[clave] || r.n };
+  if (suave) bloques.forEach(bl => bl.items.forEach(it => { it.s = 1; }));
+  const TITULO = { movilidad: 'Día sin gimnasio', precomp: 'Precompetencia', competencia: 'Día de competencia', noche: 'Recuperación', recuperacion: 'Plan B', forma: 'Plan B', agua: 'Plan B', recMar: 'Recuperación', recJue: 'Recuperación', recSab: 'Recuperación' };
+  return { clave, n: r.n, sub: r.sub, c: r.c, casa: !!r.casa, luna: !!r.luna, suave, final: r.final, fase, tope: 0, bloques, min: duracion(bloques), titulo: TITULO[clave] || r.n };
+}
+
+// ── Activación con ligas ─────────────────────────────────────
+// Base de 4 min para cualquier día de agua; en descarga, puesta a punto y competencia,
+// la versión de competencia según las pruebas marcadas con 🏁 en Mis marcas.
+export const ligasDeCompetencia = f => ['descarga', 'puesta', 'competencia'].includes(faseDe(f));
+
+export function itemsLigas(tipo) {
+  if (tipo === 'mini') return LIGAS.base.slice(0, 3).map(it => ({ ...it, s: 1 }));
+  if (tipo === 'base') return LIGAS.base;
+  const ev = S().marcas?.comp || [];
+  const estilo = id => id.split('-')[1], dist = id => Number(id.split('-')[0]);
+  const extra = [];
+  if (!ev.length || ev.some(id => estilo(id) === 'pecho')) extra.push(...LIGAS.pecho);
+  if (ev.some(id => estilo(id) === 'libre' && dist(id) <= 100)) extra.push(...LIGAS.libre);
+  const otros = [...new Set(ev.map(id => (estilo(id) === 'libre' && dist(id) > 100 ? 'libreLargo' : estilo(id))))].filter(k => LIGAS_OTRAS[k]);
+  const todos = [...LIGAS.pecho, ...LIGAS.libre];
+  for (const k of otros) extra.push(...LIGAS_OTRAS[k].map(e => todos.find(x => x.e === e)));
+  const vistos = new Set();
+  return [...LIGAS.base, ...extra].filter(it => it && !vistos.has(it.e) && vistos.add(it.e));
+}
+
+export function sesionLigas(clave, f) {
+  const tipo = clave === 'ligasMini' ? 'mini' : clave === 'ligasComp' || ligasDeCompetencia(f) ? 'comp' : 'base';
+  const items = itemsLigas(tipo).map((it, i) => resolver({ ...it }, `${clave}-${i}`, f));
+  const bloques = [{ b: 'activacion', ...BLOQUES.activacion, items }];
+  const T = { base: ['Activación con ligas', '4 min · banda ligera o mediana · antes de nadar'], comp: ['Activación de competencia', '6-8 min · banda ligera o mediana · según tus pruebas'], mini: ['Mini activación', '2 min · antes de tu siguiente prueba'] }[tipo];
+  return { clave, n: T[0], sub: T[1], c: 'var(--aqua)', casa: false, ligas: tipo, fase: faseDe(f), tope: 0, bloques, min: tipo === 'base' ? 4 : tipo === 'mini' ? 2 : Math.min(8, Math.max(6, Math.round(items.length * 0.6))), titulo: 'Antes de nadar' };
 }
 
 export function sesionDe(clave, f, opc) {
+  if (clave.startsWith('ligas')) return sesionLigas(clave, f);
   return 'ABC'.includes(clave) && clave.length === 1 ? sesionGym(f, { ...opc, letra: clave }) : sesionRutina(clave, f);
 }
 

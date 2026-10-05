@@ -328,7 +328,14 @@ html:not(.ligero) .ola-1, html:not(.ligero) .ola-2 { animation: ola 9s linear in
 .opcion b { font-size: 1.0625rem; }
 .opcion span { color: var(--txt2); font-size: 0.875rem; }
 .alts { display: grid; gap: 8px; margin-bottom: 4px; }
-.alt { position: relative; display: grid; gap: 4px; padding: 16px; border-radius: 17px; text-align: left; background: var(--bg); border: 2px solid transparent; transition: border-color .2s; }
+.alt { position: relative; border-radius: 17px; background: var(--bg); border: 2px solid transparent; transition: border-color .2s; }
+.alt-elegir { width: 100%; display: grid; gap: 8px; padding: 16px; text-align: left; min-height: 48px; }
+.alt-mas { padding: 0 16px 16px; display: grid; gap: 12px; }
+.alt-mas .pasos { margin: 0; }
+.alt-ets { display: flex; flex-wrap: wrap; gap: 6px; }
+.alt-ets:empty { display: none; }
+.et { font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--card2); color: var(--txt2); }
+.leyenda-ets { font-size: 0.8125rem; color: var(--txt2); margin: -4px 0 12px; }
 .alt-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .alt-n { font-weight: 780; font-size: 1rem; }
 .alt-sr { font-size: 0.9375rem; font-weight: 900; font-variant-numeric: tabular-nums; }
@@ -619,10 +626,6 @@ body.sin-tabs .mini { bottom: calc(var(--sa-b) + 16px); }
 .anim-svg .balon, .anim-poses .balon { fill: #FFB070; stroke: #C46A2A; stroke-width: 1.5; }
 .anim-svg .pie, .anim-poses .pie { fill: var(--aqua); }
 .tag.exp { --c: var(--amarillo); }
-.pie-plano { display: flex; align-items: center; gap: 12px; width: 100%; margin: 12px 0 0; padding: 12px 16px; border-radius: 14px; background: color-mix(in srgb, var(--amarillo) 10%, transparent); border: 1px solid color-mix(in srgb, var(--amarillo) 35%, transparent); color: var(--txt-amarillo); font-size: 0.875rem; text-align: left; }
-.pie-plano .ico { color: var(--txt-amarillo); flex: none; }
-.pie-plano b { color: var(--txt-amarillo); }
-.alt-pp { justify-self: start; font-size: 0.6875rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--amarillo) 16%, transparent); color: var(--txt-amarillo); }
 
 /* ── Marcas ─────────────────────────────────────────────────── */
 .tabs button { font-size: 0.6562rem; }
@@ -853,3 +856,52 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 .prog-ej li b { font-size: 0.9375rem; }
 .prog-ej li span { font-size: 0.8125rem; color: var(--txt2); }
 .mini-g { width: 84px; height: 30px; flex: none; }
+.anim-svg .toalla, .anim-poses .toalla { stroke: var(--txt-suave); stroke-width: 5; stroke-linecap: round; }
+
+/* ¿Cómo te fue ayer? */
+.ayer-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); gap: 8px; margin-top: 12px; }
+.ayer-btns .btn-sec { margin: 0; }
+
+/* Antes de nadar: activación con ligas */
+.card.ligas { border-color: color-mix(in srgb, var(--aqua) 35%, transparent); display: grid; gap: 12px; }
+.card.ligas .card-cab { margin: 0; }
+.ligas-n { font-size: 0.9375rem; }
+.ligas-intro { padding: 12px; border-radius: 14px; background: color-mix(in srgb, var(--aqua) 10%, transparent); display: grid; gap: 8px; font-size: 0.875rem; }
+.ligas-fila { display: grid; gap: 8px; }
+.ligas-fila .fila-2 { margin: 0; }
+.ligas-et { font-size: 0.8125rem; font-weight: 750; color: var(--txt2); }
+.ligas-notas { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 0.8125rem; color: var(--txt2); }
+.horas { display: grid; gap: 8px; padding: 12px; border-radius: 14px; background: var(--bg); }
+.horas .sub-t { margin: 0; }
+.hora-fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-weight: 700; font-size: 0.9375rem; }
+.hora-fila input { min-height: 48px; padding: 0 12px; border-radius: 12px; border: 1.5px solid var(--linea); background: var(--card); color: var(--txt); font: inherit; }
+.horas-plan { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.horas-plan li { padding: 8px 12px; border-radius: 12px; background: color-mix(in srgb, var(--aqua) 12%, transparent); font-size: 0.875rem; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.horas-plan li.mini { background: color-mix(in srgb, var(--amarillo) 14%, transparent); }
+.horas-plan li span { flex: 1 1 12rem; min-width: 0; }
+.cuenta-ligas { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--txt-aqua); }
+
+/* Plan B: elegir */
+.opcion.grande { min-height: 72px; }
+.planb-ops { display: grid; gap: 12px; }
+.planb-op { position: relative; display: grid; gap: 6px; text-align: left; padding: 16px; border-radius: 18px; background: var(--bg); border: 2px solid transparent; min-height: 48px; }
+.planb-op b { font-size: 1.0625rem; font-weight: 800; }
+.planb-op.rec { border-color: var(--turq); background: color-mix(in srgb, var(--turq) 8%, transparent); }
+.planb-meta { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--txt2); }
+.planb-meta .ico { width: 16px; height: 16px; }
+.rec-tag { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 850; padding: 3px 10px; border-radius: 999px; background: var(--turq); color: var(--sobre-acento); }
+.rec-tag .ico { width: 14px; height: 14px; }
+
+/* Tus 8 reglas de oro */
+.oro-lema { font-weight: 800; font-size: 1.0625rem; color: var(--txt-aqua); margin: 0 0 12px; text-wrap: balance; }
+.oro-carrusel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; scrollbar-width: none; overscroll-behavior-x: contain; }
+.oro-carrusel::-webkit-scrollbar { display: none; }
+.oro-t { flex: 0 0 100%; scroll-snap-align: start; min-width: 0; display: grid; align-content: start; gap: 8px; padding: 16px; border-radius: 18px; background: var(--bg); }
+.oro-ico { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--aqua) 16%, transparent); color: var(--txt-aqua); }
+.oro-ico .ico { width: 24px; height: 24px; }
+.oro-num { font-size: 0.75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--txt2); }
+.oro-t h4 { font-size: 1.1875rem; font-weight: 850; line-height: 1.2; text-wrap: balance; margin: 0; }
+.oro-ej { font-size: 0.875rem; color: var(--txt2); padding: 8px 12px; border-radius: 12px; background: var(--card2); }
+.oro-puntos { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+.oro-puntos i { width: 8px; height: 8px; border-radius: 50%; background: var(--linea); transition: transform .2s; }
+.oro-puntos i.act { background: var(--aqua); transform: scale(1.3); }

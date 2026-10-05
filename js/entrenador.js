@@ -50,7 +50,6 @@ export function renderEntrenador(v) {
         <li><b>Fuerza explosiva:</b> baja controlado en 2 s y sube lo más rápido posible. Nunca al fallo (RPE 6-8, le sobran 2-3 repeticiones).</li>
         <li><b>Máquinas para entrenar solo con seguridad</b>, con peso inicial y tope por ejercicio, y un máximo de un escalón por semana.</li>
         <li><b>Hacia atrás desde la competencia:</b> construcción, pico, descarga (−40% de volumen) y puesta a punto (2 sesiones cortas). La descarga del agua la decide usted; la app solo ajusta el seco.</li>
-        ${c.pieplano !== false ? '<li><b>Pie plano:</b> los ejercicios de equilibrio en un pie se cambian por versiones en máquina cuando le cuestan.</li>' : ''}
         <li><b>Si marca dolor de rodilla, hombro o espalda</b> en el chequeo, la app quita lo que carga esa zona y deja movilidad y core.</li>
       </ul>
       <div class="fases">${tramos().filter(t => !['antes', 'despues'].includes(t.fase)).map(t => `<div class="fase-f" style="--c:${FASES[t.fase].c}"><div><b>${FASES[t.fase].n}</b><span>${fechaCorta(t.ini)}${t.fin !== t.ini ? ' – ' + fechaCorta(t.fin) : ''}</span></div></div>`).join('')}</div>
