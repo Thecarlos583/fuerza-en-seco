@@ -168,7 +168,7 @@ function lado(p, def, punto, fijo) {
   s += ln(f.cad, f.hom, 'torso') + `<circle class="cabeza" cx="${f1(f.cab[0])}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`;
   s += pierna(f.p1, 'hueso') + brazo(f.b1, 'hueso');
   s += equipoMovil(def, f, p, 'lado');
-  if (punto) s += marca(punto, {
+  s += marca(punto, {
     rodilla: [f.p1.rod], cadera: [f.cad], pies: [f.p1.tob], hombro: [f.hom], manos: [f.b1.mano], codo: [f.b1.cod],
     espalda: [medio(f.cad, f.hom)], cabeza: [f.cab],
   }, f);
@@ -210,20 +210,51 @@ function frente(p, def, punto, fijo) {
   s.push(`<circle class="cabeza" cx="${f1(CX)}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`);
   for (const x of [bi, bd]) s.push(pl([x.hom, x.cod, x.mano], 'hueso'));
   s.push(equipoMovil(def, f, p, 'frente'));
-  if (punto) s.push(marca(punto, { rodilla: [izq.rod, der.rod], pies: [izq.pie, der.pie], cadera: [[CX, f.cad[1]]], espalda: [[CX, (f.cad[1] + f.hom[1]) / 2]], hombro: [bi.hom, bd.hom], manos: [bi.mano, bd.mano], codo: [bi.cod, bd.cod], cabeza: [[CX, f.cab[1]]] }, null));
+  s.push(marca(punto, { rodilla: [izq.rod, der.rod], pies: [izq.pie, der.pie], cadera: [[CX, f.cad[1]]], espalda: [[CX, (f.cad[1] + f.hom[1]) / 2]], hombro: [bi.hom, bd.hom], manos: [bi.mano, bd.mano], codo: [bi.cod, bd.cod], cabeza: [[CX, f.cab[1]]] }, null));
   return s.join('');
 }
 
+// La marca coral siempre existe (línea + 2 círculos) para no recrear nodos: se oculta cuando no hace falta
 function marca(punto, pts, f) {
-  let s = '';
-  if (punto.zona === 'espalda' && f) s += `<line class="marca-linea" x1="${f1(f.cad[0])}" y1="${f1(f.cad[1])}" x2="${f1(f.hom[0])}" y2="${f1(f.hom[1])}"/>`;
-  for (const q of pts[punto.zona] || pts.cadera) s += `<circle class="marca" cx="${f1(q[0])}" cy="${f1(q[1])}" r="9"/>`;
+  const lin = punto && punto.zona === 'espalda' && f;
+  const qs = punto ? (pts[punto.zona] || pts.cadera) : [];
+  const a = f ? f.cad : [0, 0], b = f ? f.hom : [0, 0];
+  let s = `<line class="marca-linea${lin ? '' : ' oculta'}" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}"/>`;
+  for (let i = 0; i < 2; i++) { const q = qs[i] || [0, 0]; s += `<circle class="marca${qs[i] ? '' : ' oculta'}" cx="${f1(q[0])}" cy="${f1(q[1])}" r="9"/>`; }
   return s;
 }
 
+const fondo = (def, vista) => `<line class="suelo" x1="6" y1="${SUELO}" x2="234" y2="${SUELO}"/>` + equipoFijo(def, vista);
+const figuraSVG = (def, q, vista, punto, fijo) => (vista === 'frente' ? frente(q, def, punto, fijo) : lado(q, def, punto, fijo));
+
 export function dibujarPose(def, p, vista = 'lado', punto = null, fijo = null) {
   const q = p.__ok ? p : completar(p, def);
-  return `<line class="suelo" x1="6" y1="${SUELO}" x2="234" y2="${SUELO}"/>` + equipoFijo(def, vista) + (vista === 'frente' ? frente(q, def, punto, fijo) : lado(q, def, punto, fijo));
+  return fondo(def, vista) + figuraSVG(def, q, vista, punto, fijo);
+}
+
+// Actualiza un grupo SVG sin reconstruirlo: si la estructura es la misma, solo cambia los atributos
+const RE_TAG = /<(\/?)(\w+)([^>]*?)\/?>/g, RE_ATR = /([\w-]+)="([^"]*)"/g;
+function parchear(g, html) {
+  const nodos = [];
+  for (const m of html.matchAll(RE_TAG)) {
+    if (m[1]) continue;
+    const a = {};
+    for (const x of m[3].matchAll(RE_ATR)) a[x[1]] = x[2];
+    nodos.push([m[2], a]);
+  }
+  const firma = nodos.map(n => n[0]).join('|');
+  if (g._firma !== firma) {
+    g.innerHTML = html;
+    g._firma = firma;
+    g._els = [...g.querySelectorAll('*')];
+    g._els.forEach((el, i) => { el._a = nodos[i][1]; });
+    return;
+  }
+  g._els.forEach((el, i) => {
+    const a = nodos[i][1], prev = el._a;
+    for (const k in a) if (prev[k] !== a[k]) el.setAttribute(k, a[k]);
+    el._a = a;
+  });
 }
 
 // ── Línea de tiempo ──────────────────────────────────────────
@@ -261,17 +292,21 @@ function poseEn(prep, t) {
 const defDe = e => { const d = ANIM[e]; return d?.como ? ANIM[d.como] : d; };
 export const tieneAnimacion = e => !!defDe(e);
 
+// Solo una animación a la vez
+let detenerActual = null;
+
 // Monta el reproductor dentro de un contenedor
 export function montar(cont, e) {
   const def = defDe(e);
   if (!def) return;
+  detenerActual?.();
   const prep = preparar(def);
   const vistas = def.vistas || ['lado'];
-  const st = { t: 0, play: true, vel: 1, vista: vistas[0], ult: performance.now(), raf: 0, paso: null };
+  const st = { t: 0, play: true, vel: 1, vista: vistas[0], ult: performance.now(), dib: 0, raf: 0, paso: null, visible: true, costo: [], gaps: [], lento: false };
   const nombreVista = v => v === 'frente' ? 'Ver de frente' : 'Ver de lado';
   cont.innerHTML = `
     <div class="anim">
-      <svg class="anim-svg" viewBox="0 0 240 196" role="img" aria-label="Animación del ejercicio"><g class="anim-g"></g></svg>
+      <svg class="anim-svg" viewBox="0 0 240 196" role="img" aria-label="Animación del ejercicio"><g class="anim-fijo"></g><g class="anim-g"></g></svg>
       <p class="anim-punto" aria-live="polite"></p>
     </div>
     <div class="anim-ctrl">
@@ -281,31 +316,56 @@ export function montar(cont, e) {
       <button data-an="next" aria-label="Pose siguiente">Pose ›</button>
       ${vistas.length > 1 ? `<button data-an="vista" class="vista">${nombreVista(vistas[1])}</button>` : ''}
     </div>
+    <p class="anim-lento" hidden>Tu teléfono va algo lento: te muestro las poses fijas. Toca cada una o usa ‹ Pose ›.</p>
     <div class="anim-poses">${def.poses.map((p, i) => `<button data-an="ir" data-i="${i}"><svg viewBox="0 0 240 196">${dibujarPose(def, p, vistas[0])}</svg><b>${i + 1}</b><span>${p.n || ''}</span></button>`).join('')}</div>`;
-  const g = cont.querySelector('.anim-g'), txt = cont.querySelector('.anim-punto');
+  const fijoG = cont.querySelector('.anim-fijo'), g = cont.querySelector('.anim-g'), txt = cont.querySelector('.anim-punto');
   const bPlay = cont.querySelector('[data-an=play]');
   const icoPlay = () => { bPlay.innerHTML = st.play ? '❚❚ Pausa' : '▶ Seguir'; };
   icoPlay();
+  fijoG.innerHTML = fondo(def, st.vista);
+  cont._st = st; // para las pruebas automáticas
 
   let ultActiva = -1;
   const pintar = () => {
+    const t0 = performance.now();
     const { p, activa, fijo } = st.paso !== null ? { p: prep.poses[st.paso], activa: st.paso, fijo: null } : poseEn(prep, st.t);
     const punto = def.poses[activa].punto || null;
-    g.innerHTML = dibujarPose(def, p, st.vista, punto, fijo);
+    parchear(g, figuraSVG(def, p, st.vista, punto, fijo));
     if (activa !== ultActiva) {
       ultActiva = activa;
       txt.textContent = punto ? punto.txt : (def.poses[activa].n || '');
       txt.classList.toggle('alerta', !!punto);
       cont.querySelectorAll('.anim-poses button').forEach((b, i) => b.classList.toggle('act', i === activa));
     }
+    return performance.now() - t0;
   };
+  // Pausa cuando no se ve en pantalla
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => { st.visible = es[0].isIntersecting; }) : null;
+  io?.observe(cont);
+  const detener = () => { cancelAnimationFrame(st.raf); io?.disconnect(); if (detenerActual === detener) detenerActual = null; };
+  detenerActual = detener;
+
   const bucle = ahora => {
-    if (!cont.isConnected) return;
-    if (st.play) st.t += (ahora - st.ult) * st.vel;
-    st.ult = ahora;
-    pintar();
+    if (!cont.isConnected) return detener();
+    const dt = ahora - st.ult; st.ult = ahora;
+    if (st.play && st.visible && document.visibilityState === 'visible') {
+      st.t += dt * st.vel;
+      if (ahora - st.dib >= 33) {          // máximo 30 cuadros por segundo
+        if (st.dib) st.gaps.push(ahora - st.dib);
+        st.dib = ahora;
+        const c = pintar();
+        // Si dibujar cuesta mucho o va a menos de 10 cuadros por segundo, pasamos a poses fijas
+        const prom = x => x.reduce((a, b) => a + b, 0) / x.length;
+        if (st.costo.length < 20) st.costo.push(c);
+        else if (!st.lento && (prom(st.costo) > 18 || prom(st.gaps.slice(-20)) > 100)) {
+          st.lento = true; st.play = false; st.paso = 0; icoPlay(); pintar();
+          cont.querySelector('.anim-lento').hidden = false;
+        }
+      }
+    }
     st.raf = requestAnimationFrame(bucle);
   };
+  pintar();
   st.raf = requestAnimationFrame(bucle);
 
   cont.onclick = ev => {
@@ -317,7 +377,9 @@ export function montar(cont, e) {
     if (a === 'vista') {
       const i = (vistas.indexOf(st.vista) + 1) % vistas.length; st.vista = vistas[i];
       b.textContent = nombreVista(vistas[(i + 1) % vistas.length]); ultActiva = -1;
+      fijoG.innerHTML = fondo(def, st.vista);
       cont.querySelectorAll('.anim-poses button svg').forEach((svg, k) => { svg.innerHTML = dibujarPose(def, def.poses[k], st.vista); });
+      pintar();
     }
     if (a === 'prev' || a === 'next' || a === 'ir') {
       st.play = false; icoPlay();
@@ -326,6 +388,7 @@ export function montar(cont, e) {
       st.paso = a === 'ir' ? Number(b.dataset.i) : (base + (a === 'next' ? 1 : -1) + n) % n;
       st.t = prep.tramos[st.paso].ini;
       ultActiva = -1;
+      pintar();
     }
   };
 }

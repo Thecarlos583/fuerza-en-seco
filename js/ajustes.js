@@ -136,6 +136,7 @@ export function renderAjustes(v) {
       <section class="card">
         <label class="sw"><span><b>Sonido</b><small>Pitidos al terminar descansos y temporizadores</small></span><input type="checkbox" name="sonido" ${c.sonido !== false ? 'checked' : ''}><i></i></label>
         <label class="sw"><span><b>Vibración</b><small>Vibra al terminar cada descanso</small></span><input type="checkbox" name="vibracion" ${c.vibracion !== false ? 'checked' : ''}><i></i></label>
+        <label class="sw"><span><b>Modo ligero</b><small>Sin olas, burbujas ni confeti, para que vaya fluida en cualquier teléfono</small></span><input type="checkbox" name="ligero" ${c.ligero !== false ? 'checked' : ''}><i></i></label>
         <button type="button" class="btn-sec" data-a="probar">${ico('play')}Probar sonido y vibración</button>
         <p class="peq txt2">Si no oyes nada, sube el volumen multimedia del teléfono (no el del timbre).</p>
         <button type="button" class="btn-sec" data-a="notif">${ico('info')}${'Notification' in window && Notification.permission === 'granted' ? 'Notificaciones activadas' : 'Activar notificaciones'}</button>
@@ -162,6 +163,8 @@ export function renderAjustes(v) {
     const n = leer(v, c);
     n.sonido = $('[name="sonido"]', v).checked;
     n.vibracion = $('[name="vibracion"]', v).checked;
+    n.ligero = $('[name="ligero"]', v).checked;
+    document.documentElement.classList.toggle('ligero', n.ligero || matchMedia('(prefers-reduced-motion: reduce)').matches);
     const err = validar(n);
     if (err) return aviso(err, 'info', 3500);
     if (!revisarGym(v)) return aviso('Deja un día libre entre sesiones de gimnasio', 'info', 3500);

@@ -60,15 +60,23 @@ export function renderHoy(v) {
     ${semanaPruebas(f)}
     ${despuesComp(f)}
     ${hero(f, t, l)}
-    ${t.clave ? `<div id="ses">${htmlSesion(t.clave, f, t.para)}</div>` : manana(f)}
+    ${t.clave ? '<div id="ses" class="ses-cargando"></div>' : manana(f)}
     ${t.d.tipo === 'competencia' && t.clave === 'competencia' ? noche(f) : ''}
-    ${tarjetaPrincipal()}
-    ${semana(f)}
-    ${lineaTiempo(f)}
-    ${stats(f)}
-    <p class="pie">${esc(FRASES[semilla(f) % FRASES.length])}</p>`;
+    <div id="hoy-resto" class="ses-cargando"></div>`;
+  // Lo que queda bajo el borde de la pantalla se pinta en el siguiente cuadro
+  const resto = () => `${tarjetaPrincipal()}${semana(f)}${lineaTiempo(f)}${stats(f)}<p class="pie">${esc(FRASES[semilla(f) % FRASES.length])}</p>`;
 
-  if (t.clave) activar($('#ses', v));
+  // La lista de ejercicios se pinta en el siguiente cuadro: la pantalla responde antes
+  requestAnimationFrame(() => setTimeout(() => {
+    const r = $('#hoy-resto', v);
+    if (r) { r.innerHTML = resto(); r.classList.remove('ses-cargando'); }
+    const ses = $('#ses', v);
+    if (!ses || !ses.isConnected) return;
+    if (!t.clave) return;
+    ses.innerHTML = htmlSesion(t.clave, f, t.para);
+    ses.classList.remove('ses-cargando');
+    activar(ses);
+  }));
   const enCurso = t.clave && esGym(t.clave) && !leerRegistro(f, t.clave)?.completa;
   pantallaEncendida(!!enCurso);
   v.onclick = ev => clic(ev, f, t);

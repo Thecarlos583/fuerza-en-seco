@@ -68,14 +68,21 @@ export function renderEntrenador(v) {
     <section class="card">
       <div class="card-cab"><h3>${ico('hoy')} Los ejercicios y por qué ayudan en el agua</h3></div>
       <p class="txt2 peq">Toca ▶ para ver cómo se hace cada uno.</p>
-      ${['A', 'B', 'C'].map(l => { const s = SESIONES[l]; return `<details class="plan-dia coach-ses"><summary><span class="dia-n">${NOMBRE_DIA[orden['ABC'.indexOf(l)]] || ''}</span><span class="dia-t">Sesión ${l} · ${s.n}<small>${s.sub}</small></span>${ico('abajo')}</summary>
-        ${['potencia', 'fuerza', 'core'].map(b => `<p class="plan-b">${BLOQ[b]}</p>${s[b].map(it => ejercicio(it)).join('')}`).join('')}
-      </details>`; }).join('')}
-      <details class="plan-dia coach-ses"><summary><span class="dia-n">Siempre</span><span class="dia-t">Activación<small>~10 min antes de cada sesión</small></span>${ico('abajo')}</summary>${ACTIVACION.map(it => ejercicio(it)).join('')}</details>
+      ${['A', 'B', 'C'].map(l => { const s = SESIONES[l]; return `<details class="plan-dia coach-ses" data-ses="${l}"><summary><span class="dia-n">${NOMBRE_DIA[orden['ABC'.indexOf(l)]] || ''}</span><span class="dia-t">Sesión ${l} · ${s.n}<small>${s.sub}</small></span>${ico('abajo')}</summary></details>`; }).join('')}
+      <details class="plan-dia coach-ses" data-ses="act"><summary><span class="dia-n">Siempre</span><span class="dia-t">Activación<small>~10 min antes de cada sesión</small></span>${ico('abajo')}</summary></details>
     </section>
 
     <button class="btn-pri" data-e="compartir">${ico('copiar')}Compartir este resumen</button>
     <p class="pie">Este plan complementa el entrenamiento de natación y no lo reemplaza.</p>`;
+
+  // El contenido de cada sesión se arma al abrirla
+  v.querySelectorAll('details[data-ses]').forEach(d => d.addEventListener('toggle', () => {
+    if (!d.open || d.dataset.listo) return;
+    d.dataset.listo = 1;
+    const l = d.dataset.ses, ses = SESIONES[l];
+    d.insertAdjacentHTML('beforeend', l === 'act' ? ACTIVACION.map(it => ejercicio(it)).join('')
+      : ['potencia', 'fuerza', 'core'].map(b => `<p class="plan-b">${BLOQ[b]}</p>${ses[b].map(it => ejercicio(it)).join('')}`).join(''));
+  }));
 
   v.onclick = async ev => {
     const ver = ev.target.closest('[data-ver]');

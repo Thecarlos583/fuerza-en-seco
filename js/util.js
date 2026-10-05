@@ -153,7 +153,9 @@ function arrastrarParaCerrar(h) {
   });
 }
 
-const sinMovimiento = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Modo ligero (por defecto) o "reducir movimiento" del sistema: sin burbujas ni confeti
+export const ligero = () => ajustes().ligero !== false || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sinMovimiento = ligero;
 
 // ── Confeti: "llegada a la pared" ───────────────────────────
 export function confeti(grande = true) {

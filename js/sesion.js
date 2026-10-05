@@ -91,7 +91,15 @@ function tarjeta(it, bl, n) {
     <div class="series" role="group" aria-label="${ronda ? 'Rondas' : 'Series'}">${Array.from({ length: it.s }, (_, k) => `<button class="serie ${hechas[k] ? 'hecha' : ''}" data-a="serie" data-k="${k}" aria-pressed="${!!hechas[k]}" aria-label="${ronda ? 'Ronda' : 'Serie'} ${k + 1}"><span class="serie-n">${k + 1}</span>${ico('check', 'serie-ok')}</button>`).join('')}</div>
     ${bloquePeso(it)}
     ${e.pp && C().pieplano !== false && it.alts.length ? `<button class="pie-plano" data-a="cambiar">${ico('cambiar')}<span><b>Pie plano:</b> si te cuesta el equilibrio o sientes el arco, cámbialo por otro</span></button>` : ''}
-    <div class="mas"><div class="mas-in">
+    <div class="mas"><div class="mas-in">${abierta ? detalles(it) : ''}    </div></div>
+  </article>`;
+}
+const minus = s => s ? s.charAt(0).toLowerCase() + s.slice(1).replace(/\.$/, '') : '';
+
+// Detalles de la tarjeta (se crean solo al abrirla)
+function detalles(it) {
+  const e = EJ[it.e];
+  return `
       ${tieneAnimacion(it.e) ? `<button class="btn-sec ver" data-a="ver">${ico('play')}Ver cómo se hace</button>` : ''}
       <h4>Para qué sirve en el agua</h4><p class="txt2">${esc(e.para)}</p>
       <h4>Cómo hacerlo</h4>
@@ -100,11 +108,8 @@ function tarjeta(it, bl, n) {
       ${e.check ? `<h4>Puntos clave</h4><ul class="claves">${e.check.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
       ${e.tec ? `<p class="sugerencia">${ico('mano')}<span>Si hay alguien en el gimnasio, vale la pena que te vea una serie. Algo como: «¿Me puedes ver una serie de ${esc(e.n.toLowerCase())}? Fíjate en ${esc(minus((e.check || e.como)[0]))}».</span></p>` : ''}
       ${e.z.length ? `<div class="mapa">${cuerpo(e.z, e.s)}</div>` : ''}
-      ${it.alts.length ? `<button class="btn-sec" data-a="cambiar">${ico('cambiar')}Cambiar ejercicio</button>` : ''}
-    </div></div>
-  </article>`;
+      ${it.alts.length ? `<button class="btn-sec" data-a="cambiar">${ico('cambiar')}Cambiar ejercicio</button>` : ''}`;
 }
-const minus = s => s ? s.charAt(0).toLowerCase() + s.slice(1).replace(/\.$/, '') : '';
 
 // ── Pesos guiados ────────────────────────────────────────────
 function bloquePeso(it) {
@@ -192,6 +197,8 @@ function clic(ev) {
       const ab = card.classList.toggle('abierta');
       b.setAttribute('aria-expanded', ab);
       ab ? abiertas.add(slot) : abiertas.delete(slot);
+      const mas = card.querySelector('.mas-in');
+      if (ab && !mas.childElementCount) mas.innerHTML = detalles(item(slot));
       vibrar(8);
       break;
     }
@@ -213,7 +220,7 @@ function tocarSerie(slot, k) {
   if (h[k]) { // deshacer
     h[k] = false;
     ctx.rec.saltos = Math.max(0, ctx.rec.saltos - contactos(it));
-    guardar(); repintarTarjeta(slot); pintarCab();
+    guardar(); refrescarSeries(slot); pintarCab();
     return;
   }
   const c = contactos(it);
@@ -241,12 +248,13 @@ function marcar(slot, k) {
   const h = (ctx.rec.hechas[slot] ||= []);
   h[k] = true;
   ctx.rec.saltos += contactos(it);
-  if (W.conPeso(it.e) && ctx.rec.pesos[slot] === undefined) ctx.rec.pesos[slot] = W.sugerido(it.e, ctx.f, { ligera: ctx.ses.ligera });
+  const pesoNuevo = W.conPeso(it.e) && ctx.rec.pesos[slot] === undefined;
+  if (pesoNuevo) ctx.rec.pesos[slot] = W.sugerido(it.e, ctx.f, { ligera: ctx.ses.ligera });
   guardar();
   sonar.serie(); vibrar(25);
   const completa = h.slice(0, it.s).filter(Boolean).length >= it.s;
   if (completa) abiertas.delete(slot);
-  repintarTarjeta(slot);
+  pesoNuevo ? repintarTarjeta(slot) : refrescarSeries(slot);
   const nb = $(`.ej[data-slot="${slot}"] .serie[data-k="${k}"]`, ctx.raiz);
   nb?.classList.add('pop'); burbujas(nb);
   pintarCab();
@@ -267,6 +275,18 @@ function marcar(slot, k) {
       bl.b === 'potencia' ? 'Descanso completo: la velocidad importa más que el cansancio.' : completa && sig ? `Siguiente: ${EJ[sig.e].n}` : '');
   }
   if (completa && sig) setTimeout(() => $(`.ej[data-slot="${sig.slot}"]`, ctx.raiz)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 450);
+}
+
+// Actualización rápida al marcar una serie: solo burbujas y estado de la tarjeta
+function refrescarSeries(slot) {
+  const card = $(`.ej[data-slot="${slot}"]`, ctx.raiz);
+  if (!card) return;
+  const it = item(slot), h = ctx.rec.hechas[slot] || [];
+  card.querySelectorAll('.serie').forEach((b, k) => { b.classList.toggle('hecha', !!h[k]); b.setAttribute('aria-pressed', !!h[k]); });
+  const completa = h.slice(0, it.s).filter(Boolean).length >= it.s;
+  card.classList.toggle('completa', completa);
+  if (completa) card.classList.remove('abierta');
+  card.querySelector('.ej-num').innerHTML = completa ? ico('check') : card.dataset.n;
 }
 
 function repintarTarjeta(slot) {

@@ -1,6 +1,6 @@
 // Arranque, navegación entre pantallas y service worker
 import { C } from './store.js';
-import { $, ico, desbloquearAudio, pantallaEncendida, cerrarHoja } from './util.js';
+import { $, ico, desbloquearAudio, pantallaEncendida, cerrarHoja, ligero } from './util.js';
 import { hoy } from './fechas.js';
 import { renderHoy } from './hoy.js';
 import { renderGuia } from './guia.js';
@@ -23,12 +23,14 @@ function ir({ arriba = true } = {}) {
   else if (v === 'bienvenida' || v === 'sesion' || !v) v = 'hoy';
   ruta = v;
   fechaPintada = hoy();
+  document.documentElement.classList.toggle('ligero', ligero());
   cerrarHoja();
   vista.onclick = null;
   document.body.classList.toggle('sin-tabs', v === 'bienvenida');
   if (v !== 'hoy') pantallaEncendida(false);
   $$tabs(v);
-  vista.classList.remove('entra'); void vista.offsetWidth; vista.classList.add('entra');
+  // La animación de entrada solo fuera del Modo ligero (reiniciarla obliga a recalcular el diseño)
+  if (!ligero()) { vista.classList.remove('entra'); void vista.offsetWidth; vista.classList.add('entra'); } else vista.classList.remove('entra');
   if (v === 'guia') renderGuia(vista, rest[0]);
   else if (v === 'marcas') renderMarcas(vista, rest[0]);
   else if (v === 'progreso') renderProgreso(vista);

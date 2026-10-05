@@ -16,7 +16,15 @@ const base = () => ({
   vistos: {},
 });
 
-const fusionar = d => ({ ...base(), ...d });
+// Migración: completa los campos nuevos sin tocar lo que ya estaba guardado
+function fusionar(d) {
+  const b = base(), e = { ...b, ...d };
+  e.marcas = { ...b.marcas, ...(d.marcas || {}) };
+  e.pruebas = { ...b.pruebas, ...(d.pruebas || {}) };
+  e.vistos = { ...(d.vistos || {}) };
+  if (e.config && e.config.ligero === undefined) e.config.ligero = true;
+  return e;
+}
 
 function cargar() {
   try {

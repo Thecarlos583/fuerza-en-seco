@@ -10,6 +10,7 @@ export const DEFAULTS = {
   gym: ['lun', 'mie', 'vie'],              // en orden: A, B, C
   agua: ['lun', 'mar', 'mie', 'jue', 'vie'],
   pieplano: true,
+  ligero: true,
   comp: { nombre: 'Juegos Deportivos Nacionales', corto: 'los Juegos Nacionales', ini: '2026-11-15', fin: '', lugar: '', piscina: 50 },
 };
 

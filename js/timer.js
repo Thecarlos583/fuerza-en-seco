@@ -46,16 +46,25 @@ function mostrar(g) {
   pintar();
 }
 
+// Escribe en el DOM solo si el valor cambió (reescribir lo mismo también obliga a repintar)
+const previo = new Map();
+function poner(el, prop, valor) {
+  const k = el.id + el.className + prop;
+  if (previo.get(k) === valor) return;
+  previo.set(k, valor);
+  if (prop === 'text') el.textContent = valor; else el.style[prop] = valor;
+}
+
 function pintar() {
   if (!t) return;
   const resta = (t.fin - Date.now()) / 1000;
   const frac = Math.min(1, Math.max(0, 1 - resta / t.total));
-  // La ola sube desde abajo a medida que pasa el descanso
-  $('#ola-agua').style.transform = `translateY(${(1 - frac) * 100}%)`;
+  // La ola sube desde abajo a medida que pasa el descanso (en pasos de 1 %)
+  poner($('#ola-agua'), 'transform', `translateY(${Math.round((1 - frac) * 100)}%)`);
   const txt = terminando ? '¡Dale!' : fmt(resta);
-  $('#descanso .reloj-num').textContent = txt;
-  $('#mini .mini-num').textContent = txt;
-  $('#mini .mini-barra').style.transform = `scaleX(${frac})`;
+  poner($('#descanso .reloj-num'), 'text', txt);
+  poner($('#mini .mini-num'), 'text', txt);
+  poner($('#mini .mini-barra'), 'transform', `scaleX(${frac.toFixed(2)})`);
   const seg = Math.ceil(resta);
   if (seg !== ultimoSeg) {
     if (seg <= 3 && seg > 0 && ultimoSeg !== null) sonar.tic();
@@ -77,6 +86,7 @@ function terminar() {
   if (terminando) return;
   terminando = true;
   clearInterval(raf); clearTimeout(respaldo);
+  poner($('#descanso .reloj-num'), 'text', '¡Dale!'); poner($('#mini .mini-num'), 'text', '¡Dale!');
   $('#descanso').classList.add('listo'); $('#mini').classList.add('listo');
   sonar.fin();
   vibrar([200, 100, 200]);
