@@ -114,7 +114,7 @@ export function renderBienvenida(v) {
   interacciones($("#form", v));
   $('#form').onsubmit = e => {
     e.preventDefault();
-    const n = leer(v, { ...c, sonido: true, vibracion: true, barraZ: 20, verEn: 'kg', otras: [] });
+    const n = leer(v, { ...c, sonido: true, vibracion: true, barraZ: 20, unidades: {}, otras: [] });
     const err = validar(n);
     if (err) return aviso(err, 'info', 3500);
     if (!revisarGym(v)) return aviso('Deja un día libre entre sesiones de gimnasio', 'info', 3500);

@@ -45,7 +45,6 @@ export function renderGuia(v, sub) {
 
     <section class="card">
       <div class="card-cab"><h3>${ico('cal')} Tu semana</h3><span class="cont">fuerza explosiva · máquinas y mancuernas</span></div>
-      ${W.switchUnidades('data-g')}
       <div class="plan">
         ${dias}
         ${ligas}
@@ -101,16 +100,6 @@ export function renderGuia(v, sub) {
   v.onclick = ev => {
     const b = ev.target.closest('[data-g=ver]');
     if (b) { ev.preventDefault(); hojaAnimacion(b.dataset.e); return; }
-    const u = ev.target.closest('[data-g=unid]');
-    if (u && W.verEn() !== u.dataset.u) {
-      // Cambia kg ⇄ lb y vuelve a pintar sin cerrar los días que estaban abiertos
-      C().verEn = u.dataset.u; guardar(); vibrar(8);
-      const abiertos = [...v.querySelectorAll('details')].map(d => d.open), y = scrollY;
-      renderGuia(v);
-      v.querySelectorAll('details').forEach((d, i) => { d.open = !!abiertos[i]; });
-      scrollTo(0, y);
-      aviso(u.dataset.u === 'kg' ? 'Pesos en kilos' : 'Pesos en libras', 'check');
-    }
   };
   const car = v.querySelector('#oro');
   car.addEventListener('scroll', () => {

@@ -98,7 +98,6 @@ function pesosHTML() {
   return `<section class="card">
     <div class="card-cab"><h3>${ico('trofeo')} Tus pesos</h3></div>
     ${conPeso.length || corporal.length ? `
-      ${conPeso.length ? W.switchUnidades('data-p') : ''}
       ${top.length ? `<p class="sub-t">Los que más subieron</p><ol class="podio">${top.map(x => `<li><span>${esc(EJ[x.e].n)}</span><b class="sube-txt">${signo(x.e, x.dif)}</b></li>`).join('')}</ol>` : ''}
       ${conPeso.length ? `<ul class="prog-ej">${conPeso.map(x => `<li>
         <div><b>${esc(EJ[x.e].n)}</b><span>Empezó con ${W.cifra(x.e, x.ini)} → hoy ${W.cifra(x.e, x.hoy)}${x.dif ? ` <em class="${x.dif > 0 ? 'sube-txt' : ''}">(${signo(x.e, x.dif)})</em>` : ''}</span></div>
@@ -161,7 +160,6 @@ function clic(ev) {
   if (!b) return;
   if (b.dataset.p === 'mes') { mes = Math.min(0, mes + Number(b.dataset.d)); vibrar(8); dispatchEvent(new Event('fs:refrescar')); }
   if (b.dataset.p === 'peso') hojaPeso();
-  if (b.dataset.p === 'unid' && W.verEn() !== b.dataset.u) { C().verEn = b.dataset.u; guardar(); vibrar(8); dispatchEvent(new Event('fs:refrescar')); }
 }
 
 // Anotar el peso corporal de la semana (uno por semana: si ya hay, se reemplaza)

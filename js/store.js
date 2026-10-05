@@ -31,7 +31,8 @@ function fusionar(d) {
     if (c.pesoCorp?.u === 'lb') c.pesoCorp = { v: Math.round(c.pesoCorp.v / 2.20462 * 2) / 2, u: 'kg' };
     if (Array.isArray(c.barraZ)) c.barraZ = c.barraZ[1] || 20;
     c.barraZ ||= 20;
-    c.verEn ||= 'kg';
+    c.unidades ||= {}; // ejercicio → unidad de sus discos, si Juan la cambió (versión 17)
+    delete c.verEn;
     // Versión 16: días de doble sesión de agua (recuperación fija y dos activaciones) y activación con ligas
     if (!Array.isArray(c.aguaDoble)) { c.aguaDoble = ['mar', 'jue', 'sab']; c.agua = [...new Set([...(c.agua || []), ...c.aguaDoble])]; }
     if (c.activacion === undefined) c.activacion = true;
