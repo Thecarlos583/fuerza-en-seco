@@ -1,10 +1,10 @@
 // Temporizadores: descanso (círculo que se llena como una ola) y trabajo (cuenta regresiva grande).
 // Se basan en la hora de fin, así que siguen exactos aunque se bloquee el teléfono.
 import { S, guardar } from './store.js';
-import { $, fmt, sonar, vibrar } from './util.js';
+import { $, fmt, sonar, vibrar, notificar, pantallaEncendida } from './util.js';
 
 // ── Descanso ─────────────────────────────────────────────────
-let t = null, raf = 0, ultimoSeg = null, terminando = false, grande = false;
+let t = null, raf = 0, ultimoSeg = null, terminando = false, grande = false, respaldo = 0;
 
 export const descansoActivo = () => !!t;
 
@@ -15,6 +15,7 @@ export function iniciarDescanso(seg, titulo, sub = '') {
   terminando = false; ultimoSeg = null;
   $('#descanso').classList.remove('listo'); $('#mini').classList.remove('listo');
   mostrar(true);
+  pantallaEncendida(true);
   bucle();
 }
 
@@ -63,24 +64,30 @@ function pintar() {
   if (resta <= 0) terminar();
 }
 
+// Tic cada 250 ms (no en cada cuadro) + respaldo exacto a la hora de fin por si el navegador frena el tic
 function bucle() {
-  cancelAnimationFrame(raf);
-  const paso = () => { pintar(); if (t && !terminando) raf = requestAnimationFrame(paso); };
-  raf = requestAnimationFrame(paso);
+  clearInterval(raf); clearTimeout(respaldo);
+  if (!t) return;
+  pintar();
+  raf = setInterval(() => { if (t && !terminando) pintar(); else clearInterval(raf); }, 250);
+  respaldo = setTimeout(() => { if (t && !terminando) pintar(); }, Math.max(0, t.fin - Date.now()) + 30);
 }
 
 function terminar() {
   if (terminando) return;
   terminando = true;
+  clearInterval(raf); clearTimeout(respaldo);
   $('#descanso').classList.add('listo'); $('#mini').classList.add('listo');
   sonar.fin();
-  vibrar([260, 120, 260]);
+  vibrar([200, 100, 200]);
+  notificar('Descanso terminado', 'Siguiente serie: ' + (t?.titulo || ''));
+  dispatchEvent(new CustomEvent('fs:descanso-fin'));
   setTimeout(cerrar, 1600);
 }
 
 export function cerrarDescanso() { if (t) cerrar(); }
 function cerrar() {
-  cancelAnimationFrame(raf);
+  clearInterval(raf); clearTimeout(respaldo);
   t = null; terminando = false;
   S().timer = null; guardar();
   mostrar(false);
@@ -97,7 +104,7 @@ function ajustar(d) {
 }
 
 // ── Trabajo (planchas, isométricos, tiempos) ─────────────────
-let w = null, wraf = 0;
+let w = null, wraf = 0, wresp = 0;
 
 // tramos: [{ tipo: 'prep' | 'trabajo' | 'cambio', s, txt }]
 export function iniciarTrabajo(nombre, tramos, alTerminar) {
@@ -106,6 +113,7 @@ export function iniciarTrabajo(nombre, tramos, alTerminar) {
   el.hidden = false;
   el.classList.remove('fin', 'pausada');
   requestAnimationFrame(() => el.classList.add('abierto'));
+  pantallaEncendida(true);
   $('#tr-nombre').textContent = nombre;
   pintarTramo();
   wbucle();
@@ -137,18 +145,22 @@ function wpintar() {
     if (w.i >= w.tramos.length) return wterminar(true);
     w.fin = Date.now() + w.tramos[w.i].s * 1000; w.ultimo = null;
     sonar.ya(); vibrar([200, 80, 200]);
+    notificar(w.tramos[w.i].tipo === 'cambio' ? 'Cambia de lado' : '¡Aguanta!', w.nombre);
     pintarTramo();
+    wbucle();
   }
 }
 
 function wbucle() {
-  cancelAnimationFrame(wraf);
-  const paso = () => { wpintar(); if (w) wraf = requestAnimationFrame(paso); };
-  wraf = requestAnimationFrame(paso);
+  clearInterval(wraf); clearTimeout(wresp);
+  if (!w) return;
+  wpintar();
+  wraf = setInterval(() => { if (w && !w.pausa) wpintar(); }, 200);
+  if (!w.pausa) wresp = setTimeout(() => { if (w && !w.pausa) wpintar(); }, Math.max(0, w.fin - Date.now()) + 30);
 }
 
 function wterminar(ok) {
-  cancelAnimationFrame(wraf);
+  clearInterval(wraf); clearTimeout(wresp);
   const cb = w?.alTerminar;
   const el = $('#trabajo');
   if (ok) {
@@ -156,7 +168,9 @@ function wterminar(ok) {
     $('#tr-fase').textContent = '¡Listo!';
     $('#tr-reloj').textContent = '✓';
     $('#tr-lado').textContent = ''; $('#tr-sig').textContent = '';
-    sonar.fin(); vibrar([260, 120, 260]);
+    sonar.fin(); vibrar([200, 100, 200]);
+    notificar('¡Listo!', (w?.nombre || '') + ' terminado');
+    dispatchEvent(new CustomEvent('fs:trabajo-fin'));
   }
   w = null;
   setTimeout(() => {
@@ -170,7 +184,7 @@ function wpausa() {
   if (!w) return;
   const el = $('#trabajo');
   if (w.pausa) { w.fin = Date.now() + w.pausa; w.pausa = null; el.classList.remove('pausada'); wbucle(); }
-  else { w.pausa = w.fin - Date.now(); el.classList.add('pausada'); }
+  else { w.pausa = w.fin - Date.now(); el.classList.add('pausada'); clearTimeout(wresp); }
   $('#tr-pausa').innerHTML = w.pausa ? 'Seguir' : 'Pausa';
 }
 
@@ -193,7 +207,7 @@ export function initTimer() {
   });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') return;
-    if (t) { pintar(); bucle(); }
+    if (t) bucle();            // recalcula; si ya terminó, suena la alarma
     if (w && !w.pausa) wbucle();
   });
   restaurar();

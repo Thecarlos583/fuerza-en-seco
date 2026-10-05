@@ -3,7 +3,7 @@ import { DEFAULTS } from './data.js';
 import { S, C, guardar, exportar, importar, reiniciar } from './store.js';
 import { SEMANA, NOMBRE_DIA, valida, hoy } from './fechas.js';
 import { diasSeguidos } from './plan.js';
-import { $, $$, ico, esc, aviso, vibrar, confeti } from './util.js';
+import { $, $$, ico, esc, aviso, vibrar, confeti, sonar } from './util.js';
 
 const seg = (nombre, ops, val) => `<div class="seg" data-seg="${nombre}">${ops.map(([v, t]) => `<button type="button" data-v="${v}" class="${String(v) === String(val) ? 'act' : ''}">${t}</button>`).join('')}</div>`;
 const diasSel = (nombre, sel, sinDom = false) => `<div class="dias-sel" data-dias="${nombre}">${SEMANA.map(d => `<button type="button" data-v="${d}" class="${sel.includes(d) ? 'act' : ''}" ${sinDom && d === 'dom' ? 'disabled' : ''}>${NOMBRE_DIA[d].slice(0, 3)}</button>`).join('')}</div>`;
@@ -136,6 +136,10 @@ export function renderAjustes(v) {
       <section class="card">
         <label class="sw"><span><b>Sonido</b><small>Pitidos al terminar descansos y temporizadores</small></span><input type="checkbox" name="sonido" ${c.sonido !== false ? 'checked' : ''}><i></i></label>
         <label class="sw"><span><b>Vibración</b><small>Vibra al terminar cada descanso</small></span><input type="checkbox" name="vibracion" ${c.vibracion !== false ? 'checked' : ''}><i></i></label>
+        <button type="button" class="btn-sec" data-a="probar">${ico('play')}Probar sonido y vibración</button>
+        <p class="peq txt2">Si no oyes nada, sube el volumen multimedia del teléfono (no el del timbre).</p>
+        <button type="button" class="btn-sec" data-a="notif">${ico('info')}${'Notification' in window && Notification.permission === 'granted' ? 'Notificaciones activadas' : 'Activar notificaciones'}</button>
+        <p class="peq txt2">Sirven para avisarte cuando termina un descanso con la app en segundo plano. No siempre llegan a tiempo: en Samsung ve a Ajustes del teléfono → Aplicaciones → Chrome → Batería → "Sin restricciones".</p>
       </section>
       <button class="btn-pri" type="submit">${ico('check')}Guardar cambios</button>
     </form>
@@ -173,6 +177,8 @@ export function renderAjustes(v) {
       a.click(); setTimeout(() => URL.revokeObjectURL(url), 2000);
     }
     if (b.dataset.a === 'importar') $('#archivo', v).click();
+    if (b.dataset.a === 'probar') { sonar.fin(); try { navigator.vibrate?.([200, 100, 200]); } catch { } aviso('¿Lo oíste? Si no, sube el volumen multimedia', 'play', 3500); }
+    if (b.dataset.a === 'notif' && 'Notification' in window) Notification.requestPermission().then(r => { aviso(r === 'granted' ? 'Notificaciones activadas' : 'No se activaron las notificaciones', 'info'); dispatchEvent(new Event('fs:refrescar')); });
     if (b.dataset.a === 'reiniciar' && confirm('¿Seguro? Se borran todas tus sesiones, pesos y ajustes.')) {
       reiniciar(); location.hash = 'bienvenida'; dispatchEvent(new Event('fs:refrescar'));
     }

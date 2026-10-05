@@ -60,18 +60,24 @@ export function vibrar(patron = 18) {
 
 // ── Sonido (Web Audio, sin archivos) ────────────────────────
 let actx = null;
+// Un único AudioContext: se crea y se desbloquea dentro del primer toque del usuario (Chrome Android lo exige)
 export function desbloquearAudio() {
   try {
     if (!actx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
-      actx = new AC();
+      actx = new AC({ latencyHint: 'interactive' });
+      window.__fsAudio = () => actx.state; // para las pruebas automáticas
     }
-    if (actx.state !== 'running') actx.resume();
+    if (actx.state !== 'running') actx.resume().catch(() => { });
+    // Un sonido vacío termina de "despertar" la salida de audio en algunos Android
+    const b = actx.createBuffer(1, 1, 22050), src = actx.createBufferSource();
+    src.buffer = b; src.connect(actx.destination); src.start(0);
   } catch { }
 }
-export function pitido(freq = 880, dur = 0.14, en = 0, vol = 0.28) {
-  if (ajustes().sonido === false || !actx || actx.state !== 'running') return;
+export function pitido(freq = 880, dur = 0.14, en = 0, vol = 0.3) {
+  if (ajustes().sonido === false || !actx) return;
+  if (actx.state !== 'running') { actx.resume().then(() => pitido(freq, dur, en, vol)).catch(() => { }); return; }
   const t = actx.currentTime + en, o = actx.createOscillator(), g = actx.createGain();
   o.type = 'sine'; o.frequency.value = freq;
   g.gain.setValueAtTime(0.0001, t);
@@ -83,7 +89,7 @@ export function pitido(freq = 880, dur = 0.14, en = 0, vol = 0.28) {
 export const sonar = {
   serie: () => pitido(1175, 0.07, 0, 0.12),
   tic: () => pitido(740, 0.08, 0, 0.2),
-  fin: () => { pitido(880, 0.15); pitido(880, 0.15, 0.2); pitido(1320, 0.45, 0.4); },
+  fin: () => { pitido(880, 0.16); pitido(880, 0.16, 0.24); pitido(1320, 0.4, 0.48); },
   ya: () => { pitido(988, 0.12); pitido(1319, 0.3, 0.16); },
   logro: () => [523, 659, 784, 1047].forEach((f, i) => pitido(f, 0.22, i * 0.11, 0.22)),
 };
@@ -193,3 +199,11 @@ export function burbujas(el, n = 7) {
 
 // Número estable por fecha, para elegir frases sin que cambien al recargar
 export const semilla = f => [...f].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
+
+// Notificación local cuando la app está en segundo plano (mejor esfuerzo, necesita permiso)
+export function notificar(titulo, cuerpo) {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted' || document.visibilityState === 'visible') return;
+    navigator.serviceWorker?.ready.then(r => r.showNotification(titulo, { body: cuerpo, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', vibrate: [200, 100, 200], tag: 'fs-timer', renotify: true })).catch(() => { });
+  } catch { }
+}

@@ -262,8 +262,8 @@ function marcar(slot, k) {
   if (bl.rondas) {
     const ultimo = bl.items[bl.items.length - 1];
     if (ultimo.slot === slot && k < bl.rondas - 1) iniciarDescanso(bl.descansoRonda, `Fin de la ronda ${k + 1}`, 'Vuelve a empezar el circuito.');
-  } else if (it.d) {
-    iniciarDescanso(it.d, completa ? `Listo: ${e.n}` : `${e.n} · serie ${k + 2} de ${it.s}`,
+  } else if (!(completa && !sig)) {
+    iniciarDescanso(it.d || 20, completa ? `Listo: ${e.n}` : `${e.n} · serie ${k + 2} de ${it.s}`,
       bl.b === 'potencia' ? 'Descanso completo: la velocidad importa más que el cansancio.' : completa && sig ? `Siguiente: ${EJ[sig.e].n}` : '');
   }
   if (completa && sig) setTimeout(() => $(`.ej[data-slot="${sig.slot}"]`, ctx.raiz)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 450);

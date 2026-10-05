@@ -58,7 +58,7 @@ addEventListener('hashchange', () => ir());
 addEventListener('fs:refrescar', () => ir({ arriba: false }));
 
 // El audio solo puede sonar después de un toque
-addEventListener('pointerdown', desbloquearAudio, { passive: true });
+['pointerdown', 'touchend', 'click'].forEach(ev => addEventListener(ev, desbloquearAudio, { passive: true, capture: true }));
 
 // Si la app queda abierta y cambia el día (medianoche), se actualiza sola
 document.addEventListener('visibilitychange', () => {
