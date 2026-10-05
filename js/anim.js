@@ -12,12 +12,14 @@
 //   hF / cF: abducción del brazo y flexión del codo · rF: rotación externa del antebrazo
 // Apoyo (def.apoyo o pose.apoyo): 1 / 2 = pie de adelante / del fondo · 'cuerpo' = lo más bajo toca el suelo
 // def.ancla = 'cadera': la cadera queda fija en (x0 + dx, y0 − dy), para máquinas con asiento.
+// curva: espalda redonda (+) o hundida (−) · tr: giro del tronco visto de frente · cu: vuelta de la cuerda
+// def.vuelta = ['hombro', …]: esos ángulos dan la vuelta completa (círculos) por el camino más corto.
 import { ANIM } from './poses.js';
 
 const L = { torso: 38, cuello: 4, cabeza: 9, muslo: 33, pierna: 32, pie: 12, brazo: 22, ante: 20 };
 export const SUELO = 182;
 const PARAMS = ['torso', 'cadera', 'rodilla', 'punta', 'hombro', 'codo', 'cadera2', 'rodilla2', 'punta2', 'hombro2', 'codo2',
-  'dx', 'dy', 'cabeza', 'giro', 'ancho', 'valgo', 'lat', 'rodLat', 'hF', 'cF', 'rF', 'hF2', 'cF2', 'rF2', 'bal'];
+  'dx', 'dy', 'cabeza', 'giro', 'ancho', 'valgo', 'lat', 'rodLat', 'hF', 'cF', 'rF', 'hF2', 'cF2', 'rF2', 'bal', 'curva', 'tr', 'cu'];
 const rad = g => g * Math.PI / 180;
 const vec = (a, l) => [Math.sin(rad(a)) * l, Math.cos(rad(a)) * l];
 const sum = (p, v) => [p[0] + v[0], p[1] + v[1]];
@@ -130,7 +132,7 @@ function equipoMovil(def, f, p, vista) {
       else s += `<rect class="agarre" x="${f1(h[0] - 2.5)}" y="${f1(h[1] - 5)}" width="5" height="10" rx="2"/>`;
     }
     if (q.tipo === 'banda') {
-      const h = f.b1.mano;
+      const h = q.mano === 2 ? f.b2.mano : vista === 'frente' && f.fm ? (q.lado === 'medio' ? medio(f.fm[0], f.fm[1]) : f.fm[q.lado ?? 1]) : f.b1.mano;
       s += `<line class="banda" x1="${q.x}" y1="${q.y}" x2="${f1(h[0])}" y2="${f1(h[1])}"/><circle class="polea" cx="${q.x}" cy="${q.y}" r="2.5"/>`;
     }
     if (q.tipo === 'carro') {
@@ -148,6 +150,18 @@ function equipoMovil(def, f, p, vista) {
       const a = [f.cad[0] + nrm[0] - u[0] * 4, f.cad[1] + nrm[1] - u[1] * 4], b = [f.hom[0] + nrm[0] + u[0] * 6, f.hom[1] + nrm[1] + u[1] * 6];
       s += `<line class="respaldo" x1="${f1(a[0])}" y1="${f1(a[1])}" x2="${f1(b[0])}" y2="${f1(b[1])}"/>`;
     }
+    if (q.tipo === 'bandaRod') {
+      s += vista === 'frente' && f.fr ? `<line class="banda" x1="${f1(f.fr[0][0])}" y1="${f1(f.fr[0][1] - 4)}" x2="${f1(f.fr[1][0])}" y2="${f1(f.fr[1][1] - 4)}"/>`
+        : `<line class="banda" x1="${f1(f.p1.rod[0] - 3)}" y1="${f1(f.p1.rod[1] - 6)}" x2="${f1(f.p1.rod[0] + 3)}" y2="${f1(f.p1.rod[1] - 6)}"/>`;
+    }
+    if (q.tipo === 'cuerda') {
+      // La cuerda va de mano a mano; su punto medio pasa bajo los pies (cu = 0) o sobre la cabeza (cu = 180)
+      const [a, b] = vista === 'frente' && f.fm ? f.fm : [f.b1.mano, f.b2.mano];
+      const m = medio(a, b), c = Math.cos(rad(p.cu));
+      const ctrl = [m[0] + (vista === 'frente' ? 0 : Math.sin(rad(p.cu)) * 70), m[1] + (c > 0 ? c * 2 * (SUELO + 1 - m[1]) : c * 2 * (m[1] - f.cab[1] + 16))];
+      s += `<path class="cuerda" d="M${f1(a[0])} ${f1(a[1])} Q${f1(ctrl[0])} ${f1(ctrl[1])} ${f1(b[0])} ${f1(b[1])}"/>`;
+    }
+    if (q.tipo === 'pesoCadera') s += disco([f.cad[0] + 2, f.cad[1] - 8], 7);
     if (q.tipo === 'balonPiso' && def.mano === 'balon' && p.bal <= 0.5) s += `<circle class="balon" cx="${q.x}" cy="${SUELO - 8}" r="8"/>`;
     if (q.tipo === 'objeto') { const r = q.en === 'rodilla' ? (vista === 'frente' && f.fr ? medio(f.fr[0], f.fr[1]) : f.p1.rod) : f.cad; s += `<circle class="balon" cx="${f1(r[0])}" cy="${f1(r[1] + (q.dy ?? 0))}" r="${q.r ?? 6}"/>`; }
     if (q.tipo === 'rodillo') { const r = { rodilla: f.p1.rod, tobillo: f.p1.tob, hombro: f.hom }[q.en] || f.cad; s += `<circle class="rodillo" cx="${f1(r[0] + (q.dx ?? 0))}" cy="${f1(r[1] + (q.dy ?? -8))}" r="6"/>`; }
@@ -168,7 +182,7 @@ function lado(p, def, punto, fijo) {
   const pierna = (x, cls) => ln(f.cad, x.rod, cls + ' muslo') + ln(x.rod, x.tob, cls + ' canilla') + pl([x.talon, x.tob, x.punta], cls + ' pie-l');
   const brazo = (x, cls) => ln(f.hom, x.cod, cls + ' brazo') + ln(x.cod, x.mano, cls + ' ante');
   let s = brazo(f.b2, 'hueso fondo') + pierna(f.p2, 'hueso fondo');
-  s += ln(f.cad, f.hom, 'torso') + `<circle class="cabeza" cx="${f1(f.cab[0])}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`;
+  s += pl([f.cad, columna(f, p.curva), f.hom], 'torso') + `<circle class="cabeza" cx="${f1(f.cab[0])}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`;
   s += pierna(f.p1, 'hueso') + brazo(f.b1, 'hueso');
   s += equipoMovil(def, f, p, 'lado');
   s += marca(punto, {
@@ -176,6 +190,13 @@ function lado(p, def, punto, fijo) {
     espalda: [medio(f.cad, f.hom)], cabeza: [f.cab],
   }, f);
   return s;
+}
+
+// Punto medio de la espalda, desplazado hacia atrás si está redonda
+function columna(f, curva) {
+  const d = [f.hom[0] - f.cad[0], f.hom[1] - f.cad[1]], l = Math.hypot(...d) || 1, u = [d[0] / l, d[1] / l];
+  const m = medio(f.cad, f.hom);
+  return [m[0] + u[1] * curva, m[1] - u[0] * curva];
 }
 
 // Vista de frente: alturas de la vista lateral y anchos propios
@@ -193,7 +214,7 @@ function frente(p, def, punto, fijo) {
   };
   const izq = piernaF(-1, f.p1, p.rodilla), der = piernaF(1, f.p2, p.rodilla2);
   const brazoF = (sg, x, hF, cF, rF, lado) => {
-    const sx = CX + sg * 11, hom = [sx, f.hom[1]];
+    const sx = CX + sg * 11 * Math.cos(rad(p.tr)) + Math.sin(rad(p.tr)) * 4, hom = [sx, f.hom[1]];
     if (def.brazosF) {
       const cod = sum(hom, [sg * Math.sin(rad(hF)) * L.brazo, Math.cos(rad(hF)) * L.brazo]);
       const a = hF + cF;
@@ -209,8 +230,8 @@ function frente(p, def, punto, fijo) {
   f.fm = [bi.mano, bd.mano];
   f.fr = [izq.rod, der.rod];
   for (const x of [izq, der]) s.push(ln(x.cad, x.rod, 'hueso muslo'), ln(x.rod, x.tob, 'hueso canilla'), `<ellipse class="pie" cx="${f1(x.pie[0])}" cy="${f1(x.pie[1])}" rx="4.5" ry="2.5"/>`);
-  s.push(ln(izq.cad, der.cad, 'hueso'), ln([CX, f.cad[1]], [CX, f.hom[1]], 'torso'), ln(bi.hom, bd.hom, 'hueso'));
-  s.push(`<circle class="cabeza" cx="${f1(CX)}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`);
+  s.push(ln(izq.cad, der.cad, 'hueso'), ln([CX, f.cad[1]], [CX + Math.sin(rad(p.tr)) * 4, f.hom[1]], 'torso'), ln(bi.hom, bd.hom, 'hueso'));
+  s.push(`<circle class="cabeza" cx="${f1(CX + Math.sin(rad(p.tr)) * 5)}" cy="${f1(f.cab[1])}" r="${L.cabeza}"/>`);
   for (const x of [bi, bd]) s.push(ln(x.hom, x.cod, 'hueso brazo'), ln(x.cod, x.mano, 'hueso ante'));
   s.push(equipoMovil(def, f, p, 'frente'));
   s.push(marca(punto, { rodilla: [izq.rod, der.rod], pies: [izq.pie, der.pie], cadera: [[CX, f.cad[1]]], espalda: [[CX, (f.cad[1] + f.hom[1]) / 2]], hombro: [bi.hom, bd.hom], manos: [bi.mano, bd.mano], codo: [bi.cod, bd.cod], cabeza: [[CX, f.cab[1]]] }, null));
@@ -299,7 +320,8 @@ function poseEn(prep, t) {
   if (local < tr.pausa) return { p: a, activa: tr.i, fijo: null };
   const f = suave(clamp((local - tr.pausa) / tr.ms, 0, 1));
   const p = { __ok: true };
-  for (const k of PARAMS) p[k] = a[k] + (b[k] - a[k]) * f;
+  const vuelta = prep.def.vuelta || [];
+  for (const k of PARAMS) p[k] = a[k] + (vuelta.includes(k) ? ((b[k] - a[k] + 540) % 360) - 180 : b[k] - a[k]) * f;
   // Mismo apoyo: queda clavado. Si cambia, se interpola el traslado de la figura.
   const ap = x => x.apoyo ?? prep.def.apoyo ?? 1;
   let fijo = { apoyo: ap(a) };

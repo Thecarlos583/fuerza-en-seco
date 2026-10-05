@@ -840,3 +840,7 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 .anim-fijas figure { margin: 0; border-radius: 16px; background: var(--anim-bg); padding: 4px; position: relative; }
 .anim-fijas figure b { position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: var(--aqua); color: var(--sobre-acento); font-size: 0.8125rem; }
 .anim-fijas figcaption { font-size: 0.8125rem; font-weight: 700; padding: 4px 8px 8px; color: var(--txt); }
+
+/* Animaciones: espalda con curva, cuerda */
+.anim-svg .torso, .anim-poses .torso { fill: none; stroke-linejoin: round; }
+.anim-svg .cuerda, .anim-poses .cuerda { fill: none; stroke: var(--salmon); stroke-width: 2; stroke-linecap: round; }

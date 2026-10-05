@@ -427,7 +427,7 @@ export const EJ = {
     error: 'Arquear la espalda baja.' },
   dorsalPuerta: { n: 'Estiramiento de dorsal en el marco de la puerta', tr: ['brazada', 'hombro'], z: ['dorsal'], s: [], casa: 'Marco de puerta',
     para: 'Dorsal suelto = brazada más larga.',
-    como: ['Agarra el marco de la puerta con una mano arriba.', 'Lleva la cadera hacia el otro lado.', 'Respira y aguanta.'],
+    como: ['Agarra el marco de la puerta con las manos a la altura de la cabeza.', 'Lleva la cadera atrás con las rodillas un poco dobladas.', 'Respira y aguanta.'],
     error: 'Forzar hasta que duela.' },
   toracica: { n: 'Rotación torácica en cuadrupedia', tr: ['sprint', 'hombro'], z: ['trapecio', 'oblicuos'], s: [], casa: 'Piso',
     para: 'Espalda alta móvil para rotar en libre.',
@@ -447,7 +447,7 @@ export const EJ = {
     error: 'Hacerlo con prisa.' },
   circBrazos: { n: 'Círculos de brazos', tr: ['hombro'], z: ['deltoides'], s: [],
     para: 'Hombros calientes antes de nadar.',
-    como: ['Brazos estirados a los lados.', 'Círculos hacia adelante.', 'Luego hacia atrás.'],
+    como: ['De pie, brazos estirados.', 'Círculos grandes hacia adelante.', 'Luego hacia atrás.'],
     error: 'Hacerlos muy rápido de entrada.' },
   salidaImag: { n: 'Salida imaginaria en streamline', tr: ['salida', 'streamline'], z: ['cuadriceps', 'gluteo'], s: [],
     para: 'Ensayar el gesto de la salida.',
@@ -536,7 +536,7 @@ export const SESIONES = {
   A: { n: 'Potencia de piernas', sub: 'Salidas, virajes y patada · con máquinas', c: 'var(--aqua)',
     potencia: [
       P('cajon', 4, 3, 90, { alts: [P('svertical', 4, 3, 90), P('scmpared', 4, 3, 90)] }),
-      P('longitud', 4, 3, 90, { alts: [P('longUna', 3, 2, 90, { lado: 'pierna' }), P('cuclillas', 4, 3, 90)] }),
+      P('longitud', 4, 3, 90, { alts: [P('cuclillas', 4, 3, 90), P('svertical', 4, 3, 90)] }),
       P('sstream', 3, 4, 60, { alts: [P('sjSinBrazos', 3, 4, 60)] }),
     ],
     fuerza: [
@@ -555,7 +555,7 @@ export const SESIONES = {
     potencia: [
       P('slam', 4, 5, 60, { alts: [P('slamCuerda', 4, 8, 60)] }),
       P('pechoPared', 4, 5, 60, { alts: [P('flexExpl', 3, 5, 90)] }),
-      P('flexExpl', 3, 5, 90, { alts: [P('flexPalmada', 3, 5, 90), P('flexRapidas', 3, 8, 90)] }),
+      P('flexExpl', 3, 5, 90, { alts: [P('flexRapidas', 3, 8, 90), P('pressPecho', 3, 6, 90)] }),
     ],
     fuerza: [
       P('jalon', 4, 8, 120, { alts: [P('domAsist', 4, 6, 120), P('dominadas', 4, 5, 120)] }),
@@ -565,7 +565,7 @@ export const SESIONES = {
       P('pressHombroMaq', 3, 10, 75, { alts: [P('pressMil', 3, 8, 75)] }),
     ],
     core: [
-      P('rotExtPolea', 2, 15, 30, { lado: 'brazo', alts: [P('rotExt', 2, 15, 30, { lado: 'brazo' }), P('rotExtManc', 2, 12, 30, { lado: 'brazo' })] }),
+      P('rotExtPolea', 2, 15, 30, { lado: 'brazo', alts: [P('rotExt', 2, 15, 30, { lado: 'brazo' })] }),
       P('facepull', 3, 12, 45, { alts: [P('rotExt', 2, 15, 30, { lado: 'brazo' })] }),
       T('hollow', 3, [20, 30], 45, { alts: [T('hollowRod', 3, 30, 45)] }),
     ],
@@ -579,8 +579,8 @@ export const SESIONES = {
     fuerza: [
       P('goblet', 4, 8, 120, { alts: [P('prensa', 4, 8, 120), P('smith', 4, 8, 120)] }),
       P('curlFem', 4, 10, 90, { alts: [P('rdl', 3, 8, 120), P('hipMaq', 4, 10, 90), P('puentePies', 3, 12, 90)] }),
-      P('prensaUna', 3, 10, 90, { lado: 'pierna', alts: [P('bulgara', 3, 8, 90, { lado: 'pierna' }), P('zancada', 3, 8, 90, { lado: 'pierna' })] }),
-      P('pressMil', 3, 10, 90, { alts: [P('pressHombroMaq', 3, 10, 90), P('landmine', 3, 8, 90, { lado: 'brazo' })] }),
+      P('prensaUna', 3, 10, 90, { lado: 'pierna', alts: [P('prensa', 3, 10, 90), P('zancada', 3, 8, 90, { lado: 'pierna' })] }),
+      P('pressMil', 3, 10, 90, { alts: [P('pressHombroMaq', 3, 10, 90)] }),
       P('remoMano', 3, 10, 75, { lado: 'brazo', alts: [P('remoPolea', 3, 10, 75), P('remoInv', 3, 8, 75)] }),
     ],
     core: [
@@ -620,8 +620,8 @@ export const RUTINAS = {
   forma: { n: 'Mantener la forma en casa', sub: '20-25 min · circuito de 3 rondas con 60 s de descanso entre rondas', c: 'var(--salmon)', casa: true,
     bloques: [
       { b: 'circuito', rondas: 3, descansoRonda: 60, items: [
-        P('pogo', 3, 15), P('sjCasa', 3, 5, 0, { alts: [P('sentRapida', 3, 12)] }), P('flexCasa', 3, 8),
-        P('bulgaraSofa', 3, 8, 0, { lado: 'pierna' }), P('puente1', 3, 10, 0, { lado: 'pierna' }), P('remoCasa', 3, 12),
+        P('pogo', 3, 15), P('sjCasa', 3, 5, 0, { alts: [P('cuclillas', 3, 5)] }), P('flexCasa', 3, 8),
+        P('sentRapida', 3, 12), P('puente1', 3, 10, 0, { lado: 'pierna' }), P('remoCasa', 3, 12),
         T('planchaLat', 3, 15, 0, { lado: 'lado' }), T('hollow', 3, 25),
       ] },
       { b: 'final', items: [P('rotExt', 2, 15, 30, { lado: 'brazo' })] },
@@ -657,7 +657,7 @@ export const FASES = {
 };
 
 // Ejercicios en los que conviene que alguien te vea la técnica la primera vez (solo sugerencia)
-export const SUGERIR = ['cajon', 'longitud', 'rdl', 'bulgara', 'slam', 'rotacional', 'pressMil'];
+export const SUGERIR = ['cajon', 'longitud', 'rdl', 'goblet', 'slam', 'rotacional', 'pressMil'];
 
 // ── Guía ─────────────────────────────────────────────────────
 export const REGLAS_PARAR = [
