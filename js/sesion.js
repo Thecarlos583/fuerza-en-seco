@@ -68,7 +68,6 @@ function tarjeta(it, bl, n) {
   const hechas = ctx.rec.hechas[it.slot] || [];
   const completa = hechas.slice(0, it.s).filter(Boolean).length >= it.s;
   const abierta = abiertas.has(it.slot);
-  const descanso = bl.rondas ? '' : it.d ? ` · ${it.d >= 60 && it.d % 60 === 0 ? it.d / 60 + ' min' : it.d + ' s'}` : '';
   const cambio = it.cambiado ? (leerDia(ctx.f).cambios?.[it.slot] ? 'hoy' : 'siempre') : null;
   const ronda = !!bl.rondas;
   return `
@@ -77,7 +76,7 @@ function tarjeta(it, bl, n) {
       <span class="ej-num">${completa ? ico('check') : n}</span>
       <span class="ej-tit">
         <span class="ej-n">${esc(e.n)}</span>
-        <span class="ej-meta"><b>${prescripcion(it)}</b>${descanso}</span>
+        <span class="chips-pres">${chipsPres(it, bl)}</span>
       </span>
       <span class="ej-chev">${ico('abajo')}</span>
     </button>
@@ -93,6 +92,12 @@ function tarjeta(it, bl, n) {
     ${e.pp && C().pieplano !== false && it.alts.length ? `<button class="pie-plano" data-a="cambiar">${ico('cambiar')}<span><b>Pie plano:</b> si te cuesta el equilibrio o sientes el arco, cámbialo por otro</span></button>` : ''}
     <div class="mas"><div class="mas-in">${abierta ? detalles(it) : ''}    </div></div>
   </article>`;
+}
+// Series, repeticiones y descanso como chips separados (se acomodan solos en pantallas angostas)
+function chipsPres(it, bl) {
+  const reps = it.seg ? `<b>${segTxt(it)}</b>` : `<b>${it.rTxt || it.r}</b> reps`;
+  const d = it.d ? (it.d >= 60 && it.d % 60 === 0 ? `${it.d / 60} min` : `${it.d} s`) : '';
+  return `<span><b>${it.s}</b> ${bl.rondas ? 'rondas' : 'series'}</span><span>${reps}${it.lado ? ' ' + LADO[it.lado] : ''}</span>${d && !bl.rondas ? `<span>${ico('reloj')}${d}</span>` : ''}`;
 }
 const minus = s => s ? s.charAt(0).toLowerCase() + s.slice(1).replace(/\.$/, '') : '';
 
