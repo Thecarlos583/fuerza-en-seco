@@ -3,7 +3,7 @@ import { DEFAULTS } from './data.js';
 import { S, C, guardar, exportar, importar, reiniciar } from './store.js';
 import { SEMANA, NOMBRE_DIA, valida, hoy } from './fechas.js';
 import { diasSeguidos } from './plan.js';
-import { $, $$, ico, esc, aviso, vibrar, confeti, sonar } from './util.js';
+import { $, $$, ico, esc, aviso, vibrar, confeti, sonar, aplicarTema } from './util.js';
 
 const seg = (nombre, ops, val) => `<div class="seg" data-seg="${nombre}">${ops.map(([v, t]) => `<button type="button" data-v="${v}" class="${String(v) === String(val) ? 'act' : ''}">${t}</button>`).join('')}</div>`;
 const diasSel = (nombre, sel, sinDom = false) => `<div class="dias-sel" data-dias="${nombre}">${SEMANA.map(d => `<button type="button" data-v="${d}" class="${sel.includes(d) ? 'act' : ''}" ${sinDom && d === 'dom' ? 'disabled' : ''}>${NOMBRE_DIA[d].slice(0, 3)}</button>`).join('')}</div>`;
@@ -82,7 +82,7 @@ function validar(c) {
 function interacciones(raiz) {
   raiz.addEventListener('click', e => {
     const s = e.target.closest('[data-seg] button');
-    if (s) { $$('button', s.parentElement).forEach(b => b.classList.toggle('act', b === s)); vibrar(); return; }
+    if (s) { $$('button', s.parentElement).forEach(b => b.classList.toggle('act', b === s)); vibrar(); if (s.parentElement.dataset.seg === 'tema') aplicarTema(s.dataset.v); return; }
     const d = e.target.closest('[data-dias] button');
     if (!d) return;
     const grupo = d.parentElement.dataset.dias;
@@ -134,6 +134,8 @@ export function renderAjustes(v) {
     <div class="top"><p class="saludo">Tu plan, a tu medida</p><h1>Ajustes</h1></div>
     <form id="form" novalidate>${formulario(c, true)}
       <section class="card">
+        <div class="campo"><span>Tema</span>${seg('tema', [['auto', 'Automático'], ['oscuro', 'Oscuro'], ['claro', 'Claro']], c.tema || 'auto')}</div>
+        <p class="peq txt2">Automático sigue el modo oscuro o claro del teléfono.</p>
         <label class="sw"><span><b>Sonido</b><small>Pitidos al terminar descansos y temporizadores</small></span><input type="checkbox" name="sonido" ${c.sonido !== false ? 'checked' : ''}><i></i></label>
         <label class="sw"><span><b>Vibración</b><small>Vibra al terminar cada descanso</small></span><input type="checkbox" name="vibracion" ${c.vibracion !== false ? 'checked' : ''}><i></i></label>
         <label class="sw"><span><b>Modo ligero</b><small>Sin olas, burbujas ni confeti, para que vaya fluida en cualquier teléfono</small></span><input type="checkbox" name="ligero" ${c.ligero !== false ? 'checked' : ''}><i></i></label>
@@ -164,6 +166,8 @@ export function renderAjustes(v) {
     n.sonido = $('[name="sonido"]', v).checked;
     n.vibracion = $('[name="vibracion"]', v).checked;
     n.ligero = $('[name="ligero"]', v).checked;
+    n.tema = $('[data-seg="tema"] .act', v)?.dataset.v || 'auto';
+    aplicarTema(n.tema);
     document.documentElement.classList.toggle('ligero', n.ligero || matchMedia('(prefers-reduced-motion: reduce)').matches);
     const err = validar(n);
     if (err) return aviso(err, 'info', 3500);

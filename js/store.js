@@ -23,6 +23,7 @@ function fusionar(d) {
   e.pruebas = { ...b.pruebas, ...(d.pruebas || {}) };
   e.vistos = { ...(d.vistos || {}) };
   if (e.config && e.config.ligero === undefined) e.config.ligero = true;
+  if (e.config && !e.config.tema) e.config.tema = 'auto';
   return e;
 }
 

@@ -86,8 +86,8 @@ const saludo = () => { const h = new Date().getHours(); return h < 12 ? 'Buenos 
 
 function olaSVG() {
   return `<svg class="ola-svg" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
-    <g class="ola-1"><path d="M0 70 Q50 55 100 70 T200 70 T300 70 T400 70 T500 70 T600 70 T700 70 T800 70 V120 H0 Z" fill="#00D1FF" opacity=".12"/></g>
-    <g class="ola-2"><path d="M0 82 Q50 70 100 82 T200 82 T300 82 T400 82 T500 82 T600 82 T700 82 T800 82 V120 H0 Z" fill="#00D1FF" opacity=".18"/></g>
+    <g class="ola-1"><path d="M0 70 Q50 55 100 70 T200 70 T300 70 T400 70 T500 70 T600 70 T700 70 T800 70 V120 H0 Z" style="fill:var(--aqua)" opacity=".12"/></g>
+    <g class="ola-2"><path d="M0 82 Q50 70 100 82 T200 82 T300 82 T400 82 T500 82 T600 82 T700 82 T800 82 V120 H0 Z" style="fill:var(--aqua)" opacity=".18"/></g>
   </svg>`;
 }
 
@@ -257,7 +257,7 @@ function semana(f) {
         <span>${INICIAL[diaDe(x)]}</span><b>${hecho && d.tipo === 'gym' ? '✓' : letra}</b>${C().agua.includes(diaDe(x)) ? '<i></i>' : ''}
       </div>`;
     }).join('')}</div>
-    <div class="leyenda"><span><i style="background:#00D1FF"></i>A piernas</span><span><i style="background:#7C9CFF"></i>B tren superior</span><span><i style="background:#1DE9B6"></i>C sin máquinas</span><span><i class="agua"></i>agua</span></div>
+    <div class="leyenda"><span><i style="background:var(--aqua)"></i>A piernas</span><span><i style="background:var(--azul)"></i>B tren superior</span><span><i style="background:var(--turq)"></i>C sin máquinas</span><span><i class="agua"></i>agua</span></div>
   </section>`;
 }
 

@@ -209,3 +209,13 @@ export function notificar(titulo, cuerpo) {
     navigator.serviceWorker?.ready.then(r => r.showNotification(titulo, { body: cuerpo, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', vibrate: [200, 100, 200], tag: 'fs-timer', renotify: true })).catch(() => { });
   } catch { }
 }
+
+// Tema: automático (sigue al teléfono), oscuro o claro. Ajusta también la barra de estado.
+const mqClaro = matchMedia('(prefers-color-scheme: light)');
+export function aplicarTema(t = ajustes().tema || 'auto') {
+  const c = t === 'auto' ? (mqClaro.matches ? 'claro' : 'oscuro') : t;
+  document.documentElement.dataset.tema = c;
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', c === 'claro' ? '#F2F8FF' : '#06142B');
+  document.querySelector('meta[name=color-scheme]')?.setAttribute('content', c === 'claro' ? 'only light' : 'dark light');
+}
+mqClaro.addEventListener?.('change', () => aplicarTema());

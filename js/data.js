@@ -11,30 +11,31 @@ export const DEFAULTS = {
   agua: ['lun', 'mar', 'mie', 'jue', 'vie'],
   pieplano: true,
   ligero: true,
+  tema: 'auto',
   comp: { nombre: 'Juegos Deportivos Nacionales', corto: 'los Juegos Nacionales', ini: '2026-11-15', fin: '', lugar: '', piscina: 50 },
 };
 
 // ── Transferencia al agua ────────────────────────────────────
 export const TRANSFER = {
-  salida:     { n: 'Salida',          c: '#00D1FF', i: '<path d="M3 20h8v-5"/><path d="M11 15L20 6"/><path d="M14 6h6v6"/>' },
-  viraje:     { n: 'Viraje',          c: '#4FC3F7', i: '<path d="M20 3v18"/><path d="M16 7H9a5 5 0 0 0 0 10h7"/><path d="M13 14l3 3-3 3"/>' },
-  patada:     { n: 'Patada de pecho', c: '#1DE9B6', i: '<path d="M5 4c0 6 3 9 7 9s7-3 7-9"/><path d="M4 20c3-3 5-4 8-4s5 1 8 4"/>' },
-  brazada:    { n: 'Brazada de pecho', c: '#7C9CFF', i: '<path d="M12 4v7"/><path d="M12 11c-4 0-7 2-8 5M12 11c4 0 7 2 8 5"/><path d="M4 16c2 3 5 4 8 4s6-1 8-4"/>' },
-  sprint:     { n: 'Sprint libre',    c: '#FFD166', i: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>' },
-  streamline: { n: 'Streamline',      c: '#8FE3FF', i: '<path d="M2 12h16"/><path d="M14 7l6 5-6 5"/><path d="M2 18c2 0 2-1.5 4-1.5S8 18 10 18"/>' },
-  hombro:     { n: 'Hombro sano',     c: '#FF9F80', i: '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>' },
-  rodilla:    { n: 'Rodilla sana',    c: '#FF9F80', i: '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M12 9v6M9 12h6"/>' },
+  salida:     { n: 'Salida',          c: 'var(--aqua)', i: '<path d="M3 20h8v-5"/><path d="M11 15L20 6"/><path d="M14 6h6v6"/>' },
+  viraje:     { n: 'Viraje',          c: 'var(--cielo)', i: '<path d="M20 3v18"/><path d="M16 7H9a5 5 0 0 0 0 10h7"/><path d="M13 14l3 3-3 3"/>' },
+  patada:     { n: 'Patada de pecho', c: 'var(--turq)', i: '<path d="M5 4c0 6 3 9 7 9s7-3 7-9"/><path d="M4 20c3-3 5-4 8-4s5 1 8 4"/>' },
+  brazada:    { n: 'Brazada de pecho', c: 'var(--azul)', i: '<path d="M12 4v7"/><path d="M12 11c-4 0-7 2-8 5M12 11c4 0 7 2 8 5"/><path d="M4 16c2 3 5 4 8 4s6-1 8-4"/>' },
+  sprint:     { n: 'Sprint libre',    c: 'var(--amarillo)', i: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>' },
+  streamline: { n: 'Streamline',      c: 'var(--celeste)', i: '<path d="M2 12h16"/><path d="M14 7l6 5-6 5"/><path d="M2 18c2 0 2-1.5 4-1.5S8 18 10 18"/>' },
+  hombro:     { n: 'Hombro sano',     c: 'var(--salmon)', i: '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>' },
+  rodilla:    { n: 'Rodilla sana',    c: 'var(--salmon)', i: '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M12 9v6M9 12h6"/>' },
 };
 
 // ── Mapa del cuerpo: zona → color ────────────────────────────
 export const GRUPOS = {
-  piernas:   { n: 'Piernas',        c: '#1DE9B6' },
-  posterior: { n: 'Glúteo/femoral', c: '#00D1FF' },
-  espalda:   { n: 'Espalda',        c: '#7C9CFF' },
-  hombros:   { n: 'Hombros',        c: '#FF9F80' },
-  brazos:    { n: 'Brazos',         c: '#B48CFF' },
-  pecho:     { n: 'Pecho',          c: '#FF6B6B' },
-  core:      { n: 'Core',           c: '#FFD166' },
+  piernas:   { n: 'Piernas',        c: 'var(--turq)' },
+  posterior: { n: 'Glúteo/femoral', c: 'var(--aqua)' },
+  espalda:   { n: 'Espalda',        c: 'var(--azul)' },
+  hombros:   { n: 'Hombros',        c: 'var(--salmon)' },
+  brazos:    { n: 'Brazos',         c: 'var(--lila)' },
+  pecho:     { n: 'Pecho',          c: 'var(--coral)' },
+  core:      { n: 'Core',           c: 'var(--amarillo)' },
 };
 export const ZONAS = {
   cuadriceps: 'piernas', aductor: 'piernas', pantorrilla: 'piernas',
@@ -508,14 +509,14 @@ export const EJ = {
 
 // ── Bloques ──────────────────────────────────────────────────
 export const BLOQUES = {
-  activacion: { n: 'Activación', c: '#00D1FF' },
-  potencia:   { n: 'Potencia',   c: '#FF6B6B' },
-  fuerza:     { n: 'Fuerza',     c: '#7C9CFF' },
-  core:       { n: 'Core y prevención', c: '#1DE9B6' },
-  movilidad:  { n: 'Movilidad',  c: '#8FE3FF' },
-  casa:       { n: 'En casa',    c: '#1DE9B6' },
-  circuito:   { n: 'Circuito',   c: '#FF9F80' },
-  final:      { n: 'Para cerrar', c: '#1DE9B6' },
+  activacion: { n: 'Activación', c: 'var(--aqua)' },
+  potencia:   { n: 'Potencia',   c: 'var(--coral)' },
+  fuerza:     { n: 'Fuerza',     c: 'var(--azul)' },
+  core:       { n: 'Core y prevención', c: 'var(--turq)' },
+  movilidad:  { n: 'Movilidad',  c: 'var(--celeste)' },
+  casa:       { n: 'En casa',    c: 'var(--turq)' },
+  circuito:   { n: 'Circuito',   c: 'var(--salmon)' },
+  final:      { n: 'Para cerrar', c: 'var(--turq)' },
 };
 
 // Prescripción: e (ejercicio) · s (series) · r (reps) o seg (segundos) · lado · d (descanso en s)
@@ -532,7 +533,7 @@ export const ACTIVACION = [
 ];
 
 export const SESIONES = {
-  A: { n: 'Potencia de piernas', sub: 'Salidas, virajes y patada · con máquinas', c: '#00D1FF',
+  A: { n: 'Potencia de piernas', sub: 'Salidas, virajes y patada · con máquinas', c: 'var(--aqua)',
     potencia: [
       P('cajon', 4, 3, 90, { alts: [P('svertical', 4, 3, 90), P('scmpared', 4, 3, 90)] }),
       P('longitud', 4, 3, 90, { alts: [P('longUna', 3, 2, 90, { lado: 'pierna' }), P('cuclillas', 4, 3, 90)] }),
@@ -550,7 +551,7 @@ export const SESIONES = {
       T('planchaLat', 3, 20, 45, { lado: 'lado', alts: [P('deadbug', 3, 8, 45, { lado: 'lado' })] }),
     ],
   },
-  B: { n: 'Potencia de tren superior', sub: 'Brazada y sprint · con máquinas', c: '#7C9CFF',
+  B: { n: 'Potencia de tren superior', sub: 'Brazada y sprint · con máquinas', c: 'var(--azul)',
     potencia: [
       P('slam', 4, 5, 60, { alts: [P('slamCuerda', 4, 8, 60)] }),
       P('pechoPared', 4, 5, 60, { alts: [P('flexExpl', 3, 5, 90)] }),
@@ -569,7 +570,7 @@ export const SESIONES = {
       T('hollow', 3, [20, 30], 45, { alts: [T('hollowRod', 3, 30, 45)] }),
     ],
   },
-  C: { n: 'Potencia y fuerza total', sub: 'Virajes y sprint · mancuernas y máquinas', c: '#1DE9B6',
+  C: { n: 'Potencia y fuerza total', sub: 'Virajes y sprint · mancuernas y máquinas', c: 'var(--turq)',
     potencia: [
       P('squatJump', 4, 4, 90, { alts: [P('cajonSentado', 4, 3, 90)] }),
       P('svertical', 3, 4, 60, { alts: [P('patinador', 3, 4, 60, { lado: 'lado' }), P('pasosBanda', 3, 12, 60, { lado: 'lado' })] }),
@@ -592,31 +593,31 @@ export const SESIONES = {
 
 // Rutinas que no son de gimnasio
 export const RUTINAS = {
-  movilidad: { n: 'Movilidad corta', sub: '10-12 min · en casa o después del agua · sin equipo, salvo una banda', c: '#8FE3FF', casa: true,
+  movilidad: { n: 'Movilidad corta', sub: '10-12 min · en casa o después del agua · sin equipo, salvo una banda', c: 'var(--celeste)', casa: true,
     bloques: [{ b: 'movilidad', items: [
       P('balanceo', 2, 10, 0, { lado: 'pierna' }), P('mtobillo', 2, 10, 0, { lado: 'pie' }), T('rana', 2, 30, 15),
       T('dorsalPared', 2, 30, 15, { lado: 'lado' }), P('toracica', 2, 8, 0, { lado: 'lado' }), P('circBrazos', 1, 10), T('respPared', 1, 120),
     ] }] },
-  precomp: { n: 'Activación precompetencia', sub: '15 min · rápido y fresco, no cansa', c: '#FFD166',
+  precomp: { n: 'Activación precompetencia', sub: '15 min · rápido y fresco, no cansa', c: 'var(--amarillo)',
     bloques: [
       { b: 'movilidad', items: [T('movGeneral', 1, 300)] },
       { b: 'potencia', items: [P('pogo', 2, 10, 30), P('svertical', 3, 2, 60), P('slamSuave', 2, 3, 45)] },
     ] },
-  competencia: { n: 'Calentamiento en seco', sub: 'Antes de entrar al agua', c: '#FFD166',
+  competencia: { n: 'Calentamiento en seco', sub: 'Antes de entrar al agua', c: 'var(--amarillo)',
     bloques: [{ b: 'activacion', items: [
       T('movGeneral', 1, 300), P('circBrazos', 1, 10), P('rotExt', 1, 10, 0, { lado: 'brazo' }), P('svertical', 1, 3), P('salidaImag', 1, 2),
     ] }] },
-  noche: { n: 'Recuperación de la noche', sub: '8 min · después de competir', c: '#8FE3FF', casa: true,
+  noche: { n: 'Recuperación de la noche', sub: '8 min · después de competir', c: 'var(--celeste)', casa: true,
     bloques: [{ b: 'movilidad', items: [T('respPared', 1, 180), P('gatoCamello', 1, 10), T('rana', 1, 30), T('dorsalPared', 1, 30, 0, { lado: 'lado' })] }] },
 
   // Plan B en casa
-  recuperacion: { n: 'Recuperación activa en casa', sub: '12-15 min · para cuando vienes muy cansado', c: '#8FE3FF', casa: true,
+  recuperacion: { n: 'Recuperación activa en casa', sub: '12-15 min · para cuando vienes muy cansado', c: 'var(--celeste)', casa: true,
     final: 'Hoy lo importante es dormir 9 horas.',
     bloques: [{ b: 'casa', items: [
       T('respPared', 1, 180), P('balanceo', 2, 10, 0, { lado: 'pierna' }), P('mtobillo', 2, 10, 0, { lado: 'pie' }),
       P('toracica', 2, 8, 0, { lado: 'lado' }), T('dorsalPuerta', 2, 30, 15, { lado: 'lado' }), T('rana', 2, 30, 15), P('gatoCamello', 1, 10),
     ] }] },
-  forma: { n: 'Mantener la forma en casa', sub: '20-25 min · circuito de 3 rondas con 60 s de descanso entre rondas', c: '#FF9F80', casa: true,
+  forma: { n: 'Mantener la forma en casa', sub: '20-25 min · circuito de 3 rondas con 60 s de descanso entre rondas', c: 'var(--salmon)', casa: true,
     bloques: [
       { b: 'circuito', rondas: 3, descansoRonda: 60, items: [
         P('pogo', 3, 15), P('sjCasa', 3, 5, 0, { alts: [P('sentRapida', 3, 12)] }), P('flexCasa', 3, 8),
@@ -625,7 +626,7 @@ export const RUTINAS = {
       ] },
       { b: 'final', items: [P('rotExt', 2, 15, 30, { lado: 'brazo' })] },
     ] },
-  agua: { n: 'Mantener el agua en seco', sub: '25-30 min · para cuando faltaste a la piscina', c: '#00D1FF', casa: true,
+  agua: { n: 'Mantener el agua en seco', sub: '25-30 min · para cuando faltaste a la piscina', c: 'var(--aqua)', casa: true,
     bloques: [
       { b: 'casa', items: [
         T('cardio', 1, 900, 0, { alts: [T('cuerda', 8, 60, 60)] }),
@@ -638,21 +639,21 @@ export const RUTINAS = {
 // ── Periodización ────────────────────────────────────────────
 // p / f: series de potencia / fuerza que se suman o restan a la cifra base (construcción)
 export const FASES = {
-  tecnica:    { n: 'Técnica', c: '#00D1FF', p: -1, f: -1, core: 0, rpe: '6', tope: 30,
+  tecnica:    { n: 'Técnica', c: 'var(--aqua)', p: -1, f: -1, core: 0, rpe: '6', tope: 30,
     txt: 'Aprende a moverte bien. Pocas series, técnica perfecta y pruebas iniciales.' },
-  construir:  { n: 'Construir', c: '#1DE9B6', p: 0, f: 0, core: 0, rpe: '7', tope: 40,
+  construir:  { n: 'Construir', c: 'var(--turq)', p: 0, f: 0, core: 0, rpe: '7', tope: 40,
     txt: 'Subimos el trabajo. Saltos frescos y fuerza dejando 2-3 repeticiones de reserva.' },
-  construir2: { n: 'Construir +', c: '#1DE9B6', p: 0, f: 0, core: 0, rpe: '7', tope: 40,
+  construir2: { n: 'Construir +', c: 'var(--turq)', p: 0, f: 0, core: 0, rpe: '7', tope: 40,
     txt: 'Mismo trabajo, más calidad. Si la sesión pasada te salió limpia, prueba un escalón más.' },
-  pico:       { n: 'Pico', c: '#FF6B6B', p: 0, f: 0, core: 0, rpe: '7-8', tope: 45,
+  pico:       { n: 'Pico', c: 'var(--coral)', p: 0, f: 0, core: 0, rpe: '7-8', tope: 45,
     txt: 'Máxima intención en cada salto. Un poco más de peso, nunca al fallo.' },
-  descarga:   { n: 'Descarga', c: '#FFD166', p: -1, f: -1, core: -1, rpe: '6', tope: 25, peso: 0.85,
+  descarga:   { n: 'Descarga', c: 'var(--amarillo)', p: -1, f: -1, core: -1, rpe: '6', tope: 25, peso: 0.85,
     txt: 'Menos volumen, misma velocidad. Tu cuerpo está asimilando el trabajo. Semana de pruebas finales.' },
-  puesta:     { n: 'Puesta a punto', c: '#B48CFF', p: 0, f: null, core: -1, rpe: '5', tope: 12, peso: 0.5,
+  puesta:     { n: 'Puesta a punto', c: 'var(--lila)', p: 0, f: null, core: -1, rpe: '5', tope: 12, peso: 0.5,
     txt: 'Sesiones cortas, rápidas y frescas. Nada nuevo y nada que te deje adolorido.' },
-  competencia: { n: 'Competencia', c: '#FFD166', txt: '¡A nadar! Calentamiento en seco antes de entrar al agua y recuperación en la noche.' },
-  despues:    { n: 'Después', c: '#8FB3D9', txt: 'Ciclo terminado. Descansa unos días y arma tu próximo objetivo en Ajustes.' },
-  antes:      { n: 'Antes del plan', c: '#8FB3D9', txt: 'El plan todavía no arranca. Mientras, puedes hacer la movilidad corta.' },
+  competencia: { n: 'Competencia', c: 'var(--amarillo)', txt: '¡A nadar! Calentamiento en seco antes de entrar al agua y recuperación en la noche.' },
+  despues:    { n: 'Después', c: 'var(--txt2)', txt: 'Ciclo terminado. Descansa unos días y arma tu próximo objetivo en Ajustes.' },
+  antes:      { n: 'Antes del plan', c: 'var(--txt2)', txt: 'El plan todavía no arranca. Mientras, puedes hacer la movilidad corta.' },
 };
 
 // Ejercicios en los que conviene que alguien te vea la técnica la primera vez (solo sugerencia)

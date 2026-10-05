@@ -2,7 +2,7 @@
 import { fechaCorta } from './fechas.js';
 import { vibrar } from './util.js';
 
-export const COL = { serie: '#00D1FF', inicial: '#4C6EF5', final: '#0E9FA8', meta: '#FFD166', alto: '#FF6B6B' };
+export const COL = { serie: 'var(--aqua)', inicial: 'var(--serie-ini)', final: 'var(--serie-fin)', meta: 'var(--amarillo)', alto: 'var(--coral)' };
 const esc = s => String(s).replace(/"/g, '&quot;');
 
 // Línea de tiempos de una prueba: más abajo = más rápido. Línea punteada en la meta.
@@ -16,7 +16,7 @@ export function lineaTiempos(h, { meta = null, fmt, id }) {
   const Y = v => T + ((v - mn) / (mx - mn)) * (H - T - B) * -1 + (H - T - B);
   const pts = h.map((x, i) => [X(i), Y(x.cs)]);
   const marcas = [mn + pad, (mn + mx) / 2, mx - pad];
-  const linea = h.length > 1 ? `<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="${COL.serie}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` : '';
+  const linea = h.length > 1 ? `<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" style="stroke:${COL.serie}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` : '';
   const mejor = Math.min(...h.map(x => x.cs));
   const ancho = (W - L - R) / Math.max(2, h.length);
   return `<figure class="grafica">
@@ -24,7 +24,7 @@ export function lineaTiempos(h, { meta = null, fmt, id }) {
       ${marcas.map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" class="g-grid"/><text x="${L - 6}" y="${Y(v) + 3.5}" text-anchor="end" class="g-eje">${fmt(Math.round(v))}</text>`).join('')}
       ${meta ? `<line x1="${L}" x2="${W - R}" y1="${Y(meta)}" y2="${Y(meta)}" class="g-meta"/><text x="${W - R}" y="${Y(meta) - 5}" text-anchor="end" class="g-eje">Meta ${fmt(meta)}</text>` : ''}
       ${linea}
-      ${pts.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${h[i].cs === mejor ? 5.5 : 4}" fill="${h[i].cs === mejor ? COL.meta : COL.serie}" stroke="var(--card)" stroke-width="2"/>`).join('')}
+      ${pts.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${h[i].cs === mejor ? 5.5 : 4}" style="fill:${h[i].cs === mejor ? COL.meta : COL.serie};stroke:var(--card);stroke-width:2"/>`).join('')}
       <text x="${L}" y="${H - 6}" class="g-eje">${fechaCorta(h[0].f)}</text>
       ${h.length > 1 ? `<text x="${W - R}" y="${H - 6}" text-anchor="end" class="g-eje">${fechaCorta(h.at(-1).f)}</text>` : ''}
       ${pts.map(([x], i) => `<rect class="g-hit" data-tip="${esc(`<b>${fmt(h[i].cs)}</b> · ${fechaCorta(h[i].f)}${h[i].tipo === 'comp' ? ' · competencia' : ''}`)}" data-x="${x}" x="${x - ancho / 2}" y="${T}" width="${ancho}" height="${H - T - B}" fill="transparent"/>`).join('')}
@@ -46,7 +46,7 @@ export function barrasRPE(h) {
       <text x="${W - R}" y="${Y(8) - 4}" text-anchor="end" class="g-eje">zona ideal 6-8</text>
       ${h.map((x, i) => {
         const cx = L + paso * i + paso / 2, alto = x.rpe >= 9;
-        return `<rect x="${cx - bw / 2}" y="${Y(x.rpe)}" width="${bw}" height="${Y(0) - Y(x.rpe)}" rx="4" fill="${alto ? COL.alto : COL.serie}"/>
+        return `<rect x="${cx - bw / 2}" y="${Y(x.rpe)}" width="${bw}" height="${Y(0) - Y(x.rpe)}" rx="4" style="fill:${alto ? COL.alto : COL.serie}"/>
           ${alto ? `<text x="${cx}" y="${Y(x.rpe) - 4}" text-anchor="middle" class="g-val">!</text>` : ''}
           <rect class="g-hit" data-tip="${esc(`<b>RPE ${x.rpe}</b> · Sesión ${x.letra} · ${fechaCorta(x.f)}${alto ? ' · muy alto' : ''}`)}" data-x="${cx}" x="${cx - paso / 2}" y="${T}" width="${paso}" height="${H - T - B}" fill="transparent"/>`;
       }).join('')}

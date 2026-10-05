@@ -6,7 +6,18 @@
   <title>Fuerza en Seco</title>
   <meta name="description" content="Preparación física en seco para nadar más rápido: salidas, virajes, patada y brazada de pecho.">
   <meta name="theme-color" content="#06142B">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="dark light">
+  <script>
+    // Tema antes del primer pintado (sin parpadeo): automático, oscuro o claro
+    try {
+      var e = JSON.parse(localStorage.getItem('fuerza-en-seco:v1') || '{}'), t = (e.config && e.config.tema) || 'auto';
+      var c = t === 'auto' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'oscuro') : t;
+      document.documentElement.dataset.tema = c;
+      document.querySelector('meta[name=theme-color]').content = c === 'claro' ? '#F2F8FF' : '#06142B';
+      // "only light": evita que el modo oscuro forzado del navegador oscurezca el tema claro
+      document.querySelector('meta[name=color-scheme]').content = c === 'claro' ? 'only light' : 'dark light';
+    } catch (_) { document.documentElement.dataset.tema = 'oscuro'; }
+  </script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="format-detection" content="telephone=no">
   <link rel="manifest" href="manifest.json">

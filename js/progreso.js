@@ -56,7 +56,7 @@ function pruebas(f) {
   return `<section class="card">
     <div class="card-cab"><h3>${ico('salto')} Pruebas físicas</h3></div>
     <p class="txt2 peq">Inicial: semana 1. Final: semana de descarga${fd ? ` (${fechaCorta(fd.ini)} – ${fechaCorta(fd.fin)})` : ''}. Nunca en la puesta a punto.</p>
-    <div class="leyenda ad-ley"><span><i style="background:#4C6EF5"></i>Inicial${P.inicial.f ? ` · ${fechaCorta(P.inicial.f)}` : ''}</span><span><i style="background:#0E9FA8"></i>Final${P.final.f ? ` · ${fechaCorta(P.final.f)}` : ''}</span></div>
+    <div class="leyenda ad-ley"><span><i style="background:var(--serie-ini)"></i>Inicial${P.inicial.f ? ` · ${fechaCorta(P.inicial.f)}` : ''}</span><span><i style="background:var(--serie-fin)"></i>Final${P.final.f ? ` · ${fechaCorta(P.final.f)}` : ''}</span></div>
     ${PRUEBAS_FIS.map(t => {
       const a = P.inicial[t.k], b = P.final[t.k];
       const mejora = a != null && b != null ? Math.round((b - a) * 10) / 10 : null;
@@ -102,7 +102,7 @@ function calendario(f) {
       <button class="cal-nav" data-p="mes" data-d="1" aria-label="Mes siguiente">${ico('atras', 'girar180')}</button>
     </div>
     <div class="cal">${['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(x => `<span class="cal-h">${x}</span>`).join('')}${celdas}</div>
-    <div class="leyenda"><span><i style="background:#00D1FF"></i>Sesión hecha</span><span><i class="casa-l"></i>En casa</span><span><i class="falta-l"></i>Sesión perdida</span></div>
+    <div class="leyenda"><span><i style="background:var(--aqua)"></i>Sesión hecha</span><span><i class="casa-l"></i>En casa</span><span><i class="falta-l"></i>Sesión perdida</span></div>
   </section>`;
 }
 

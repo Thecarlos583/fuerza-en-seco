@@ -11,7 +11,7 @@ export function renderGuia(v, sub) {
   const c = C();
   const ts = tramos().filter(t => !['antes', 'despues'].includes(t.fase));
   const orden = gymOrden();
-  const lista = items => `<ul>${items.map(it => `<li style="--c:${EJ[it.e].maq ? '#7C9CFF' : '#00D1FF'}"><i class="punto"></i><span>${esc(EJ[it.e].n)}${EJ[it.e].maq ? ' <small>(máquina)</small>' : ''}</span>${tieneAnimacion(it.e) ? `<button class="ver-mini" data-g="ver" data-e="${it.e}" aria-label="Ver cómo se hace">${ico('play')}</button>` : ''}<b>${prescripcion(it)}</b></li>`).join('')}</ul>`;
+  const lista = items => `<ul>${items.map(it => `<li style="--c:${EJ[it.e].maq ? 'var(--azul)' : 'var(--aqua)'}"><i class="punto"></i><span>${esc(EJ[it.e].n)}${EJ[it.e].maq ? ' <small>(máquina)</small>' : ''}</span>${tieneAnimacion(it.e) ? `<button class="ver-mini" data-g="ver" data-e="${it.e}" aria-label="Ver cómo se hace">${ico('play')}</button>` : ''}<b>${prescripcion(it)}</b></li>`).join('')}</ul>`;
   const diaSesion = letra => {
     const s = SESIONES[letra];
     return `<details class="plan-dia"><summary><span class="dia-n">${NOMBRE_DIA[orden['ABC'.indexOf(letra)]] || ''}</span><span class="dia-t">Sesión ${letra} · ${s.n}<small>${s.sub}</small></span>${ico('abajo')}</summary>
@@ -37,7 +37,7 @@ export function renderGuia(v, sub) {
       <p class="peq txt2">Las series cambian según la fase: aquí ves las de las semanas de construcción.</p>
     </section>
 
-    ${c.pieplano !== false ? `<section class="card regla" style="--c:#FFD166">
+    ${c.pieplano !== false ? `<section class="card regla" style="--c:var(--amarillo)">
       <h3>${ico('info')} Pie plano</h3>
       <ul>
         <li>Entrena con zapatos que sujeten bien el arco, no descalzo ni con zapatos muy blandos.</li>
@@ -47,12 +47,12 @@ export function renderGuia(v, sub) {
       </ul>
     </section>` : ''}
 
-    <section class="card regla" style="--c:#FF6B6B">
+    <section class="card regla" style="--c:var(--coral)">
       <h3>${ico('alto')} Cuándo parar</h3>
       <div class="reglas-parar">${REGLAS_PARAR.map(r => `<div><b>${esc(r.t)}</b><p>${esc(r.d)}</p></div>`).join('')}</div>
     </section>
 
-    <section class="card regla" style="--c:#00D1FF">
+    <section class="card regla" style="--c:var(--aqua)">
       <h3>${ico('guia')} Reglas del entrenador</h3>
       <ul>${REGLAS_ENTRENADOR.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
     </section>

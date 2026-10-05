@@ -1,6 +1,6 @@
 // Arranque, navegación entre pantallas y service worker
 import { C } from './store.js';
-import { $, ico, desbloquearAudio, pantallaEncendida, cerrarHoja, ligero } from './util.js';
+import { $, ico, desbloquearAudio, pantallaEncendida, cerrarHoja, ligero, aplicarTema } from './util.js';
 import { hoy } from './fechas.js';
 import { renderHoy } from './hoy.js';
 import { renderGuia } from './guia.js';
@@ -24,6 +24,7 @@ function ir({ arriba = true } = {}) {
   ruta = v;
   fechaPintada = hoy();
   document.documentElement.classList.toggle('ligero', ligero());
+  aplicarTema();
   cerrarHoja();
   vista.onclick = null;
   document.body.classList.toggle('sin-tabs', v === 'bienvenida');

@@ -144,16 +144,16 @@ function bloquePeso(it) {
 
 function discosSVG(e, total) {
   const d = W.discos(e, total);
-  const col = { 20: '#FF6B6B', 45: '#FF6B6B', 10: '#7C9CFF', 25: '#7C9CFF', 5: '#1DE9B6', 2.5: '#FFD166', 1.25: '#8FB3D9' };
+  const col = { 20: 'var(--coral)', 45: 'var(--coral)', 10: 'var(--azul)', 25: 'var(--azul)', 5: 'var(--turq)', 2.5: 'var(--amarillo)', 1.25: 'var(--txt2)' };
   const alto = x => ({ 20: 72, 45: 72, 25: 62, 10: 56, 5: 44, 2.5: 34, 1.25: 28 }[x] || 30);
-  const placa = (x, p) => { const h = alto(p); return `<rect x="${x}" y="${50 - h / 2}" width="12" height="${h}" rx="3" fill="${col[p]}"/>`; };
+  const placa = (x, p) => { const h = alto(p); return `<rect x="${x}" y="${50 - h / 2}" width="12" height="${h}" rx="3" style="fill:${col[p]}"/>`; };
   const der = d.lado.map((p, i) => placa(196 + i * 14, p)).join('');
   const izq = d.lado.map((p, i) => placa(92 - i * 14, p)).join('');
   const txt = d.lado.length ? `${d.lado.map(num).join(' + ')} ${d.u} por lado` : 'sin discos';
   return `<div class="discos">
     <svg viewBox="0 0 300 100" aria-hidden="true">
-      <rect x="16" y="46" width="268" height="8" rx="4" fill="#8FB3D9"/>
-      <rect x="104" y="40" width="6" height="20" rx="2" fill="#F2F8FF"/><rect x="190" y="40" width="6" height="20" rx="2" fill="#F2F8FF"/>
+      <rect x="16" y="46" width="268" height="8" rx="4" style="fill:var(--txt2)"/>
+      <rect x="104" y="40" width="6" height="20" rx="2" style="fill:var(--txt)"/><rect x="190" y="40" width="6" height="20" rx="2" style="fill:var(--txt)"/>
       ${izq}${der}
     </svg>
     <p><b>${d.tipo} (${num(d.barra)} ${d.u})</b> + ${txt} = <b>${num(total)} ${d.u}</b></p>
