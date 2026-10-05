@@ -145,14 +145,14 @@ function bloquePeso(it) {
       <span class="tope-mini">${ico('candado')}tope ${W.cifra(e, tope)}</span></p>
     ${p.nota && primera ? `<p class="ultima">${esc(p.nota)}</p>` : ''}
     ${sube ? `<button class="sube" data-a="subir" data-v="${sube}">${ico('trofeo')}<span>La sesión pasada salió limpia: hoy puedes probar <b>${W.texto(e, sube)}</b></span></button>` : ''}
-    ${p.eq === 'barra' && v ? discosSVG(e, v) : ''}
+    ${v ? (W.usaDiscos(e) ? discosSVG(e, v) : `<p class="carga">${ico('info')}<span>${W.comoCargar(e, v)}</span></p>`) : ''}
     ${p.eq !== 'balon' ? W.switchDiscos(e, 'data-a') : ''}`;
 }
 
 function discosSVG(e, total) {
   const d = W.discos(e, total);
-  const col = { 45: 'var(--coral)', 20: 'var(--coral)', 25: 'var(--azul)', 10: 'var(--lila)', 5: 'var(--turq)', 2.5: 'var(--amarillo)', 1.25: 'var(--txt2)' };
-  const alto = x => ({ 45: 72, 20: 72, 25: 62, 10: 52, 5: 42, 2.5: 32, 1.25: 26 }[x] || 30);
+  const col = { 45: 'var(--coral)', 20: 'var(--coral)', 35: 'var(--amarillo)', 15: 'var(--amarillo)', 25: 'var(--azul)', 10: 'var(--lila)', 5: 'var(--turq)', 2.5: 'var(--salmon)', 1.25: 'var(--txt2)' };
+  const alto = x => ({ 45: 72, 20: 72, 35: 66, 15: 64, 25: 62, 10: 52, 5: 42, 2.5: 32, 1.25: 26 }[x] || 30);
   const placa = (x, p) => { const h = alto(p); return `<rect x="${x}" y="${50 - h / 2}" width="12" height="${h}" rx="3" style="fill:${col[p]}"/>`; };
   const der = d.lado.map((p, i) => placa(196 + i * 14, p)).join('');
   const izq = d.lado.map((p, i) => placa(92 - i * 14, p)).join('');
@@ -163,7 +163,8 @@ function discosSVG(e, total) {
       <rect x="104" y="40" width="6" height="20" rx="2" style="fill:var(--txt)"/><rect x="190" y="40" width="6" height="20" rx="2" style="fill:var(--txt)"/>
       ${izq}${der}
     </svg>
-    <p><b>${d.tipo} (${num(d.barra)} ${d.u})</b> + ${txt} = <b>${num(total)} ${d.u}</b></p>
+    <p class="carga-txt">${W.comoCargar(e, total)}</p>
+    <p>${d.barra ? `<b>${d.tipo} (${num(d.barra)} ${d.u})</b> + ` : ''}${txt}${d.barra ? '' : ' (sin contar el carro)'} = <b>${num(total)} ${d.u}</b></p>
   </div>`;
 }
 

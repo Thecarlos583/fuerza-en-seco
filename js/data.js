@@ -50,7 +50,7 @@ export const ZONAS = {
 // ── Pesos guiados (nadador de 16 años, 55-65 kg, sin experiencia) ──
 // eq: manc (una mancuerna) · mano (una en cada mano) · barra · maquina · balon · banda · cajon · corporal
 // ini / tope: [kg, lb]; se usa el de la unidad del equipo (barras en lb, el resto en kg). ini 0 = peso corporal.
-// barra: 'z' (barra Z), 'oli' (olímpica) o 'smith'; topeExtra = discos sobre la barra.
+// barra: 'z' (barra Z), 'oli' (olímpica) o 'smith'; topeExtra = discos sobre la barra. carro: máquina de discos (prensa).
 export const PESOS = {
   goblet:      { eq: 'manc', ini: [8, 17.5], tope: [20, 45] },
   sentBarra:   { eq: 'barra', barra: 'z', ini: 'barra', tope: [35, 75], nota: 'Empieza con la barra Z o la barra sola.' },
@@ -80,13 +80,13 @@ export const PESOS = {
   facepull:    { eq: 'maquina', ini: [5, 10], tope: [15, 30], nota: 'Si lo haces con banda: banda ligera → mediana.' },
   pallof:      { eq: 'maquina', ini: [5, 10], tope: [12.5, 25], nota: 'Si lo haces con banda: banda ligera → mediana.' },
   aductorMaq:  { eq: 'maquina', ini: [15, 30], tope: [30, 65] },
-  prensa:      { eq: 'maquina', ini: [30, 65], tope: [80, 180], nota: 'Sin contar el carro de la máquina.' },
+  prensa:      { eq: 'maquina', carro: 1, ini: [30, 65], tope: [80, 180], nota: 'Sin contar el carro de la máquina.' },
   hipMaq:      { eq: 'maquina', ini: [20, 45], tope: [50, 110] },
   remoMaq:     { eq: 'maquina', ini: [20, 45], tope: [40, 90] },
   rotExtPolea: { eq: 'maquina', ini: [2.5, 5], tope: [7.5, 15] },
   curlFem:     { eq: 'maquina', ini: [15, 30], tope: [35, 75] },
   talones:     { eq: 'maquina', ini: [20, 45], tope: [50, 110] },
-  prensaUna:   { eq: 'maquina', ini: [15, 35], tope: [40, 90], nota: 'Sin contar el carro de la máquina.' },
+  prensaUna:   { eq: 'maquina', carro: 1, ini: [15, 35], tope: [40, 90], nota: 'Sin contar el carro de la máquina.' },
   pressPecho:  { eq: 'maquina', ini: [15, 30], tope: [35, 75] },
   pressHombroMaq: { eq: 'maquina', ini: [10, 20], tope: [25, 55] },
   ytw:         { eq: 'banda' }, rotExt: { eq: 'banda' }, pasosBanda: { eq: 'banda' }, rotBanda: { eq: 'banda' }, slamCuerda: { eq: 'banda' },
@@ -94,7 +94,7 @@ export const PESOS = {
   sentFrontal: { eq: 'mano', ini: [4, 10], tope: [10, 22.5] },
   sentCaja:    { eq: 'manc', ini: 0, tope: [10, 22.5], nota: 'Empieza sin peso; luego una mancuerna al pecho.' },
   zancadaEst:  { eq: 'mano', ini: 0, tope: [8, 17.5] },
-  talonesPrensa: { eq: 'maquina', ini: [30, 65], tope: [70, 155] },
+  talonesPrensa: { eq: 'maquina', carro: 1, ini: [30, 65], tope: [70, 155] },
   talonesSentado: { eq: 'manc', ini: [8, 17.5], tope: [20, 45] },
   remoManc:    { eq: 'mano', ini: [6, 12.5], tope: [14, 30] },
   pressMancBanco: { eq: 'mano', ini: [6, 12.5], tope: [14, 30] },

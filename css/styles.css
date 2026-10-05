@@ -905,3 +905,8 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 .oro-puntos { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
 .oro-puntos i { width: 8px; height: 8px; border-radius: 50%; background: var(--linea); transition: transform .2s; }
 .oro-puntos i.act { background: var(--aqua); transform: scale(1.3); }
+
+/* Cómo armar el peso: discos por lado, pasador o mancuernas */
+.carga { display: flex; gap: 8px; align-items: flex-start; margin: 8px 2px 0; font-size: 0.875rem; color: var(--txt); }
+.carga .ico { flex: none; width: 18px; height: 18px; color: var(--txt-aqua); margin-top: 1px; }
+.discos .carga-txt { color: var(--txt); font-weight: 700; font-size: 0.9375rem; margin-bottom: 4px; }

@@ -9,7 +9,7 @@ import { diasEntre } from './fechas.js';
 import { faseDe, semanaDe } from './plan.js';
 
 const MANC = { kg: [1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 22.5, 25, 27.5, 30], lb: [2.5, 5, 8, 10, 12.5, 15, 17.5, 20, 22.5, 25, 30, 35, 40, 45, 50, 55, 60] };
-const DISCOS = { kg: [20, 10, 5, 2.5, 1.25], lb: [45, 25, 10, 5, 2.5] };
+const DISCOS = { kg: [20, 15, 10, 5, 2.5, 1.25], lb: [45, 35, 25, 10, 5, 2.5] };
 const rango = (a, b, p) => { const o = []; for (let v = a; v <= b + 1e-9; v += p) o.push(Math.round(v * 100) / 100); return o; };
 export const KG_LB = 2.20462;
 
@@ -156,11 +156,38 @@ export function textoFijo(e) {
 }
 
 // ── Calculadora de discos (en la unidad de los discos de ese ejercicio) ──
+// Barras: la barra + discos por lado. Máquinas de discos (prensa): solo discos por lado, sin contar el carro.
 export function discos(e, total) {
-  const u = unidad(e), b = barra(e, u);
+  const u = unidad(e), b = PESOS[e].eq === 'barra' ? barra(e, u) : 0;
   let lado = Math.max(0, (total - b) / 2);
   const out = [];
   for (const d of DISCOS[u]) while (lado >= d - 1e-9) { out.push(d); lado = Math.round((lado - d) * 100) / 100; }
-  const tipo = PESOS[e].barra === 'oli' ? 'Barra olímpica' : PESOS[e].barra === 'smith' ? 'Barra de la Smith' : 'Barra Z';
-  return { barra: b, u, lado: out, tipo };
+  const tipo = !b ? 'Carro' : PESOS[e].barra === 'oli' ? 'Barra olímpica' : PESOS[e].barra === 'smith' ? 'Barra de la Smith' : 'Barra Z';
+  return { barra: b, u, lado: out, tipo, sobra: Math.round(lado * 100) / 100 };
+}
+export const usaDiscos = e => PESOS[e]?.eq === 'barra' || !!PESOS[e]?.carro;
+
+// "2 de 10 kg y 1 de 2,5 kg"
+export function agrupar(lado, u) {
+  const n = {};
+  for (const d of lado) n[d] = (n[d] || 0) + 1;
+  const partes = Object.keys(n).map(Number).sort((a, b) => b - a).map(d => `${n[d]} de ${num(d)} ${u}`);
+  return partes.length > 1 ? `${partes.slice(0, -1).join(', ')} y ${partes.at(-1)}` : partes[0] || '';
+}
+
+// Cómo armar el peso de hoy, según el equipo
+export function comoCargar(e, v) {
+  const p = PESOS[e], u = unidad(e);
+  if (!v || !p) return '';
+  if (usaDiscos(e)) {
+    const d = discos(e, v);
+    const ajuste = d.sobra ? ` (no cuadra exacto: usa el disco más cercano)` : '';
+    const b = d.tipo[0].toLowerCase() + d.tipo.slice(1);
+    if (p.eq === 'barra') return d.lado.length ? `Pon ${agrupar(d.lado, u)} de cada lado de la ${b} (${num(d.barra)} ${u})${ajuste}.` : `Solo la ${b}, sin discos.`;
+    return `Pon ${agrupar(d.lado, u)} de cada lado, sin contar el carro${ajuste}.`;
+  }
+  if (p.eq === 'mano') return `Una mancuerna de ${num(v)} ${u} en cada mano.`;
+  if (p.eq === 'manc') return `Una mancuerna de ${num(v)} ${u}.`;
+  if (p.eq === 'balon') return `Un balón de ${num(v)} kg.`;
+  return `Pon el pasador de la máquina en ${num(v)} ${u}.`;
 }
