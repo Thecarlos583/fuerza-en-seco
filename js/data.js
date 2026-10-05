@@ -1103,7 +1103,7 @@ export const AGARRES = {
   pulloverBanda: ag('pronado', 'hombros', 'banda', 'Brazos casi rectos, baja en arco', DED),
   pressBanda: ag('pronado', 'hombros', 'banda', 'Banda bajo los pies, muñecas rectas', DED),
   rotBanda: ag('neutro', 'n/a', 'banda', 'Ambas manos juntas, gira desde la cadera', DED),
-  ytw: ag('pronado', 'hombros', 'banda', 'Brazos rectos, pulgares hacia arriba', DED),
+  ytw: ag('neutro', 'hombros', 'banda', 'Brazos rectos, pulgares hacia arriba', DED),
   slamCuerda: ag('neutro', 'n/a', 'banda', 'Una punta en cada mano, palmas enfrentadas', DED),
   pasosBanda: ag('ninguno', 'n/a', 'banda', 'Banda sobre las rodillas, pasos cortos', DED),
   sentBanda: ag('ninguno', 'n/a', 'banda', 'Banda sobre las rodillas, empújala hacia afuera', DED),
@@ -1138,3 +1138,26 @@ const SIN_AGARRE = ['m9090', 'mtobillo', 'puente', 'balanceo', 'pogo', 'cajon', 
   'elevPiernas', 'toquesTalon', 'crunchInv', 'nadadorPiso', 'retraccion', 'pasosLat', 'brazadaSeco', 'ytwInclinado'];
 for (const id of SIN_AGARRE) AGARRES[id] ??= { ...SIN, deducido: true };
 for (const [id, a] of Object.entries(AGARRES)) if (EJ[id]) EJ[id].agarre = a;
+
+// Contexto para los dibujos: 'posición/implemento' (ver POSES en agarres.js); en piernas 'P:carga' (cómo se lleva el peso)
+const CONTEXTO = {
+  remoMaq: 'jalarFrente/manijas', pressPecho: 'empujeFrente/manijas', pressHombroMaq: 'empujeArriba/manijas', jalon: 'arriba/barraJalon',
+  remoPolea: 'jalarFrente/triangulo', pulloverPolea: 'arriba/cuerda', facepull: 'jalarCara/cuerda', rotExtPolea: 'jalarFrente/manija',
+  pallof: 'empujeFrente/manijaJuntas', rotPolea: 'jalarFrente/manijaJuntas', domAsist: 'arriba/barraFija', dominadas: 'arriba/barraFija',
+  domNegativa: 'arriba/barraFija', remoInv: 'arriba/barraFija', landmine: 'empujeArriba/manija',
+  pressMil: 'empujeArriba/mancuernas', pressSentado: 'empujeArriba/mancuernas', pressMancBanco: 'empujeFrente/mancuernas', elevLat: 'colgando/mancuernas',
+  vueloPajaro: 'colgando/mancuernas', remoMano: 'colgando/mancuernaUna', remoManc: 'colgando/mancuernas', pullover: 'arriba/mancuerna1', rotExtManc: 'jalarFrente/mancuernaUna',
+  slam: 'arriba/balon', slamSuave: 'arriba/balon', slamRodillas: 'arriba/balon', lanzArriba: 'arriba/balon', pulloverBalon: 'arriba/balon',
+  pechoPared: 'sostener/balon', rotacional: 'sostener/balon', rotRodillas: 'sostener/balon', rotSentado: 'sostener/balon', rotDePie: 'sostener/balon',
+  pullApart: 'jalarFrente/banda', pullToalla: 'jalarFrente/banda', rotExt: 'jalarFrente/bandaUna', remoCasa: 'jalarFrente/banda', slamCuerda: 'jalarFrente/banda',
+  jalonBanda: 'arriba/banda', libreBanda: 'arriba/banda', brazadaBanda: 'arriba/banda', pulloverBanda: 'arriba/banda', ytw: 'arriba/banda',
+  pressBanda: 'empujeArriba/banda', rotBanda: 'sostener/manijaJuntas',
+  flexExpl: 'piso/piso', flexPalmada: 'piso/piso', flexRapidas: 'piso/piso', flexCasa: 'piso/piso', flexBanco: 'piso/piso', flexRodillas: 'piso/piso',
+  goblet: 'P:goblet', sentCaja: 'P:goblet', sentFrontal: 'P:hombrosCarga', sumo: 'P:entrePiernas', hipthrust: 'P:caderaManc', puente1: 'P:caderaManc',
+  rdl: 'P:frenteMuslos', bulgara: 'P:lados', zancada: 'P:lados', zancadaEst: 'P:lados', stepup: 'P:lados', sentBarra: 'P:espalda', smith: 'P:espalda', talonesSentado: 'P:rodilla',
+};
+for (const [id, c] of Object.entries(CONTEXTO)) {
+  const a = AGARRES[id];
+  if (!a) continue;
+  if (c.startsWith('P:')) a.carga = c.slice(2); else [a.pos, a.imp] = c.split('/');
+}

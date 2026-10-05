@@ -915,6 +915,20 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 :root[data-tema="claro"] { --ag-piel: #F3C7A2; --ag-borde: #8A5634; --ag-metal: #5B6B80; --ag-goma: #33445C; --ag-cuerda: #A8803C; --ag-fondo: var(--bg); }
 
 /* ── Agarres y accesorios (js/agarres.js) ── */
+:root {
+  --ag-metal-c: #E3EAF2; --ag-metal-o: #6D7C8E; --ag-goma-c: #6A7686; --ag-goma-o: #1E252E;
+  --ag-cuerda-o: #A88F5C; --ag-tela: #2F3B4C; --ag-tela-c: #46566B; --ag-tela-o: #1B232E;
+  --ag-fit: #3E7BD6; --ag-fit-c: #8DB8F2; --ag-fit-o: #1F4A8C;
+  --ag-b1: #F2D35B; --ag-b2: #E8664F; --ag-b3: #3FAF6B; --ag-b4: #2C3440;
+  --ag-fig: color-mix(in srgb, var(--txt2) 38%, transparent);
+}
+:root[data-tema="claro"] {
+  --ag-metal-c: #F4F7FA; --ag-metal-o: #55657A; --ag-goma-c: #5B6676; --ag-goma-o: #1A2029;
+  --ag-cuerda-o: #8A6F3A; --ag-tela: #34404F; --ag-tela-c: #4C5C70; --ag-tela-o: #1E2632;
+  --ag-fit: #2F6AC4; --ag-fit-c: #7FAAE8; --ag-fit-o: #1B4280;
+  --ag-b4: #1E242C;
+  --ag-fig: color-mix(in srgb, var(--txt2) 30%, transparent);
+}
 .ag-chip { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 6px 12px; border-radius: 999px; border: 0;
   font: inherit; font-size: 0.8125rem; font-weight: 750; line-height: 1.2; text-align: left; color: var(--txt);
   background: color-mix(in srgb, var(--ag-acento) 14%, var(--card2)); }
@@ -922,22 +936,28 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 button.ag-chip { cursor: pointer; }
 button.ag-chip::before { content: ''; position: absolute; inset: -7px -2px; }
 button.ag-chip:active { transform: scale(.97); }
-.ag-chip .ag-ico { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--ag-acento); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ag-ico { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--ag-acento); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ag-ico-eq { width: 24px; height: 16px; stroke-width: 8; }
 .ag-chip span { min-width: 0; overflow-wrap: anywhere; }
 .alt-ag { display: flex; flex-wrap: wrap; gap: 6px; }
 .alt-ag .ag-chip { min-height: 28px; padding: 4px 10px; font-size: 0.75rem; }
 
+/* Hoja "Cómo agarrarlo" */
 .ag-sec { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--linea); display: grid; gap: 10px; }
 .ag-sec p { color: var(--txt); line-height: 1.45; }
 .ag-h { display: flex; align-items: center; gap: 8px; font-size: 1.0625rem; font-weight: 800; }
-.ag-h .ag-ico { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--ag-acento); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.ag-par { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.ag-par figure { margin: 0; padding: 8px; border-radius: 16px; background: var(--ag-fondo); text-align: center; }
-.ag-par figcaption { font-size: 0.8125rem; font-weight: 750; color: var(--txt2); margin-top: 4px; }
+.ag-h .ag-ico { width: 20px; height: 20px; }
+.ag-h .ag-ico-eq { width: 30px; height: 20px; }
+.ag-sec figure { margin: 0; padding: 8px; border-radius: 16px; background: var(--ag-fondo); text-align: center; }
+.ag-sec figcaption { font-size: 0.8125rem; font-weight: 700; color: var(--txt2); margin-top: 2px; }
+.ag-leyenda { color: var(--ag-acento); }
+.ag-fila { display: grid; grid-template-columns: minmax(96px, 38%) 1fr; gap: 12px; align-items: center; }
+.ag-fila > div { display: grid; gap: 6px; min-width: 0; }
+.ag-solo .ag-svg { max-width: 240px; margin: 0 auto; }
+.ag-palmas { font-weight: 750; }
 .ag-nota { font-size: 0.875rem; color: var(--txt2) !important; }
 .ag-clave { margin-top: 16px; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, var(--ag-acento) 12%, var(--card2)); line-height: 1.45; }
-.ag-ancho, .ag-acc { padding: 8px; border-radius: 16px; background: var(--ag-fondo); }
-.ag-acc { max-height: 140px; }
+.ag-foto .ag-svg { max-width: 300px; margin: 0 auto; }
 
 /* Dibujos */
 .ag-svg { display: block; width: 100%; height: auto; }
@@ -948,19 +968,51 @@ button.ag-chip:active { transform: scale(.97); }
 .ag-borde-t.ag-pulgar { stroke: var(--ag-acento); }
 .ag-linea { fill: none; stroke: var(--ag-borde); stroke-width: 2; stroke-linecap: round; }
 .ag-barra { fill: var(--ag-metal); }
-.ag-flecha { fill: none; stroke: var(--ag-acento); stroke-width: 3; stroke-linecap: round; }
-.ag-flecha-p { fill: var(--ag-acento); }
-.ag-cuerpo { fill: var(--txt2); opacity: .55; }
-.ag-cuerpo-l { fill: none; stroke: var(--txt2); stroke-width: 9; stroke-linecap: round; opacity: .55; }
-.ag-raya { stroke: var(--txt2); stroke-width: 2; stroke-dasharray: 4 4; }
-.ag-txt { fill: var(--txt2); font-size: 11px; font-weight: 700; }
-.ag-eq { fill: none; stroke: var(--ag-metal); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
-.ag-grueso { stroke: var(--ag-goma); stroke-width: 9; }
-.ag-gancho { fill: none; stroke: var(--ag-acento); stroke-width: 3; }
-.ag-cuerda { fill: none; stroke: var(--ag-cuerda); stroke-width: 7; stroke-linecap: round; }
+.ag-barra-l { fill: none; stroke: var(--ag-metal); stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+.ag-banda-l { fill: none; stroke: var(--ag-acento); stroke-width: 10; stroke-linecap: round; }
+.ag-disco { fill: var(--ag-goma); stroke: var(--ag-metal); stroke-width: 2; }
+.ag-mango { fill: var(--ag-goma); stroke: var(--ag-metal); stroke-width: 2; }
+.ag-marco { fill: none; stroke: var(--ag-metal); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.ag-cuerda { fill: none; stroke: var(--ag-cuerda); stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
 .ag-tope { fill: var(--ag-goma); }
-.ag-acol { fill: var(--ag-goma); stroke: var(--ag-metal); stroke-width: 2; }
-.ag-banda { fill: none; stroke: var(--ag-acento); stroke-width: 8; }
+.ag-balon { fill: var(--ag-goma); stroke: var(--ag-metal); stroke-width: 2; }
+.ag-piso { fill: var(--ag-metal); opacity: .6; }
+.ag-raya { fill: none; stroke: var(--txt2); stroke-width: 2; stroke-dasharray: 4 4; }
+.ag-txt { fill: var(--txt); font-size: 12px; font-weight: 800; }
+/* Figura de cuerpo entero */
+.ag-fig { fill: var(--ag-fig); }
+.ag-fig-l { fill: none; stroke: var(--ag-fig); stroke-width: 13; stroke-linecap: round; }
+.ag-figura .ag-borde-t { stroke-width: 11; }
+.ag-figura .ag-piel-t { stroke-width: 7; }
+.ag-antebrazo { fill: none; stroke: var(--ag-acento); stroke-width: 4; stroke-linecap: round; }
+.ag-fbar { fill: none; stroke: var(--ag-metal); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.ag-fdisco { fill: var(--ag-goma); stroke: var(--ag-metal); stroke-width: 1.5; }
+.ag-fmango { fill: var(--ag-goma); stroke: var(--ag-metal); stroke-width: 1.5; }
+.ag-fbalon { fill: var(--ag-goma); stroke: var(--ag-metal); stroke-width: 2; }
+.ag-fbanda { fill: none; stroke: var(--ag-acento); stroke-width: 4; stroke-linecap: round; }
+.ag-figura .ag-cuerda { stroke-width: 4; }
+.ag-cable { fill: none; stroke: var(--txt2); stroke-width: 2; }
+.ag-pared { fill: var(--ag-fig); }
+/* Imagen de referencia del accesorio */
+.ag-acc .ag-cable { stroke-width: 3; }
+.ag-mosq { fill: none; stroke: var(--ag-metal-o); stroke-width: 3; stroke-linecap: round; }
+.ag-metal-l { fill: none; stroke: var(--ag-metal); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+.ag-metal-l.ag-fino { stroke-width: 5; }
+.ag-goma-l { fill: none; stroke: var(--ag-goma); stroke-width: 16; stroke-linecap: round; }
+.ag-goma-tex { fill: none; stroke: var(--ag-goma-o); stroke-width: 16; stroke-dasharray: 2 4; }
+.ag-estria { fill: none; stroke: var(--ag-goma-o); stroke-width: 1.5; opacity: .55; }
+.ag-cuerda-g { fill: none; stroke: var(--ag-cuerda); stroke-width: 14; stroke-linecap: round; }
+.ag-cuerda-t { fill: none; stroke: var(--ag-cuerda-o); stroke-width: 14; stroke-dasharray: 3 5; opacity: .7; }
+.ag-tela { fill: var(--ag-tela); stroke: var(--ag-tela-o); stroke-width: 2; }
+.ag-tela-c { fill: var(--ag-tela-c); stroke: var(--ag-tela-o); stroke-width: 1.5; }
+.ag-costura { fill: none; stroke: var(--ag-tela-c); stroke-width: 2; stroke-dasharray: 5 4; }
+.ag-banda-f { fill: none; stroke-width: 9; }
+.ag-sombra { fill: var(--ag-goma-o); opacity: .35; }
+.ag-costura-b { fill: none; stroke: var(--ag-goma-o); stroke-width: 3; }
+.ag-etiqueta { fill: var(--ag-acento); }
+.ag-txt-e { fill: var(--bg); font-size: 14px; font-weight: 900; }
+.ag-brillo { fill: var(--ag-metal-c); opacity: .3; }
+
 
 /* Guía: cuatro filas que se deslizan */
 .ag-sub { color: var(--txt2); font-size: 0.875rem; margin: -4px 0 4px; }
