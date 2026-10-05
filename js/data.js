@@ -1024,3 +1024,117 @@ export const ESTILOS = [
   ['combinado', 'Combinado', [100, 200, 400]],
 ];
 export const MARCAS_INICIO = { seguidas: ['50-pecho', '100-pecho', '50-libre'], principal: '100-pecho', comp: ['50-pecho', '100-pecho', '50-libre'] };
+
+// ── Agarre de cada ejercicio (dibujos y catálogo en js/agarres.js) ──
+// ag(manos, ancho, equipo, nota, DED): '/' separa opciones. DED = deducido (no estaba en la tabla, por revisar).
+const DED = true;
+const op = x => (x.includes('/') ? x.split('/') : x);
+const ag = (manos, ancho, equipo, nota, deducido) => ({ manos: op(manos), ancho: op(ancho), equipo: op(equipo), nota, ...(deducido ? { deducido } : {}) });
+const SIN = ag('ninguno', 'n/a', 'ninguno', '');
+export const AGARRES = {
+  // Máquinas y poleas
+  prensa: ag('ninguno', 'n/a', 'ninguno', 'Las manijas laterales solo sirven para sujetarte'),
+  prensaUna: ag('ninguno', 'n/a', 'ninguno', 'Las manijas laterales solo sirven para sujetarte'),
+  talonesPrensa: ag('ninguno', 'n/a', 'ninguno', 'Las manijas laterales solo sirven para sujetarte'),
+  curlFem: ag('ninguno', 'n/a', 'ninguno', 'Las manijas solo sirven para sujetarte'),
+  aductorMaq: ag('ninguno', 'n/a', 'ninguno', 'Las manijas laterales solo sirven para sujetarte'),
+  hipMaq: ag('ninguno', 'n/a', 'ninguno', 'Las manijas solo sirven para sujetarte', DED),
+  talones: ag('ninguno', 'n/a', 'ninguno', 'Hombros bajo los cojines; sujeta las manijas', DED),
+  remoMaq: ag('neutro', 'n/a', 'ninguno', 'Pecho apoyado, aprieta los omóplatos'),
+  pressPecho: ag('neutro/pronado', 'n/a', 'ninguno', 'Elige la manija más cómoda, a la altura del pecho medio'),
+  pressHombroMaq: ag('neutro', 'n/a', 'ninguno', 'Empuja sin arquear la espalda baja'),
+  jalon: ag('pronado', 'ancho', 'barra-jalon', 'Manos en las curvas, pecho afuera, codos hacia abajo'),
+  remoPolea: ag('neutro', 'cerrado', 'triangulo', 'Torso fijo, aprieta atrás'),
+  pulloverPolea: ag('neutro', 'hombros', 'cuerda', 'Brazos casi rectos'),
+  facepull: ag('neutro', 'hombros', 'cuerda/banda', 'Polea a la altura de la cara, abre las manos al llegar'),
+  rotExtPolea: ag('neutro', 'n/a', 'manija', 'Codo pegado a 90°'),
+  pallof: ag('neutro', 'n/a', 'manija', 'Ambas manos entrelazadas, empuja sin girar el torso'),
+  rotPolea: ag('neutro', 'n/a', 'manija', 'Ambas manos entrelazadas, gira desde la cadera'),
+  domAsist: ag('pronado/supino/neutro', 'hombros/ancho', 'ninguno', 'Según la manija que elijas; pulgares rodeando'),
+  // Barras
+  dominadas: ag('pronado', 'ancho', 'ninguno', 'Un poco más ancho que los hombros, pulgares rodeando'),
+  domNegativa: ag('pronado', 'ancho', 'ninguno', 'Igual que la dominada; baja lento', DED),
+  remoInv: ag('pronado', 'ancho', 'ninguno', 'Cuerpo recto, pecho a la barra'),
+  sentBarra: ag('pronado', 'ancho', 'ninguno', 'Barra sobre los trapecios, muñecas rectas'),
+  smith: ag('pronado', 'ancho', 'ninguno', 'Barra sobre los trapecios, muñecas rectas', DED),
+  landmine: ag('neutro', 'n/a', 'ninguno', 'Mano en el extremo de la barra, muñeca recta'),
+  // Mancuernas
+  goblet: ag('neutro', 'n/a', 'ninguno', 'Mancuerna vertical pegada al pecho, manos bajo el disco'),
+  sentCaja: ag('neutro', 'n/a', 'ninguno', 'Como la goblet: mancuerna vertical pegada al pecho', DED),
+  sentFrontal: ag('neutro', 'n/a', 'ninguno', 'Mancuernas apoyadas en los hombros, codos al frente', DED),
+  sumo: ag('neutro', 'n/a', 'ninguno', 'Ambas manos en un extremo, mancuerna vertical'),
+  hipthrust: ag('neutro', 'n/a', 'ninguno', 'Ambas manos sujetándola sobre la cadera'),
+  puente1: ag('neutro', 'n/a', 'ninguno', 'Ambas manos sujetándola sobre la cadera', DED),
+  rdl: ag('neutro', 'n/a', 'ninguno', 'Mancuernas pegadas a las piernas'),
+  bulgara: ag('neutro', 'n/a', 'ninguno', 'Brazos a los lados'),
+  zancada: ag('neutro', 'n/a', 'ninguno', 'Brazos a los lados'),
+  zancadaEst: ag('neutro', 'n/a', 'ninguno', 'Brazos a los lados'),
+  stepup: ag('neutro', 'n/a', 'ninguno', 'Brazos a los lados'),
+  pressMil: ag('neutro/diagonal', 'n/a', 'ninguno', 'Más cómodo para el hombro que las palmas al frente'),
+  pressSentado: ag('neutro/diagonal', 'n/a', 'ninguno', 'Más cómodo para el hombro que las palmas al frente'),
+  pressMancBanco: ag('neutro/pronado', 'n/a', 'ninguno', 'Codos a unos 45-60° del cuerpo'),
+  elevLat: ag('pronado', 'n/a', 'ninguno', 'Palmas hacia el piso, codos un poco flexionados'),
+  vueloPajaro: ag('neutro', 'n/a', 'ninguno', 'Palmas enfrentadas, codos casi rectos'),
+  remoMano: ag('neutro', 'n/a', 'ninguno', 'Mancuerna hacia la cadera'),
+  remoManc: ag('neutro', 'n/a', 'ninguno', 'Torso inclinado, mancuernas hacia la cadera', DED),
+  pullover: ag('neutro', 'n/a', 'ninguno', 'Manos sujetando el disco de arriba por dentro'),
+  rotExtManc: ag('neutro', 'n/a', 'ninguno', 'Codo pegado a 90°'),
+  talonesSentado: ag('neutro', 'n/a', 'ninguno', 'Mancuerna sobre la rodilla, sujétala con las manos', DED),
+  // Balón medicinal
+  slam: ag('neutro', 'n/a', 'balon', 'Manos a los lados y un poco detrás del balón'),
+  slamSuave: ag('neutro', 'n/a', 'balon', 'Manos a los lados y un poco detrás del balón'),
+  slamRodillas: ag('neutro', 'n/a', 'balon', 'Manos a los lados y un poco detrás del balón'),
+  pechoPared: ag('neutro', 'n/a', 'balon', 'Manos a los lados del balón, nunca debajo'),
+  rotacional: ag('neutro', 'n/a', 'balon', 'Manos a los lados del balón, nunca debajo'),
+  rotRodillas: ag('neutro', 'n/a', 'balon', 'Manos a los lados del balón, nunca debajo'),
+  lanzArriba: ag('neutro', 'n/a', 'balon', 'Manos a los lados y un poco detrás del balón', DED),
+  rotSentado: ag('neutro', 'n/a', 'balon', 'Balón frente al pecho, manos a los lados', DED),
+  rotDePie: ag('neutro', 'n/a', 'balon', 'Balón frente al pecho, manos a los lados', DED),
+  pulloverBalon: ag('neutro', 'n/a', 'balon', 'Manos a los lados del balón, brazos casi rectos', DED),
+  balonRod: ag('ninguno', 'n/a', 'balon', 'Balón entre las rodillas; manos libres', DED),
+  // Bandas
+  pullApart: ag('pronado', 'hombros', 'banda', 'Brazos rectos, abre la banda al pecho'),
+  pullToalla: ag('pronado', 'hombros', 'ninguno', 'Toalla bien tensa, brazos rectos', DED),
+  rotExt: ag('neutro', 'n/a', 'banda', 'Codo pegado a 90°'),
+  remoCasa: ag('neutro', 'hombros', 'banda', 'Banda atada a una puerta, codos atrás'),
+  jalonBanda: ag('pronado', 'hombros', 'banda', 'Brazos casi rectos'),
+  libreBanda: ag('pronado', 'hombros', 'banda', 'Brazos casi rectos'),
+  brazadaBanda: ag('pronado', 'hombros', 'banda', 'Brazos casi rectos'),
+  pulloverBanda: ag('pronado', 'hombros', 'banda', 'Brazos casi rectos, baja en arco', DED),
+  pressBanda: ag('pronado', 'hombros', 'banda', 'Banda bajo los pies, muñecas rectas', DED),
+  rotBanda: ag('neutro', 'n/a', 'banda', 'Ambas manos juntas, gira desde la cadera', DED),
+  ytw: ag('pronado', 'hombros', 'banda', 'Brazos rectos, pulgares hacia arriba', DED),
+  slamCuerda: ag('neutro', 'n/a', 'banda', 'Una punta en cada mano, palmas enfrentadas', DED),
+  pasosBanda: ag('ninguno', 'n/a', 'banda', 'Banda sobre las rodillas, pasos cortos', DED),
+  sentBanda: ag('ninguno', 'n/a', 'banda', 'Banda sobre las rodillas, empújala hacia afuera', DED),
+  puenteBanda: ag('ninguno', 'n/a', 'banda', 'Banda sobre las rodillas, empújala hacia afuera', DED),
+  aperturaBanda: ag('ninguno', 'n/a', 'banda', 'Banda sobre las rodillas, ábrelas lento', DED),
+  // Flexiones
+  flexExpl: ag('pronado', 'ancho', 'ninguno', 'Un poco más abiertas que los hombros, codos a 45°'),
+  flexPalmada: ag('pronado', 'ancho', 'ninguno', 'Un poco más abiertas que los hombros, codos a 45°'),
+  flexRapidas: ag('pronado', 'ancho', 'ninguno', 'Un poco más abiertas que los hombros, codos a 45°'),
+  flexCasa: ag('pronado', 'ancho', 'ninguno', 'Un poco más abiertas que los hombros, codos a 45°'),
+  flexBanco: ag('pronado', 'ancho', 'ninguno', 'Manos en el borde del banco, codos a 45°'),
+  flexRodillas: ag('pronado', 'ancho', 'ninguno', 'Un poco más abiertas que los hombros, codos a 45°'),
+  // Core y apoyos en el piso (de la tabla)
+  plancha: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; apoyo en los antebrazos'),
+  planchaRod: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; apoyo en los antebrazos'),
+  planchaLat: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; apoyo en el antebrazo'),
+  planchaLatRod: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; apoyo en el antebrazo'),
+  copen: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; apoyo en el antebrazo'),
+  copenRod: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; apoyo en el antebrazo'),
+  copenSofa: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; apoyo en el antebrazo'),
+  hollow: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; brazos estirados atrás'),
+  hollowRod: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; brazos estirados atrás'),
+  superman: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; brazos en streamline'),
+  deadbug: ag('ninguno', 'n/a', 'ninguno', 'Sin agarre; brazos estirados hacia el techo'),
+};
+// Saltos, movilidad, estiramientos y ejercicios con el propio cuerpo: sin agarre ni accesorio (deducidos)
+const SIN_AGARRE = ['m9090', 'mtobillo', 'puente', 'balanceo', 'pogo', 'cajon', 'svertical', 'scmpared', 'longitud', 'longUna', 'cuclillas',
+  'sstream', 'sjSinBrazos', 'hiper', 'squatJump', 'cajonSentado', 'patinador', 'puentePies', 'birddog', 'rana', 'dorsalPared', 'dorsalPuerta',
+  'toracica', 'respPared', 'gatoCamello', 'movGeneral', 'circBrazos', 'salidaImag', 'sjCasa', 'sentRapida', 'bulgaraSofa', 'cardio', 'cuerda',
+  'patadaSeco', 'streamPared', 'mariposa', 'flexorCadera', 'pechoPuerta', 'nino', 'estCuad', 'estIsquio', 'estPantorrilla', 'torsion',
+  'cajonBajo', 'stepExpl', 'saltoLatFreno', 'skipping', 'talonesPie', 'saltoLinea', 'shuffle', 'sentPausa', 'zancadaLat', 'crunch',
+  'elevPiernas', 'toquesTalon', 'crunchInv', 'nadadorPiso', 'retraccion', 'pasosLat', 'brazadaSeco', 'ytwInclinado'];
+for (const id of SIN_AGARRE) AGARRES[id] ??= { ...SIN, deducido: true };
+for (const [id, a] of Object.entries(AGARRES)) if (EJ[id]) EJ[id].agarre = a;

@@ -910,3 +910,67 @@ p, li, small, .hero-sub, .ej-meta { text-wrap: pretty; }
 .carga { display: flex; gap: 8px; align-items: flex-start; margin: 8px 2px 0; font-size: 0.875rem; color: var(--txt); }
 .carga .ico { flex: none; width: 18px; height: 18px; color: var(--txt-aqua); margin-top: 1px; }
 .discos .carga-txt { color: var(--txt); font-weight: 700; font-size: 0.9375rem; margin-bottom: 4px; }
+
+:root { --ag-acento: var(--aqua); --ag-piel: #F0C29B; --ag-borde: #8A5634; --ag-metal: #A9BCD3; --ag-goma: #4E6585; --ag-cuerda: #E8D5A6; --ag-fondo: var(--bg); }
+:root[data-tema="claro"] { --ag-piel: #F3C7A2; --ag-borde: #8A5634; --ag-metal: #5B6B80; --ag-goma: #33445C; --ag-cuerda: #A8803C; --ag-fondo: var(--bg); }
+
+/* ── Agarres y accesorios (js/agarres.js) ── */
+.ag-chip { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 6px 12px; border-radius: 999px; border: 0;
+  font: inherit; font-size: 0.8125rem; font-weight: 750; line-height: 1.2; text-align: left; color: var(--txt);
+  background: color-mix(in srgb, var(--ag-acento) 14%, var(--card2)); }
+.ag-chip-eq { background: var(--card2); }
+button.ag-chip { cursor: pointer; }
+button.ag-chip::before { content: ''; position: absolute; inset: -7px -2px; }
+button.ag-chip:active { transform: scale(.97); }
+.ag-chip .ag-ico { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--ag-acento); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ag-chip span { min-width: 0; overflow-wrap: anywhere; }
+.alt-ag { display: flex; flex-wrap: wrap; gap: 6px; }
+.alt-ag .ag-chip { min-height: 28px; padding: 4px 10px; font-size: 0.75rem; }
+
+.ag-sec { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--linea); display: grid; gap: 10px; }
+.ag-sec p { color: var(--txt); line-height: 1.45; }
+.ag-h { display: flex; align-items: center; gap: 8px; font-size: 1.0625rem; font-weight: 800; }
+.ag-h .ag-ico { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--ag-acento); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ag-par { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ag-par figure { margin: 0; padding: 8px; border-radius: 16px; background: var(--ag-fondo); text-align: center; }
+.ag-par figcaption { font-size: 0.8125rem; font-weight: 750; color: var(--txt2); margin-top: 4px; }
+.ag-nota { font-size: 0.875rem; color: var(--txt2) !important; }
+.ag-clave { margin-top: 16px; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, var(--ag-acento) 12%, var(--card2)); line-height: 1.45; }
+.ag-ancho, .ag-acc { padding: 8px; border-radius: 16px; background: var(--ag-fondo); }
+.ag-acc { max-height: 140px; }
+
+/* Dibujos */
+.ag-svg { display: block; width: 100%; height: auto; }
+.ag-piel { fill: var(--ag-piel); stroke: var(--ag-borde); stroke-width: 2; }
+.ag-borde-t, .ag-piel-t { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ag-borde-t { stroke: var(--ag-borde); }
+.ag-piel-t { stroke: var(--ag-piel); }
+.ag-borde-t.ag-pulgar { stroke: var(--ag-acento); }
+.ag-linea { fill: none; stroke: var(--ag-borde); stroke-width: 2; stroke-linecap: round; }
+.ag-barra { fill: var(--ag-metal); }
+.ag-flecha { fill: none; stroke: var(--ag-acento); stroke-width: 3; stroke-linecap: round; }
+.ag-flecha-p { fill: var(--ag-acento); }
+.ag-cuerpo { fill: var(--txt2); opacity: .55; }
+.ag-cuerpo-l { fill: none; stroke: var(--txt2); stroke-width: 9; stroke-linecap: round; opacity: .55; }
+.ag-raya { stroke: var(--txt2); stroke-width: 2; stroke-dasharray: 4 4; }
+.ag-txt { fill: var(--txt2); font-size: 11px; font-weight: 700; }
+.ag-eq { fill: none; stroke: var(--ag-metal); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.ag-grueso { stroke: var(--ag-goma); stroke-width: 9; }
+.ag-gancho { fill: none; stroke: var(--ag-acento); stroke-width: 3; }
+.ag-cuerda { fill: none; stroke: var(--ag-cuerda); stroke-width: 7; stroke-linecap: round; }
+.ag-tope { fill: var(--ag-goma); }
+.ag-acol { fill: var(--ag-goma); stroke: var(--ag-metal); stroke-width: 2; }
+.ag-banda { fill: none; stroke: var(--ag-acento); stroke-width: 8; }
+
+/* Guía: cuatro filas que se deslizan */
+.ag-sub { color: var(--txt2); font-size: 0.875rem; margin: -4px 0 4px; }
+.ag-gtit { font-size: 1rem; font-weight: 800; margin: 16px 0 8px; }
+.ag-carrusel { display: flex; align-items: flex-start; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; margin: 0 -16px; padding: 0 16px 4px; scroll-padding: 0 16px; }
+.ag-carrusel::-webkit-scrollbar { display: none; }
+.ag-t { flex: 0 0 82%; scroll-snap-align: start; min-width: 0; display: grid; align-content: start; gap: 6px; padding: 14px; border-radius: 18px; background: var(--ag-fondo); }
+.ag-t .ag-svg { max-height: 120px; margin-bottom: 4px; }
+.ag-t b { font-size: 1rem; }
+.ag-t p { font-size: 0.875rem; line-height: 1.4; color: var(--txt); }
+.ag-t .ag-uso { color: var(--txt2); }
+.ag-truco { background: color-mix(in srgb, var(--ag-acento) 12%, var(--ag-fondo)); }
+.ag-num { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; font-weight: 900; color: var(--ag-acento); background: color-mix(in srgb, var(--ag-acento) 16%, transparent); }

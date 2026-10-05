@@ -9,6 +9,7 @@ import { tieneAnimacion, montar } from './anim.js';
 import { iniciarDescanso, iniciarTrabajo, cerrarDescanso } from './timer.js';
 import { $, $$, ico, esc, num, chipTransfer, abrirHoja, cerrarHoja, aviso, vibrar, sonar, burbujas, confeti, pantallaEncendida } from './util.js';
 import { sumar, lunesDe } from './fechas.js';
+import { chipsAgarre, hojaAgarre } from './agarres.js';
 
 let ctx = null; // { clave, f, para, ses, rec, raiz }
 const abiertas = new Set();
@@ -81,6 +82,7 @@ function tarjeta(it, bl, n) {
       <span class="ej-chev">${ico('abajo')}</span>
     </button>
     <div class="ej-tags">
+      ${chipsAgarre(e.agarre, 'data-a')}
       ${e.tr.map(chipTransfer).join('')}
       ${e.maq ? `<span class="tag neutro">Máquina</span>` : ''}
       ${e.exp ? `<span class="tag exp">⚡ Baja en 2 s, sube explosivo</span>` : ''}
@@ -228,6 +230,7 @@ function clic(ev) {
     case 'cambiar': hojaCambiar(slot); break;
     case 'revertir': revertir(slot); break;
     case 'ver': hojaAnimacion(item(slot).e); break;
+    case 'agarre': hojaAgarre(EJ[item(slot).e].n, EJ[item(slot).e].agarre); break;
     case 'discos': cambiarDiscos(slot, b.dataset.u); break;
     case 'terminar': terminar(); break;
     default: return;
@@ -379,6 +382,7 @@ function hojaCambiar(slot) {
       <button class="alt-elegir" type="button" aria-expanded="false">
         <span class="alt-cab"><span class="alt-n">${extra}${esc(EJ[a.e].n)}</span><b class="alt-sr">${prescripcion(a)}</b></span>
         <span class="alt-ets">${etiquetas(orig, a)}</span>
+        ${EJ[a.e].agarre ? `<span class="alt-ag">${chipsAgarre(EJ[a.e].agarre)}</span>` : ''}
         ${a.e === it.e ? '<span class="alt-tag">Ahora</span>' : ''}
       </button>
       <div class="alt-mas" hidden></div>

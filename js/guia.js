@@ -7,6 +7,7 @@ import { fechaCorta, fechaLarga, NOMBRE_DIA, SEMANA } from './fechas.js';
 import { ico, esc, vibrar, aviso } from './util.js';
 import { prescripcion, hojaAnimacion } from './sesion.js';
 import { tieneAnimacion } from './anim.js';
+import { guiaAgarresHTML } from './agarres.js';
 
 export function renderGuia(v, sub) {
   const c = C();
@@ -73,6 +74,8 @@ export function renderGuia(v, sub) {
       </div>
       <div class="oro-puntos" aria-hidden="true">${REGLAS_ORO.map((_, k) => `<i class="${k ? '' : 'act'}"></i>`).join('')}</div>
     </section>
+
+    ${guiaAgarresHTML(Object.values(EJ))}
 
     <section class="card" id="primer-dia">
       <div class="card-cab"><h3>${ico('mano')} Si quieres que te guíen</h3></div>
